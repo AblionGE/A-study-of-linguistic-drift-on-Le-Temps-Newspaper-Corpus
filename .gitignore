@@ -1,0 +1,6 @@
+.settings/
+.project
+bin/
+input/
+output/
+temp/
