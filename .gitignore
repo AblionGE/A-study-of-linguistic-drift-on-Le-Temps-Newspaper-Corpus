@@ -1,3 +1,9 @@
+bin*
+.metadata
+.checkstyle
+.classpath
+.project
+
 .settings/
 .project
 bin/
