@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
+import java.util.StringTokenizer;
 
 /**
  * Test.
@@ -39,7 +40,7 @@ public class Ngram {
 		
 		private Text gram = new Text();
 		private int ngramSize = 1;
-		private String ngramSeparator;
+		private String ngramSeparator = ",";
 		
 		private String concat(Collection<String> stringCollection) {
 			StringBuilder concatenator = new StringBuilder();
@@ -59,22 +60,27 @@ public class Ngram {
 			InterruptedException {
 			
 			String stringArticle = article.toString();
-			String[] words = stringArticle.split("\\s+");
-			//StringTokenizer wordIterator = new StringTokenizer(stringArticle);
+
 			Deque<String> currentNgram = new ArrayDeque<>();
+ 			String[] splittedArticle = stringArticle.split("\\s+");
+			int counter = 0;
 			
-			//initialize the Deque
-			for (int i = 0; i < ngramSize; i++) {
-				//String nextToken = wordIterator.nextToken();
-				//currentNgram.add(nextToken);
+			//article is too small
+			if (splittedArticle.length < ngramSize) {
+			    return;
 			}
-			
-			for (int i = 0; i < words.length; i++) {
-				String word = words[i];
-				String year = "{" + String.valueOf(key.get()) + "}";
-				String toReturn = year + word;
-				gram.set(toReturn);
+
+			for (; counter < ngramSize - 1; counter++) {
+				 currentNgram.addLast(splittedArticle[counter]);
+			}
+
+			String year = String.valueOf(key.get());
+
+			for (;counter < splittedArticle.length; counter++) {
+			    	currentNgram.addLast(splittedArticle[counter]);
+				gram.set(year + "//" + concat(currentNgram));
 				context.write(gram, ONE);
+				currentNgram.removeFirst();
 			}
 		}
 	}
@@ -98,23 +104,16 @@ public class Ngram {
 				throws IOException, InterruptedException {
 			int sum = 0;
 			Iterator<IntWritable> valuesIt = values.iterator();
-			String year = new String();
 			
 			while (valuesIt.hasNext()) {
 				IntWritable value = (IntWritable) valuesIt.next();
 				sum += value.get();
 			}
-			Pattern pattern = Pattern.compile("(\\{\\d*\\})");
-			Matcher matcher = pattern.matcher(key.toString());
-			if (matcher.find()) {
-				year = matcher.group(1);
-			}
-			Text finalKey = new Text(key.toString().replace(year, ""));
-			year = year.replace("{", "");
-			year = year.replace("}", "");
+			String[] parts = key.toString().split("//", 2);
+			String year = parts[0];
+			String ngram = parts[1];
 			Path outPath = FileOutputFormat.getOutputPath(context);
-			//Path finalPath = new Path(outPath.toString() + "/" + year.toString());
-			mout.write("Output", finalKey, new IntWritable(sum), year);
+			mout.write("Output", ngram, new IntWritable(sum), year);
 		}
 		
 		@Override
