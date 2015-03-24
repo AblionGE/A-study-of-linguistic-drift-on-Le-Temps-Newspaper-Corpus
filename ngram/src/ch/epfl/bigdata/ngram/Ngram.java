@@ -107,7 +107,6 @@ public class Ngram {
 			Pattern pattern = Pattern.compile("(\\{\\d*\\})");
 			Matcher matcher = pattern.matcher(key.toString());
 			if (matcher.find()) {
-				System.out.println("foud !");
 				year = matcher.group(1);
 			}
 			Text finalKey = new Text(key.toString().replace(year, ""));
@@ -141,7 +140,7 @@ public class Ngram {
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		Job job = Job.getInstance(conf, "Ngram");
 		job.setJarByClass(Ngram.class);
-		//job.setNumReduceTasks(2);
+		job.setNumReduceTasks(Integer.parseInt(userArgs[2]));
 		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);

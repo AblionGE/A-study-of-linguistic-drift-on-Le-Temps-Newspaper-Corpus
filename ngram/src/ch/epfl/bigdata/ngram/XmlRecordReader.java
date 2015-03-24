@@ -92,7 +92,7 @@ public class XmlRecordReader extends RecordReader<IntWritable, Text> {
 	
 	private String process(String s) {
 		//return UNDESIRABLES.matcher(s).replaceAll("");
-		return s.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+		return s.replaceAll("\\P{L}", " ").toLowerCase();
 	}
 
 	@Override
