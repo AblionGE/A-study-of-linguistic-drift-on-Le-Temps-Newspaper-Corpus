@@ -56,9 +56,9 @@ public class Ngram {
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
-			ngramSize = conf.getInt("ngram_size", 2)
-			separator = conf.get("separator", "\\s+")
-			ngramSeparator= conf.get("ngramSeparator", ",")
+			ngramSize = conf.getInt("ngram_size", 2);
+			String separator = conf.get("separator", "\\s+");
+			ngramSeparator= conf.get("ngramSeparator", ",");
 			
 			String stringArticle = article.toString();
  			String[] splittedArticle = stringArticle.split(separator);
