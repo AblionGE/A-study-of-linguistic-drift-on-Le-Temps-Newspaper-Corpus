@@ -5,9 +5,8 @@
     This configuration file was written by the eclipse-cs plugin configuration editor
 -->
 <!--
-    Checkstyle-Configuration: Big_Data_check
-    Description: 
-Checkstyle configuration that checks the sun coding conventions.
+    Checkstyle-Configuration: CheckstyleBigData
+    Description: none
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>
@@ -96,6 +95,12 @@ Checkstyle configuration that checks the sun coding conventions.
       <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
     </module>
     <module name="RightCurly"/>
+    <module name="NonEmptyAtclauseDescription">
+      <property name="severity" value="ignore"/>
+    </module>
+    <module name="AtclauseOrder">
+      <property name="severity" value="ignore"/>
+    </module>
   </module>
   <module name="JavadocPackage">
     <property name="severity" value="ignore"/>
