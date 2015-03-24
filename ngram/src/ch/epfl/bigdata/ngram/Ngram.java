@@ -36,7 +36,7 @@ public class Ngram {
 		private static final IntWritable ONE = new IntWritable(1);
 		
 		private Text gram = new Text();
-		private int ngramSize = 2;
+		private int ngramSize;
 		private String ngramSeparator = ",";
 		
 		private String concat(Collection<String> stringCollection) {
@@ -55,9 +55,13 @@ public class Ngram {
 		@Override
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
+			Configuration conf = context.getConfiguration();
+			ngramSize = conf.getInt("ngram_size", 2)
+			separator = conf.get("separator", "\\s+")
+			ngramSeparator= conf.get("ngramSeparator", ",")
 			
 			String stringArticle = article.toString();
- 			String[] splittedArticle = stringArticle.split("\\s+");
+ 			String[] splittedArticle = stringArticle.split(separator);
  			
  			for (int i = 1; i <= ngramSize; i++) {
  				Deque<String> currentNgram = new ArrayDeque<>();
