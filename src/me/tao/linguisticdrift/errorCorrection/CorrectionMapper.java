@@ -49,9 +49,10 @@ public class CorrectionMapper extends Mapper<LongWritable, Text, CombinationKey,
 		filterError();
 		
 		// Set key
-		combinationKey.setFirstKey(valueOfKey_1);
-		combinationKey.setSecondKey(valueOfKey_2);
-        
+		combinationKey.setFirstKey(valueOfKey_1);		// The first key is the count of a word. 
+		combinationKey.setSecondKey(valueOfKey_2);		// The second key is the ACSII of the first character of this word. 
+														// It is a secondary sort that it will sort based on the first key firstly, and then second key.
+		
 		// Write information
 		
 		if(valueOfOutput.toString().length() != 0){
