@@ -1,3 +1,4 @@
+package ch.bigdata2015.linguisticdrift.tfidf;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 
@@ -31,6 +32,7 @@ public class TfIdf {
 		//TF Parts
 		
 		//IDF Parts
+		
 		
 		// To avoid The _SUCCESS files being created in the mapreduce output folder.
 		job.getConfiguration().setBoolean("mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
