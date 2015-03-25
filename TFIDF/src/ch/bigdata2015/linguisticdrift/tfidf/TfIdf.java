@@ -6,12 +6,13 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
  * TF-IDF functionality. This code is to find the relevance of words through
  * years
  * 
- * @author Marc Schaer
+ * @author Marc Schaer and Jeremy Weber
  *
  */
 public class TfIdf {
@@ -19,7 +20,7 @@ public class TfIdf {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 50;
+	private static final int NBOFREDUCERS = 3;
 
 	/**
 	 * Main function.
@@ -51,15 +52,13 @@ public class TfIdf {
 		    Path outputPath = new Path(args[1]);
 		    outputPath.getFileSystem(conf).delete(new Path(args[1]), true);
 
-			job.setOutputFormatClass(IDFFileOutputFormat.class);
+			//job.setOutputFormatClass(IDFFileOutputFormat.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
 			
 			FileInputFormat.addInputPath(job, new Path(args[0]));
-			IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
-
-			// read all 1-gram files (only the words) then do a wordcount
-			// then create a file with all words and the idf value
+			//IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
+			FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
 			// folder.
@@ -73,9 +72,15 @@ public class TfIdf {
 
 		}
 
-		// Combination of boths
+		// Combination of boths with creating an input file with format
+		// word year TFIDF
 		{
 
+		}
+		
+		//Recreate files per year
+		{
+			
 		}
 
 		System.exit(0);

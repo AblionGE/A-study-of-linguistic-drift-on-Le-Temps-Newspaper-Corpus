@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.Mapper;
  * The Mapper takes 1-grams and return each word with the value one to indicate that the word appears in the year.
  * @author Marc Schaer
  *
+ * TODO : Adapt the code for n-grams if needed
  */
 public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 
@@ -18,10 +19,13 @@ public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 	private Text word = new Text();
 
 	/**
-	 * Map function.
-	 * @param key : the word
-	 * @param value
-	 * @param context
+	 * Map Function.
+	 * Goes through each line, consider only the word (drop the number of occurrences)
+	 * and do like a simple Word Count (assign value one to the word to indicate that
+	 * the word appears in this year 
+	 * @param key : The key
+	 * @param value : the word and the number of occurrences
+	 * @param context : The context of the app
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */

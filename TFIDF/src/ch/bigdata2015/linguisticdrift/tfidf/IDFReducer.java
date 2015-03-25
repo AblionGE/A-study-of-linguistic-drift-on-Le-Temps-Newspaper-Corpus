@@ -6,16 +6,18 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
- * The reducer for IFD.
+ * The reducer for IFD. Compute the number of year in which each word appears
  * 
  * @author Marc Schaer
  *
  */
-public class IDFReducer extends Reducer<Text, IntWritable, Text, DoubleWritable> {
+public class IDFReducer extends Reducer<Text, IntWritable, Text, Text> {
 
-	private DoubleWritable result = new DoubleWritable();
+	private Text result = new Text();
+	private MultipleOutputs<Text, Text> mos;
 
 	/**
 	 * Setup the reducer.
@@ -23,10 +25,12 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, DoubleWritable>
 	protected void setup(Context context) throws IOException,
 			InterruptedException {
 		super.setup(context);
+		mos = new MultipleOutputs<Text, Text>(context);
 	}
 
 	/**
 	 * Reduce method.
+	 * Compute the number of year in which each word appears
 	 * 
 	 * @param key
 	 *            : the word
@@ -39,13 +43,14 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, DoubleWritable>
 		for (IntWritable val : values) {
 			sum += val.get();
 		}
-		//FIXME : 159 should be known from the input directory
-		result.set(Math.log((2/sum)));
-		context.write(key, result);
+		// FIXME : 159 should be known from the input directory
+		result.set("0000 \t" + new DoubleWritable(Math.log((159 / sum))));
+		mos.write(key, result, "ITF");
 	}
 
 	protected void cleanup(Context context) throws IOException,
 			InterruptedException {
 		super.cleanup(context);
+		mos.close();
 	}
 }
