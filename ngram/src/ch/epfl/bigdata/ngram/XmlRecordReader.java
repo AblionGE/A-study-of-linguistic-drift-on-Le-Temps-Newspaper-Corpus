@@ -89,11 +89,6 @@ public class XmlRecordReader extends RecordReader<IntWritable, Text> {
 	public float getProgress() throws IOException, InterruptedException {
 		return done ? 1.0f : 0.0f;
 	}
-	
-	private String process(String s) {
-		//return UNDESIRABLES.matcher(s).replaceAll("");
-		return s.replaceAll("\\P{L}", " ").toLowerCase();
-	}
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {		
@@ -108,7 +103,7 @@ public class XmlRecordReader extends RecordReader<IntWritable, Text> {
 		}
 		
 		Node nNode = nList.item(pos);
-		String nodeText = process(nNode.getTextContent());
+		String nodeText = nNode.getTextContent();
 		value.set(new Text(nodeText));
 		
 		pos++;

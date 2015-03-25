@@ -2,9 +2,12 @@ package ch.epfl.bigdata.ngram;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -33,6 +36,12 @@ public class Ngram {
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
+		private String preProcess(String s) {
+			//return UNDESIRABLES.matcher(s).replaceAll("");
+			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
+			//return s.replaceAll("[^\\p{L}]+", " ").toLowerCase();
+		}
+		
 		private static final IntWritable ONE = new IntWritable(1);
 		
 		private Text gram = new Text();
@@ -56,35 +65,39 @@ public class Ngram {
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
-			ngramSize = conf.getInt("ngram_size", 2);
+			ngramSize = conf.getInt("ngramSize", 2);
 			String separator = conf.get("separator", "\\s+");
 			ngramSeparator= conf.get("ngramSeparator", ",");
 			
 			String stringArticle = article.toString();
- 			String[] splittedArticle = stringArticle.split(separator);
+			String tempArticle = preProcess(stringArticle).trim();
+ 			String[] splittedArticle = tempArticle.split(separator);
  			
- 			for (int i = 1; i <= ngramSize; i++) {
- 				Deque<String> currentNgram = new ArrayDeque<>();
-				int counter = 0;
-				
-				//article is too small
-				if (splittedArticle.length < i) {
-				    return;
-				}
-	
-				for (; counter < i - 1; counter++) {
-					 currentNgram.addLast(splittedArticle[counter]);
-				}
-	
-				String year = String.valueOf(key.get());
-	
-				for (; counter < splittedArticle.length; counter++) {
-				    	currentNgram.addLast(splittedArticle[counter]);
-					gram.set(year + "//" + concat(currentNgram));
-					context.write(gram, ONE);
-					currentNgram.removeFirst();
-				}
- 			}
+ 			List<String> list = new ArrayList<String>(Arrays.asList(splittedArticle));
+ 			list.removeAll(Arrays.asList(""));
+ 			splittedArticle = list.toArray(new String[0]);
+ 			
+			Deque<String> currentNgram = new ArrayDeque<>();
+			int counter = 0;
+			
+			
+			//article is too small
+			if (splittedArticle.length < ngramSize) {
+			    return;
+			}
+
+			for (; counter < ngramSize - 1; counter++) {
+				 currentNgram.addLast(splittedArticle[counter]);
+			}
+
+			String year = String.valueOf(key.get());
+
+			for (; counter < splittedArticle.length; counter++) {
+			    currentNgram.addLast(splittedArticle[counter]);
+				gram.set(year + "//" + concat(currentNgram));
+				context.write(gram, ONE);
+				currentNgram.removeFirst();
+			}
 		}
 	}
 	
@@ -161,7 +174,7 @@ public class Ngram {
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		Job job = Job.getInstance(conf, "Ngram");
 		job.setJarByClass(Ngram.class);
-		job.setNumReduceTasks(100);
+		job.setNumReduceTasks(25);
 		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
@@ -184,9 +197,6 @@ public class Ngram {
 		boolean done = job.waitForCompletion(true);
 		
 		if (done) {
-			/*Path path = FileOutputFormat.getOutputPath(job);
-			FileSystem fs = path.getFileSystem(job.getConfiguration());
-			fs.deleteOnExit(new Path(path.toString() + "/_SUCCESS"));*/
 			System.exit(0);
 		} else {
 			System.exit(1);
