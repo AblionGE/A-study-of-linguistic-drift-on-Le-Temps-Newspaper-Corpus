@@ -29,8 +29,7 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, Text> {
 	}
 
 	/**
-	 * Reduce method.
-	 * Compute the number of year in which each word appears
+	 * Reduce method. Compute the number of year in which each word appears
 	 * 
 	 * @param key
 	 *            : the word
@@ -43,8 +42,10 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, Text> {
 		for (IntWritable val : values) {
 			sum += val.get();
 		}
-		// FIXME : 159 should be known from the input directory
-		result.set("0000 \t" + new DoubleWritable(Math.log((159 / sum))));
+
+		result.set("0000 \t"
+				+ new DoubleWritable(Math.log((context.getConfiguration()
+						.getLong("numOfFiles", 0) / sum))));
 		mos.write(key, result, "ITF");
 	}
 

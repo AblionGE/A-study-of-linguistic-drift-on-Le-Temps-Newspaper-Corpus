@@ -20,7 +20,7 @@ public class TfIdf {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 3;
+	private static final int NBOFREDUCERS = 25;
 
 	/**
 	 * Main function.
@@ -39,26 +39,30 @@ public class TfIdf {
 		// IDF Parts
 		{
 			Configuration conf = new Configuration();
+
+			// Delete existing output dir
+			Path outputPath = new Path(args[1]);
+			outputPath.getFileSystem(conf).delete(outputPath, true);
+
+			Path inputPath = new Path(args[0]);
+			conf.setLong("numOfFiles", inputPath.getFileSystem(conf)
+					.getContentSummary(inputPath).getFileCount());
+
 			Job job = Job.getInstance(conf, "IDF");
-			//conf.set(Job.NUM_MAPS, "25");
 
 			job.setNumReduceTasks(TfIdf.NBOFREDUCERS);
 
 			job.setJarByClass(TfIdf.class);
 			job.setMapperClass(IDFMapper.class);
 			job.setReducerClass(IDFReducer.class);
-			
-			// Delete existing output dir 
-		    Path outputPath = new Path(args[1]);
-		    outputPath.getFileSystem(conf).delete(new Path(args[1]), true);
 
-			//job.setOutputFormatClass(IDFFileOutputFormat.class);
+			// job.setOutputFormatClass(IDFFileOutputFormat.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
-			
-			FileInputFormat.addInputPath(job, new Path(args[0]));
-			//IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
-			FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+			FileInputFormat.addInputPath(job, inputPath);
+			// IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
+			FileOutputFormat.setOutputPath(job, outputPath);
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
 			// folder.
@@ -77,10 +81,10 @@ public class TfIdf {
 		{
 
 		}
-		
-		//Recreate files per year
+
+		// Recreate files per year
 		{
-			
+
 		}
 
 		System.exit(0);
