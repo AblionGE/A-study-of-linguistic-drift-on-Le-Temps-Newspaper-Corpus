@@ -5,7 +5,7 @@
     This configuration file was written by the eclipse-cs plugin configuration editor
 -->
 <!--
-    Checkstyle-Configuration: CheckstyleBigData
+    Checkstyle-Configuration: bigdata_guide
     Description: none
 -->
 <module name="Checker">
@@ -13,10 +13,14 @@
   <module name="TreeWalker">
     <property name="tabWidth" value="4"/>
     <module name="JavadocMethod">
+      <property name="scope" value="public"/>
       <property name="suppressLoadErrors" value="true"/>
     </module>
     <module name="JavadocType"/>
-    <module name="JavadocVariable"/>
+    <module name="JavadocVariable">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
     <module name="JavadocStyle"/>
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
@@ -60,7 +64,10 @@
     </module>
     <module name="NeedBraces"/>
     <module name="RightCurly"/>
-    <module name="AvoidInlineConditionals"/>
+    <module name="AvoidInlineConditionals">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
     <module name="HiddenField"/>
@@ -88,7 +95,9 @@
     </module>
     <module name="TodoComment"/>
     <module name="UpperEll"/>
-    <module name="EmptyLineSeparator"/>
+    <module name="EmptyLineSeparator">
+      <property name="tokens" value="PACKAGE_DEF,IMPORT,CLASS_DEF,ENUM_DEF,INTERFACE_DEF,CTOR_DEF,METHOD_DEF,STATIC_INIT,INSTANCE_INIT"/>
+    </module>
     <module name="OverloadMethodsDeclarationOrder"/>
     <module name="FinalLocalVariable">
       <property name="severity" value="ignore"/>
@@ -109,7 +118,7 @@
   <module name="NewlineAtEndOfFile"/>
   <module name="Translation"/>
   <module name="FileLength">
-    <property name="max" value="120"/>
+    <property name="max" value="1000"/>
   </module>
   <module name="FileTabCharacter">
     <property name="severity" value="ignore"/>
