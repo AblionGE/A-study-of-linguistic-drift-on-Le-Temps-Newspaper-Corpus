@@ -14,6 +14,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 
+/**
+ * For every word, generate a list of "hashes" by removing letters such as to gather bags of words
+ * that result in the same hash. Equivalent to Levenshtein distance <= 2.
+ * @author nicolas
+ */
 public class OcrGroupByHash {
 
 	public static class GroupByHashMapper extends Mapper<Object, Text, Text, Text> {

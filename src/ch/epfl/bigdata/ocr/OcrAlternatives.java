@@ -1,8 +1,6 @@
 package ch.epfl.bigdata.ocr;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -13,22 +11,16 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.StringUtils;
 
+/**
+ * Using the result of {@link OcrGroupByHash}, list the replacement alternatives for every rare word
+ * @author nicolas
+ *
+ */
 public class OcrAlternatives {
-
-	private static class Freq{
-		public final String word;
-		public final int occurrences;
-		public Freq(String word, int occurences){
-			this.word = word;
-			this.occurrences = occurences;
-		}
-		@Override
-		public String toString(){
-			return word+":"+occurrences;
-		}
-	}
+	
+	private static final int RARE_THRESHOLD = 5;
+	//private static final int CORRECT_THRESHOLD = 100;
 	
 	/**
 	 * Output all possible pairs of words from the right part, the left component of the pair having a lower (or equal) occurrence value
@@ -43,18 +35,20 @@ public class OcrAlternatives {
 			String[] entries = both[1].split(",");
 			//LoggerFactory.getLogger(this.getClass()).info(oneGramLine.toString());
 			
-			Freq[] freqs = new Freq[entries.length];
+			WordFreqPair[] freqs = new WordFreqPair[entries.length];
 			for(int i = 0; i < entries.length; i++){
-				String[] temp = entries[i].split(":");
-				freqs[i] = new Freq(temp[0], Integer.parseInt(temp[1]));
+				freqs[i] = WordFreqPair.fromString(entries[i]);
 			}	
 			
+			/*
+			 * Output every possible pair of word, as long as they don't both occur rarely
+			 */
 			for (int i = 0; i < entries.length; i++) {
 				for(int j = i+1; j < entries.length; j++){
-					if(freqs[i].occurrences < freqs[j].occurrences){
-						context.write(new Text(freqs[i].toString()), new Text(freqs[j].toString()));
-					} else {
-						context.write(new Text(freqs[j].toString()), new Text(freqs[i].toString()));
+				    WordFreqPair max = (freqs[i].occurrences > freqs[j].occurrences ? freqs[i] : freqs[j]);
+				    WordFreqPair min = (max.occurrences == freqs[i].occurrences ? freqs[j] : freqs[i]);
+					if(max.occurrences > RARE_THRESHOLD && min.occurrences < RARE_THRESHOLD){
+						context.write(new Text(min.toString()), new Text(max.toString()));
 					}
 				}
 			}
@@ -64,12 +58,15 @@ public class OcrAlternatives {
 	public static class AlternativesReducer extends Reducer<Text, Text, Text, Text> {
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
-			Iterator<Text> iter = values.iterator();
-			HashSet<String> alternatives = new HashSet<>();
-			while (iter.hasNext()) {
-				alternatives.add(iter.next().toString());
+			
+			WordFreqPair max = new WordFreqPair("", -1);
+			for(Text t: values){
+				WordFreqPair pair = WordFreqPair.fromString(t.toString());
+				if(pair.occurrences > max.occurrences){
+					max = pair;
+				}
 			}
-			context.write(key,new Text(StringUtils.join(",", alternatives)));
+			context.write(key,new Text(max.toString()));
 		}
 	}
 
