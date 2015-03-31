@@ -4,13 +4,15 @@ import subprocess
 import sys
 import multiprocessing
 
-ROOT_DIR='/projects/linguistic-shift/cor_ngrams/1-grams'
+ROOT_DIR='/projects/linguistic-shift/cor_ngrams/%s-grams'
 START_YEAR=1840
 END_YEAR=1998
 
 def get_occurence(year):
     year = str(year)
     ngram = sys.argv[1]
+    ngram_size = len(ngram.split(' '))
+    root_dir = ROOT_DIR % ngram_size
     occurences = subprocess.check_output("hadoop fs -cat '%s/*%s*' | grep -P '[\t]%s$' | awk '{print $1}'" % (ROOT_DIR, year, ngram), shell=True).strip()
     return int(occurences.strip() or 0)
 
