@@ -8,17 +8,16 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 /**
  * Reducer to split file by year.
+ * Simply write the key and the value
  * 
  * @author Marc Schaer
  *
  */
 public class SplitByYearTFIDFReducer extends
-		Reducer<IntWritable, Iterable<Text>, IntWritable, Text> {
+		Reducer<IntWritable, Text, IntWritable, Iterable<Text>> {
 
 	public void reduce(IntWritable key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
-		for (Text t : values) {
-			context.write(key, t);
-		}
+		context.write(key, values);
 	}
 }

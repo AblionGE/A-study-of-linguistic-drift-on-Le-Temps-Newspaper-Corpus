@@ -57,7 +57,6 @@ public class TFIDF {
 			job.setMapperClass(IDFMapper.class);
 			job.setReducerClass(IDFReducer.class);
 
-			// job.setOutputFormatClass(IDFFileOutputFormat.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
 
@@ -66,6 +65,7 @@ public class TFIDF {
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
 			// folder.
+
 			job.getConfiguration().setBoolean(
 					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
 
@@ -75,8 +75,8 @@ public class TFIDF {
 			}
 
 		}
-		
-		//Compute TFIDF
+
+		// Compute TFIDF
 		{
 			// Combination of boths with creating an input file with format
 			// word year TFIDF
@@ -96,11 +96,10 @@ public class TFIDF {
 			job.setMapperClass(TFIDFMapper.class);
 			job.setReducerClass(TFIDFReducer.class);
 
-			// job.setOutputFormatClass(IDFFileOutputFormat.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(Text.class);
 
-			FileInputFormat.addInputPath(job, inputPath); //
+			FileInputFormat.addInputPath(job, inputPath);
 			FileOutputFormat.setOutputPath(job, outputPath);
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
@@ -134,7 +133,7 @@ public class TFIDF {
 			job.setReducerClass(SplitByYearTFIDFReducer.class);
 
 			// job.setOutputFormatClass(IDFFileOutputFormat.class);
-			job.setOutputKeyClass(Text.class);
+			job.setOutputKeyClass(IntWritable.class);
 			job.setOutputValueClass(Text.class);
 			job.setOutputFormatClass(TFIDFFileOutputFormat.class);
 

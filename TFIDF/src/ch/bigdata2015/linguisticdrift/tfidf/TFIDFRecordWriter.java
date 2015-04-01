@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
  * TFIDF RecordWriter.
+ * Writes in a single file per year
  * @author Marc Schaer
  *
  */
@@ -39,10 +40,7 @@ public class TFIDFRecordWriter extends
 	@Override
 	public void write(IntWritable year, Iterable<Text> textList)
 			throws IOException, InterruptedException {
-		// I remove the last part of the name which is
-		// a counter of each part of the file
-		String fileName = year.toString().substring(0,
-				year.toString().lastIndexOf("_"));
+		String fileName = year.toString();
 
 		// Get the whole path for the output file
 		Path file = new Path(this.path.getParent() + "/" + this.path.getName()
@@ -55,7 +53,7 @@ public class TFIDFRecordWriter extends
 				out = fs.create(file);
 			}
 			for (Text t : textList) {
-				out.writeChars(t.toString());
+				out.writeChars(t.toString() + "\n");
 			}
 		} finally {
 			if (out != null) {
