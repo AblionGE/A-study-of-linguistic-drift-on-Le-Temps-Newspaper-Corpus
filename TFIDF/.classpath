@@ -12,5 +12,7 @@
 	<classpathentry kind="lib" path="/home/marc/Documents/EPFL/BigData/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.6.0.jar"/>
 	<classpathentry kind="lib" path="/home/marc/Documents/EPFL/BigData/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.6.0.jar"/>
 	<classpathentry kind="lib" path="/home/marc/Documents/EPFL/BigData/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.6.0.jar"/>
+	<classpathentry kind="lib" path="/home/marc/Documents/EPFL/BigData/Project/A-study-of-linguistic-drift-on-Le-Temps-Newspaper-Corpus/TFIDF/libs/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="/home/marc/Documents/EPFL/BigData/Project/A-study-of-linguistic-drift-on-Le-Temps-Newspaper-Corpus/TFIDF/libs/gson-2.3.1-javadoc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

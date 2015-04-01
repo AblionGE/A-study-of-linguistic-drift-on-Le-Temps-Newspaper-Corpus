@@ -1,3 +1,5 @@
+package ch.bigdata2015.linguisticdrift.tfidf;
+
 import java.io.IOException;
 
 import org.apache.hadoop.io.IntWritable;
