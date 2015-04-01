@@ -20,7 +20,7 @@ public class TfIdf {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 25;
+	private static final int NBOFREDUCERS = 2;
 
 	/**
 	 * Main function.
@@ -79,6 +79,39 @@ public class TfIdf {
 		// Combination of boths with creating an input file with format
 		// word year TFIDF
 		{
+			Configuration conf = new Configuration();
+
+			// Delete existing output dir
+			Path outputPath = new Path(args[1]);
+			outputPath.getFileSystem(conf).delete(outputPath, true);
+
+			Path inputPath = new Path(args[0]);
+
+			Job job = Job.getInstance(conf, "TFIDF");
+
+			job.setNumReduceTasks(TfIdf.NBOFREDUCERS);
+
+			job.setJarByClass(TfIdf.class);
+			job.setMapperClass(TFIDFMapper.class);
+			job.setReducerClass(TFIDFReducer.class);
+
+			// job.setOutputFormatClass(IDFFileOutputFormat.class);
+			job.setOutputKeyClass(Text.class);
+			job.setOutputValueClass(Text.class);
+
+			FileInputFormat.addInputPath(job, inputPath);
+			// IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
+			FileOutputFormat.setOutputPath(job, outputPath);
+
+			// To avoid The _SUCCESS files being created in the mapreduce output
+			// folder.
+			job.getConfiguration().setBoolean(
+					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
+
+			int result = job.waitForCompletion(true) ? 0 : 1;
+			if (result != 0) {
+				System.exit(result);
+			}
 
 		}
 

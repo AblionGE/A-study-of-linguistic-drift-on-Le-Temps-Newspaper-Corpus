@@ -33,7 +33,7 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, Text> {
 	 * 
 	 * @param key
 	 *            : the word
-	 * @param value
+	 * @param values
 	 *            : the list of occurrences
 	 */
 	public void reduce(Text key, Iterable<IntWritable> values, Context context)
