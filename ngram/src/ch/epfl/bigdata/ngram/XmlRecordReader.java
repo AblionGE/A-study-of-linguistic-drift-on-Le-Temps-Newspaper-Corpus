@@ -22,13 +22,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * The {@link RecordReader} going with {@link XmlFileInputFormat}.
+ * The {@link RecordReader} going with {@link XmlFileInputFormat}. Splits at the <full_text> tag.
  * @author gbrechbu
  *
  */
 public class XmlRecordReader extends RecordReader<IntWritable, Text> {
-	
-	//private static final Pattern UNDESIRABLES = Pattern.compile("[\\Q][(){},.;!?<>%_-\\E]");
 	
 	private IntWritable key;
 	private Text value;

@@ -23,23 +23,23 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
- * Test.
+ * Main class which contains the mapper class, the reducer class and the main function.
  * @author gbrechbu
  *
  */
 public class Ngram {
 	
+	private static final int NUM_REDUCERS = 25;
+	
 	/**
-	 * A simple mapper. Takes a full article and returns a <key/value> pair with value = 1 and key = "{year}word"
+	 * A simple mapper. Takes a full article and returns a <key/value> pair with key = "{year}word" and value = 1
 	 * @author gbrechbu
 	 *
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
 		private String preProcess(String s) {
-			//return UNDESIRABLES.matcher(s).replaceAll("");
 			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
-			//return s.replaceAll("[^\\p{L}]+", " ").toLowerCase();
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
@@ -67,7 +67,7 @@ public class Ngram {
 			Configuration conf = context.getConfiguration();
 			ngramSize = conf.getInt("ngramSize", 2);
 			String separator = conf.get("separator", "\\s+");
-			ngramSeparator= conf.get("ngramSeparator", ",");
+			ngramSeparator = conf.get("ngramSeparator", ",");
 			
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
@@ -102,7 +102,7 @@ public class Ngram {
 	}
 	
 	/**.
-	 * Combiner for the ngrams.
+	 * Combiner for the ngrams. Simply sums the values.
 	 * @author gbrechbu
 	 *
 	 */
@@ -174,7 +174,7 @@ public class Ngram {
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		Job job = Job.getInstance(conf, "Ngram");
 		job.setJarByClass(Ngram.class);
-		job.setNumReduceTasks(25);
+		job.setNumReduceTasks(NUM_REDUCERS);
 		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
