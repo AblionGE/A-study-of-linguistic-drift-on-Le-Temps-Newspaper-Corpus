@@ -24,8 +24,13 @@ public class TFIDFRecordWriter extends
 	private Configuration conf;
 	private Path path;
 
-	public TFIDFRecordWriter(Configuration conf, Path p) {
-		this.conf = conf;
+	/**
+	 * Constructor.
+	 * @param c the configuration
+	 * @param p Path of the file
+	 */
+	public TFIDFRecordWriter(Configuration c, Path p) {
+		this.conf = c;
 		this.path = p;
 	}
 

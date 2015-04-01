@@ -15,15 +15,12 @@ public class TFIDFReducer extends Reducer<Text, Text, Text, Text> {
 	private Text result = new Text();
 	private Double idf = 0.0;
 
-	// private MultipleOutputs<Text, Text> mos;
-
 	/**
 	 * Setup the reducer.
 	 */
 	protected void setup(Context context) throws IOException,
 			InterruptedException {
 		super.setup(context);
-		// mos = new MultipleOutputs<Text, Text>(context);
 	}
 
 	/**
@@ -59,6 +56,5 @@ public class TFIDFReducer extends Reducer<Text, Text, Text, Text> {
 	protected void cleanup(Context context) throws IOException,
 			InterruptedException {
 		super.cleanup(context);
-		// mos.close();
 	}
 }

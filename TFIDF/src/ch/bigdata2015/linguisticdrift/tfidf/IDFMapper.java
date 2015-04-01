@@ -17,7 +17,7 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
 public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 
-	private final IntWritable ONE = new IntWritable(1);
+	private static final IntWritable ONE = new IntWritable(1);
 	private Text word = new Text();
 
 	/**
