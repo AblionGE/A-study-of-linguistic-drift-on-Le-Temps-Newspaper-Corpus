@@ -20,11 +20,9 @@ public class SplitByYearTFIDFMapper extends Mapper<Object, Text, IntWritable, Te
 	public void map(Object key, Text value, Context context)
 			throws IOException, InterruptedException {
 		String v = value.toString();
-		String[] parts = v.split(" ");
-		System.out.println(parts.length + " : " + parts[0] + " + " + parts[1]);
-		String[] wordAndYear = parts[0].split("\t");
-		String year = wordAndYear[1];
-		String tfidf = wordAndYear[0] + " " + parts[1];
+		String[] parts = v.split("\t");
+		String year = parts[1];
+		String tfidf = parts[0] + " " + parts[2];
 
 		context.write(new IntWritable(new Integer(year)), new Text(tfidf));
 	}

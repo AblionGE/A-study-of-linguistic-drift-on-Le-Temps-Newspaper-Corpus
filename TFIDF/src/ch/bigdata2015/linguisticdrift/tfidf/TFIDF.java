@@ -27,7 +27,7 @@ public class TFIDF {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 2;
+	private static final int NBOFREDUCERS = 50;
 
 	/**
 	 * Main function.
@@ -50,7 +50,7 @@ public class TFIDF {
 			// create Hadoop job
 			Job job = Job.getInstance();
 			job.setJarByClass(TFIDF.class);
-			job.setJobName("Tf");
+			job.setJobName("TF1");
 
 			// set mapper/reducer classes
 			job.setMapperClass(TfMapperTot.class);
@@ -73,7 +73,7 @@ public class TFIDF {
 			// Create a HashMap that links a year with its total number of words
 			HashMap<String, Double> yearFreqMap = new HashMap<String, Double>();
 			try {
-				Path pt = new Path("outputTf-tmp/part-r-00000");
+				Path pt = new Path(args[1] + "-tmp/TF-r-00000");
 				FileSystem fs = FileSystem.get(conf);
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						fs.open(pt)));
@@ -88,9 +88,9 @@ public class TFIDF {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			//Transform the hashMap into JSON format 
+			// Transform the hashMap into JSON format
 			String mapToString = json.toJson(yearFreqMap);
-			//Save the HashMap in order to have acces in the mapper
+			// Save the HashMap in order to have acces in the mapper
 			conf.set("yearFreq", mapToString);
 			/*
 			 * Start the second Map
@@ -98,17 +98,19 @@ public class TFIDF {
 			// create Hadoop job
 			Job job2 = new Job(conf);
 			job2.setJarByClass(TFIDF.class);
-			job2.setJobName("Tf");
+			job2.setJobName("TF2");
 
 			// set mapper/reducer classes
 			job2.setMapperClass(TfMapperVal.class);
+			job2.setReducerClass(TfReducerVal.class);
 
 			job2.setOutputKeyClass(Text.class);
 			job2.setOutputValueClass(Text.class);
 
 			// define input and output folders
 			FileInputFormat.addInputPath(job2, new Path(args[0]));
-			FileOutputFormat.setOutputPath(job2, new Path(args[1]));
+			FileOutputFormat.setOutputPath(job2, new Path(args[1]
+					+ "-tmpTFIDF-TF"));
 
 			// launch job with verbose output and wait until it finishes
 			job2.waitForCompletion(true);
@@ -120,8 +122,8 @@ public class TFIDF {
 			Configuration conf = new Configuration();
 
 			// Delete existing output dir
-			Path outputPath = new Path(args[1]);
-			outputPath.getFileSystem(conf).delete(outputPath, true);
+			Path outputPath = new Path(args[1] + "-tmpTFIDF-IDF");
+			// outputPath.getFileSystem(conf).delete(outputPath, true);
 
 			Path inputPath = new Path(args[0]);
 			conf.setLong("numOfFiles", inputPath.getFileSystem(conf)
@@ -161,10 +163,11 @@ public class TFIDF {
 			Configuration conf = new Configuration();
 
 			// Delete existing output dir
-			Path outputPath = new Path(args[1]);
+			Path outputPath = new Path(args[1] + "-tmpCompute");
 			outputPath.getFileSystem(conf).delete(outputPath, true);
 
-			Path inputPath = new Path(args[0]);
+			Path inputPath1 = new Path(args[1] + "-tmpTFIDF-IDF");
+			Path inputPath2 = new Path(args[1] + "-tmpTFIDF-TF");
 
 			Job job = Job.getInstance(conf, "TFIDF");
 
@@ -174,10 +177,13 @@ public class TFIDF {
 			job.setMapperClass(TFIDFMapper.class);
 			job.setReducerClass(TFIDFReducer.class);
 
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(Text.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(Text.class);
 
-			FileInputFormat.addInputPath(job, inputPath);
+			FileInputFormat.addInputPath(job, inputPath1);
+			FileInputFormat.addInputPath(job, inputPath2);
 			FileOutputFormat.setOutputPath(job, outputPath);
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
@@ -200,7 +206,7 @@ public class TFIDF {
 			Path outputPath = new Path(args[1]);
 			outputPath.getFileSystem(conf).delete(outputPath, true);
 
-			Path inputPath = new Path(args[0]);
+			Path inputPath = new Path(args[1] + "-tmpCompute");
 
 			Job job = Job.getInstance(conf, "TFIDFMerge");
 

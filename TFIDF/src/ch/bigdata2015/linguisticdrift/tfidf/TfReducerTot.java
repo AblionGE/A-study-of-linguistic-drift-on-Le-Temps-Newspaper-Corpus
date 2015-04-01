@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Reducer.Context;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
  * Tf computation to compute the total number of word
@@ -15,6 +17,24 @@ import org.apache.hadoop.mapreduce.Reducer;
 public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 	private IntWritable outputValue = new IntWritable();
+	private MultipleOutputs<Text, IntWritable> mos;
+
+	/**
+	 * Setup the reducer.
+	 */
+	@Override
+	protected void setup(Context context) throws IOException,
+			InterruptedException {
+		super.setup(context);
+		mos = new MultipleOutputs<Text, IntWritable>(context);
+	}
+
+	@Override
+	protected void cleanup(Context context) throws IOException,
+			InterruptedException {
+		super.cleanup(context);
+		mos.close();
+	}
 
 	public void reduce(Text inputKey, Iterable<IntWritable> inputValues,
 			Context context) throws IOException, InterruptedException {
@@ -25,7 +45,7 @@ public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> 
 			sumOfYear += occ.get();
 		}
 		outputValue.set(sumOfYear);
-		context.write(inputKey, outputValue);
+		mos.write(inputKey, outputValue, "TF");
 	}
 
 }

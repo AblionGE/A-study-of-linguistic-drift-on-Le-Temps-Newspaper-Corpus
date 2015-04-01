@@ -1,6 +1,7 @@
 package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -33,21 +34,26 @@ public class TFIDFReducer extends Reducer<Text, Text, Text, Text> {
 	 */
 	public void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException {
+
+		ArrayList<Text> cache = new ArrayList<Text>();
 		for (Text val : values) {
-			if (((val.toString().split(" "))[0]).equals("0000")) {
-				String idfStr = (val.toString().split(" "))[1];
+			String[] parts = val.toString().split("\t");
+			if ((parts[0]).equals("0000")) {
+				String idfStr = parts[1];
 				idf = new Double(idfStr);
-				break;
+			} else {
+				cache.add(new Text(val));
 			}
 		}
 
-		for (Text val : values) {
-			if (!((val.toString().split(" "))[0]).equals("0000")) {
-				String[] parts = val.toString().split(" ");
+		for (Text val : cache) {
+			String[] parts = val.toString().split("\t");
+			if (!((parts[0]).equals("0000"))) {
 				String year = parts[0];
 				String tf = parts[1];
+
 				Double tfidf = new Double(tf) * idf;
-				result.set(year + " " + tfidf);
+				result.set(year + "\t" + tfidf);
 				context.write(key, result);
 			}
 		}

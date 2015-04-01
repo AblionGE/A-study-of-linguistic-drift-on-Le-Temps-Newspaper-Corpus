@@ -12,8 +12,8 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
- * TFIDF RecordWriter.
- * Writes in a single file per year
+ * TFIDF RecordWriter. Writes in a single file per year
+ * 
  * @author Marc Schaer
  *
  */
@@ -26,8 +26,11 @@ public class TFIDFRecordWriter extends
 
 	/**
 	 * Constructor.
-	 * @param c the configuration
-	 * @param p Path of the file
+	 * 
+	 * @param c
+	 *            the configuration
+	 * @param p
+	 *            Path of the file
 	 */
 	public TFIDFRecordWriter(Configuration c, Path p) {
 		this.conf = c;
@@ -58,7 +61,7 @@ public class TFIDFRecordWriter extends
 				out = fs.create(file);
 			}
 			for (Text t : textList) {
-				out.writeChars(t.toString() + "\n");
+				out.writeBytes(t.toString() + "\n");
 			}
 		} finally {
 			if (out != null) {

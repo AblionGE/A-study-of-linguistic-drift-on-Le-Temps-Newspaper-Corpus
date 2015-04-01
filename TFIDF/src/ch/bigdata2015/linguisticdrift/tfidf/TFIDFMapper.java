@@ -19,9 +19,9 @@ public class TFIDFMapper extends Mapper<Object, Text, Text, Text> {
 	public void map(Object key, Text value, Context context)
 			throws IOException, InterruptedException {
 		String v = value.toString();
-		String[] parts = v.split(" ");
+		String[] parts = v.split("\t");
 		String word = parts[0];
-		String str = parts[1] + " " + parts[2];
+		String str = parts[1] + "\t" + parts[2];
 
 		context.write(new Text(word), new Text(str));
 	}

@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -52,8 +50,9 @@ public class TfMapperVal extends Mapper<LongWritable, Text, Text, Text> {
 		// For every line we take the word and its occurence
 		while (token.hasMoreTokens()) {
 			// We burn the word
-			int numberOcc = new Integer(token.nextToken());
+			//FIXME : I swap the next 2 lines to have them working on the cluster
 			String word = token.nextToken();
+			int numberOcc = new Integer(token.nextToken());
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(word);
 			double freqTotOcc = yearFreqMap.get(fileName);

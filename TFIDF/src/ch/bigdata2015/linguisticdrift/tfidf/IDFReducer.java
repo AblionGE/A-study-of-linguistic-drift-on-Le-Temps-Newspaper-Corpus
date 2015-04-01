@@ -43,10 +43,10 @@ public class IDFReducer extends Reducer<Text, IntWritable, Text, Text> {
 			sum += val.get();
 		}
 
-		result.set("0000 \t"
+		result.set("0000\t"
 				+ new DoubleWritable(Math.log((context.getConfiguration()
 						.getLong("numOfFiles", 0) / sum))));
-		mos.write(key, result, "ITF");
+		mos.write(key, result, "IDF");
 	}
 
 	protected void cleanup(Context context) throws IOException,
