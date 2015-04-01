@@ -12,7 +12,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 /**
- * A custom FileInputFormat for GZip, needed as Gzip files cannot be split.
+ * A custom FileInputFormat for XML, this format is not splittable.
  * @author gbrechbu
  *
  */
