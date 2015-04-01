@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  * @author Marc Schaer and Jeremy Weber
  *
  */
-public class TfIdf {
+public class TFIDF {
 
 	/**
 	 * Number of reducers.
@@ -38,6 +38,7 @@ public class TfIdf {
 
 		// IDF Parts
 		{
+
 			Configuration conf = new Configuration();
 
 			// Delete existing output dir
@@ -50,9 +51,9 @@ public class TfIdf {
 
 			Job job = Job.getInstance(conf, "IDF");
 
-			job.setNumReduceTasks(TfIdf.NBOFREDUCERS);
+			job.setNumReduceTasks(TFIDF.NBOFREDUCERS);
 
-			job.setJarByClass(TfIdf.class);
+			job.setJarByClass(TFIDF.class);
 			job.setMapperClass(IDFMapper.class);
 			job.setReducerClass(IDFReducer.class);
 
@@ -61,7 +62,6 @@ public class TfIdf {
 			job.setOutputValueClass(IntWritable.class);
 
 			FileInputFormat.addInputPath(job, inputPath);
-			// IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
 			FileOutputFormat.setOutputPath(job, outputPath);
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
@@ -75,10 +75,11 @@ public class TfIdf {
 			}
 
 		}
-
-		// Combination of boths with creating an input file with format
-		// word year TFIDF
+		
+		//Compute TFIDF
 		{
+			// Combination of boths with creating an input file with format
+			// word year TFIDF
 			Configuration conf = new Configuration();
 
 			// Delete existing output dir
@@ -89,9 +90,9 @@ public class TfIdf {
 
 			Job job = Job.getInstance(conf, "TFIDF");
 
-			job.setNumReduceTasks(TfIdf.NBOFREDUCERS);
+			job.setNumReduceTasks(TFIDF.NBOFREDUCERS);
 
-			job.setJarByClass(TfIdf.class);
+			job.setJarByClass(TFIDF.class);
 			job.setMapperClass(TFIDFMapper.class);
 			job.setReducerClass(TFIDFReducer.class);
 
@@ -99,8 +100,7 @@ public class TfIdf {
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(Text.class);
 
-			FileInputFormat.addInputPath(job, inputPath);
-			// IDFFileOutputFormat.setOutputPath(job, new Path(args[1]));
+			FileInputFormat.addInputPath(job, inputPath); //
 			FileOutputFormat.setOutputPath(job, outputPath);
 
 			// To avoid The _SUCCESS files being created in the mapreduce output
@@ -117,7 +117,39 @@ public class TfIdf {
 
 		// Recreate files per year
 		{
+			Configuration conf = new Configuration();
 
+			// Delete existing output dir
+			Path outputPath = new Path(args[1]);
+			outputPath.getFileSystem(conf).delete(outputPath, true);
+
+			Path inputPath = new Path(args[0]);
+
+			Job job = Job.getInstance(conf, "TFIDFMerge");
+
+			job.setNumReduceTasks(TFIDF.NBOFREDUCERS);
+
+			job.setJarByClass(TFIDF.class);
+			job.setMapperClass(SplitByYearTFIDFMapper.class);
+			job.setReducerClass(SplitByYearTFIDFReducer.class);
+
+			// job.setOutputFormatClass(IDFFileOutputFormat.class);
+			job.setOutputKeyClass(Text.class);
+			job.setOutputValueClass(Text.class);
+			job.setOutputFormatClass(TFIDFFileOutputFormat.class);
+
+			FileInputFormat.addInputPath(job, inputPath);
+			TFIDFFileOutputFormat.setOutputPath(job, outputPath);
+
+			// To avoid The _SUCCESS files being created in the mapreduce output
+			// folder.
+			job.getConfiguration().setBoolean(
+					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
+
+			int result = job.waitForCompletion(true) ? 0 : 1;
+			if (result != 0) {
+				System.exit(result);
+			}
 		}
 
 		System.exit(0);

@@ -2,27 +2,28 @@ package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 /**
- * Mapper for TF-IDF combination.
- * 
+ * Mapper to split file by year.
  * @author Marc Schaer
  *
  */
-public class TFIDFMapper extends Mapper<Object, Text, Text, Text> {
-
+public class SplitByYearTFIDFMapper extends Mapper<Object, Text, IntWritable, Text> {
+	
 	/**
-	 * Mapper for TFIDF combinator. Map files in format : word year value
+	 * Mapper.
 	 */
 	public void map(Object key, Text value, Context context)
 			throws IOException, InterruptedException {
 		String v = value.toString();
 		String[] parts = v.split(" ");
-		String word = parts[0];
-		String str = parts[1] + " " + parts[2];
+		String year = parts[1];
+		String tfidf = parts[0] + " " + parts[2];
 
-		context.write(new Text(word), new Text(str));
+		context.write(new IntWritable(new Integer(year)), new Text(tfidf));
 	}
+
 }
