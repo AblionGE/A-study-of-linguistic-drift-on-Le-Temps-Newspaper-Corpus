@@ -42,14 +42,14 @@ public class TFIDF {
 		{
 			// Delete existing output dir
 			Configuration conf = new Configuration();
-			Path outputPathTmp = new Path(args[1]+"-tmp");
+			Path outputPathTmp = new Path(args[1] + "-tmp");
 			outputPathTmp.getFileSystem(conf).delete(outputPathTmp, true);
 			Path outputPath = new Path(args[1]);
 			outputPath.getFileSystem(conf).delete(outputPath, true);
 
 			// create Hadoop job
 			Job job = Job.getInstance();
-			job.setJarByClass(Tf.class);
+			job.setJarByClass(TFIDF.class);
 			job.setJobName("Tf");
 
 			// set mapper/reducer classes
@@ -61,7 +61,7 @@ public class TFIDF {
 
 			// define input and output folders
 			FileInputFormat.addInputPath(job, new Path(args[0]));
-			FileOutputFormat.setOutputPath(job, new Path(args[1]+"-tmp"));
+			FileOutputFormat.setOutputPath(job, new Path(args[1] + "-tmp"));
 
 			// launch job with verbose output and wait until it finishes
 			job.waitForCompletion(true);
@@ -92,9 +92,6 @@ public class TFIDF {
 			String mapToString = json.toJson(yearFreqMap);
 			//Save the HashMap in order to have acces in the mapper
 			conf.set("yearFreq", mapToString);
-			FileSystem fs = FileSystem.get(conf);
-			Path pathMerge = new Path("outputTf-tmp/yearTotFreq.txt");
-			//FileUtil.copyMerge(fs, new Path(args[1]+"-tmp"), fs, pathMerge, true, conf, "");
 			/*
 			 * Start the second Map
 			 */
