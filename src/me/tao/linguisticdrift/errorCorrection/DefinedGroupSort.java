@@ -1,7 +1,12 @@
-package me.tao.linguisticdrift.errorCorrection;
+package me.tao.linguisticdrift.errorcorrection;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
+
+/*
+ * Define group strategy
+ * data with the same first key will be grouped into the same group.
+ */
 
 public class DefinedGroupSort extends WritableComparator{
 	public DefinedGroupSort() {

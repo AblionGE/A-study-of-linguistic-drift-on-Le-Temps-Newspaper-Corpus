@@ -1,12 +1,17 @@
-package me.tao.linguisticdrift.errorCorrection;
+package me.tao.linguisticdrift.errorcorrection;
 
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.IntWritable;
+
+/*
+ * Define Combination Key
+ */
 
 public class CombinationKey implements WritableComparable<CombinationKey> {
 
@@ -43,9 +48,15 @@ public class CombinationKey implements WritableComparable<CombinationKey> {
         this.secondKey.write(outPut);
     }
     
+    /*
+     * Define comparison strategy
+     * Note: This comparison is applied to the first default sort of mapreduce, i.e., sort phase of map
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    
 	@Override
-	public int compareTo(CombinationKey IntKey) {
-		return this.firstKey.compareTo(IntKey.getFirstKey());
+	public int compareTo(CombinationKey combinationKey) {
+		return this.firstKey.compareTo(combinationKey.getFirstKey());
 	}
 
 }
