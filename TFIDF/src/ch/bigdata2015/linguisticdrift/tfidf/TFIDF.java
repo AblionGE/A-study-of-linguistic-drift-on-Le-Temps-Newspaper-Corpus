@@ -27,7 +27,7 @@ public class TFIDF {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 50;
+	private static final int NBOFREDUCERS = 3;
 
 	/**
 	 * Main function.
@@ -205,7 +205,6 @@ public class TFIDF {
 
 			// Delete existing output dir
 			Path outputPath = new Path(args[1]);
-			outputPath.getFileSystem(conf).delete(outputPath, true);
 
 			Path inputPath = new Path(args[1] + "-tmpCompute");
 
@@ -238,9 +237,9 @@ public class TFIDF {
 			Path computePath = new Path(args[1] + "-tmpCompute");
 			Path IDFPath = new Path(args[1] + "-tmpTFIDF-IDF");
 			Path TFPath = new Path(args[1] + "-tmpTFIDF-TF");
-			computePath.getFileSystem(conf).delete(outputPath, true);
-			IDFPath.getFileSystem(conf).delete(outputPath, true);
-			TFPath.getFileSystem(conf).delete(outputPath, true);
+			computePath.getFileSystem(conf).delete(computePath, true);
+			IDFPath.getFileSystem(conf).delete(IDFPath, true);
+			TFPath.getFileSystem(conf).delete(TFPath, true);
 			
 			if (result != 0) {
 				System.exit(result);
