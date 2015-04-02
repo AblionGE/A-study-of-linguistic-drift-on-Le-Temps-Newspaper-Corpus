@@ -56,23 +56,50 @@ public class TFIDF {
 			// set mapper/reducer classes
 			job.setMapperClass(TfMapperTot.class);
 			job.setReducerClass(TfReducerTot.class);
-			job.setOutputFormatClass(TFTotFileOutputFormat.class);
 
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
 
 			// define input and output folders
 			FileInputFormat.addInputPath(job, new Path(args[0]));
-			TFTotFileOutputFormat.setOutputPath(job, new Path(args[1] + "-TotOccurenceYear"));
+			FileOutputFormat.setOutputPath(job, new Path(args[1] + "-TotOccurenceYear-tmp"));
 
 			job.getConfiguration().setBoolean(
 					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
 			
 			// launch job with verbose output and wait until it finishes
 			job.waitForCompletion(true);
-
+			
 			// ///////////
-			// Second MapReduce in order to compute the tf value
+			// Second MapReduce in order to merge TotOccurence file
+			// //////////
+
+			Job job2 = new Job(conf);
+			job2.setJarByClass(TFIDF.class);
+			job2.setJobName("TF1Merge");
+			job2.setNumReduceTasks(TFIDF.NBOFREDUCERS);
+
+			// set mapper/reducer classes
+			job2.setMapperClass(TfMapperMerge.class);
+			job2.setReducerClass(TfReducerMerge.class);
+			job2.setOutputFormatClass(TFTotFileOutputFormat.class);
+
+			job2.setOutputKeyClass(Text.class);
+			job2.setOutputValueClass(Text.class);
+
+			// define input and output folders
+			FileInputFormat.addInputPath(job2, new Path(args[1] + "-TotOccurenceYear-tmp"));
+			TFTotFileOutputFormat.setOutputPath(job2, new Path(args[1]
+					+ "-TotOccurenceYear"));
+			
+			job2.getConfiguration().setBoolean(
+					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
+
+			// launch job with verbose output and wait until it finishes
+			job2.waitForCompletion(true);
+			
+			// ///////////
+			// Third MapReduce in order to compute the tf value
 			// //////////
 			Gson json = new Gson();
 			// Create a HashMap that links a year with its total number of words
@@ -102,28 +129,28 @@ public class TFIDF {
 			 * Start the second Map
 			 */
 			// create Hadoop job
-			Job job2 = new Job(conf);
-			job2.setJarByClass(TFIDF.class);
-			job2.setJobName("TF2");
-			job2.setNumReduceTasks(TFIDF.NBOFREDUCERS);
+			Job job3 = new Job(conf);
+			job3.setJarByClass(TFIDF.class);
+			job3.setJobName("TF2");
+			job3.setNumReduceTasks(TFIDF.NBOFREDUCERS);
 
 			// set mapper/reducer classes
-			job2.setMapperClass(TfMapperVal.class);
-			job2.setReducerClass(TfReducerVal.class);
+			job3.setMapperClass(TfMapperVal.class);
+			job3.setReducerClass(TfReducerVal.class);
 
-			job2.setOutputKeyClass(Text.class);
-			job2.setOutputValueClass(Text.class);
+			job3.setOutputKeyClass(Text.class);
+			job3.setOutputValueClass(Text.class);
 
 			// define input and output folders
-			FileInputFormat.addInputPath(job2, new Path(args[0]));
-			FileOutputFormat.setOutputPath(job2, new Path(args[1]
+			FileInputFormat.addInputPath(job3, new Path(args[0]));
+			FileOutputFormat.setOutputPath(job3, new Path(args[1]
 					+ "-tmpTFIDF-TF"));
 			
-			job2.getConfiguration().setBoolean(
+			job3.getConfiguration().setBoolean(
 					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
 
 			// launch job with verbose output and wait until it finishes
-			job2.waitForCompletion(true);
+			job3.waitForCompletion(true);
 		}
 
 		// IDF Parts
@@ -246,9 +273,11 @@ public class TFIDF {
 			Path computePath = new Path(args[1] + "-tmpCompute");
 			Path IDFPath = new Path(args[1] + "-tmpTFIDF-IDF");
 			Path TFPath = new Path(args[1] + "-tmpTFIDF-TF");
+			Path TotOccurPathTmp = new Path(args[1] + "-TotOccurenceYear-tmp");
 			computePath.getFileSystem(conf).delete(computePath, true);
 			IDFPath.getFileSystem(conf).delete(IDFPath, true);
 			TFPath.getFileSystem(conf).delete(TFPath, true);
+			TotOccurPathTmp.getFileSystem(conf).delete(TotOccurPathTmp, true);
 			
 			if (result != 0) {
 				System.exit(result);

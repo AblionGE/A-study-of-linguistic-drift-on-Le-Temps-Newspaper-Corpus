@@ -17,7 +17,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * @author Marc Schaer
  *
  */
-public class TFTotRecordWriter extends RecordWriter<Text, IntWritable> {
+public class TFTotRecordWriter extends RecordWriter<Text, Iterable<Text>> {
 
 	private DataOutputStream out;
 	private Configuration conf;
@@ -45,7 +45,7 @@ public class TFTotRecordWriter extends RecordWriter<Text, IntWritable> {
 	}
 
 	@Override
-	public void write(Text year, IntWritable occurences) throws IOException,
+	public void write(Text key, Iterable<Text> occurences) throws IOException,
 			InterruptedException {
 		String fileName = "YearOccurences";
 
@@ -59,7 +59,9 @@ public class TFTotRecordWriter extends RecordWriter<Text, IntWritable> {
 			} else {
 				out = fs.create(file);
 			}
-			out.writeBytes(year.toString() + "\t" + occurences.toString() + "\n");
+			for (Text occ: occurences) {
+				out.writeBytes(occ.toString() + "\n");
+			}
 		} finally {
 			if (out != null) {
 				out.close();

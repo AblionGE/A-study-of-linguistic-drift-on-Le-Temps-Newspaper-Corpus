@@ -34,10 +34,10 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 		// For every line we take the word and its occurence
 		while (token.hasMoreTokens()) {
 			// We burn the word
-			
+
 			int numberOcc = new Integer(token.nextToken());
 			token.nextToken();
-			
+
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(fileName);
 			outputValue.set(numberOcc);
