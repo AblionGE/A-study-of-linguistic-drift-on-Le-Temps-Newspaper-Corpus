@@ -16,7 +16,6 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 	private IntWritable outputValue = new IntWritable();
-	private MultipleOutputs<Text, IntWritable> mos;
 
 	/**
 	 * Setup the reducer.
@@ -25,14 +24,12 @@ public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> 
 	protected void setup(Context context) throws IOException,
 			InterruptedException {
 		super.setup(context);
-		mos = new MultipleOutputs<Text, IntWritable>(context);
 	}
 
 	@Override
 	protected void cleanup(Context context) throws IOException,
 			InterruptedException {
 		super.cleanup(context);
-		mos.close();
 	}
 
 	public void reduce(Text inputKey, Iterable<IntWritable> inputValues,
@@ -44,7 +41,7 @@ public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> 
 			sumOfYear += occ.get();
 		}
 		outputValue.set(sumOfYear);
-		mos.write(inputKey, outputValue, "YearOccurences");
+		context.write(inputKey, outputValue);
 	}
 
 }

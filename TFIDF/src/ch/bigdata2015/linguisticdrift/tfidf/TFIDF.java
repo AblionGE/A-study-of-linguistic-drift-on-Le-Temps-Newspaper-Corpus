@@ -56,14 +56,18 @@ public class TFIDF {
 			// set mapper/reducer classes
 			job.setMapperClass(TfMapperTot.class);
 			job.setReducerClass(TfReducerTot.class);
+			job.setOutputFormatClass(TFTotFileOutputFormat.class);
 
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
 
 			// define input and output folders
 			FileInputFormat.addInputPath(job, new Path(args[0]));
-			FileOutputFormat.setOutputPath(job, new Path(args[1] + "-TotOccurenceYear"));
+			TFTotFileOutputFormat.setOutputPath(job, new Path(args[1] + "-TotOccurenceYear"));
 
+			job.getConfiguration().setBoolean(
+					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
+			
 			// launch job with verbose output and wait until it finishes
 			job.waitForCompletion(true);
 
@@ -74,7 +78,7 @@ public class TFIDF {
 			// Create a HashMap that links a year with its total number of words
 			HashMap<String, Double> yearFreqMap = new HashMap<String, Double>();
 			try {
-				Path pt = new Path(args[1] + "-TotOccurenceYear/YearOccurences-r-00000");
+				Path pt = new Path(args[1] + "-TotOccurenceYear/YearOccurences");
 				FileSystem fs = FileSystem.get(conf);
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						fs.open(pt)));
@@ -114,6 +118,9 @@ public class TFIDF {
 			FileInputFormat.addInputPath(job2, new Path(args[0]));
 			FileOutputFormat.setOutputPath(job2, new Path(args[1]
 					+ "-tmpTFIDF-TF"));
+			
+			job2.getConfiguration().setBoolean(
+					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
 
 			// launch job with verbose output and wait until it finishes
 			job2.waitForCompletion(true);
