@@ -1,4 +1,4 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public class TfReducerVal extends Reducer<Text, Text, Text, Text> {
 			Context context) throws IOException, InterruptedException {
 
 		for (Text occ : inputValues) {
-			mos.write(inputKey, occ, "TF");
+			mos.write(inputKey, occ, "YearOccurences");
 		}
 	}
 }

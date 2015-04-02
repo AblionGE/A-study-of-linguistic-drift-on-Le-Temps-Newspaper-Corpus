@@ -1,4 +1,4 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,8 +51,8 @@ public class TfMapperVal extends Mapper<LongWritable, Text, Text, Text> {
 		while (token.hasMoreTokens()) {
 			// We burn the word
 			//FIXME : I swap the next 2 lines to have them working on the cluster
-			String word = token.nextToken();
 			int numberOcc = new Integer(token.nextToken());
+			String word = token.nextToken();
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(word);
 			double freqTotOcc = yearFreqMap.get(fileName);

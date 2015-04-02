@@ -1,11 +1,10 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
@@ -45,7 +44,7 @@ public class TfReducerTot extends Reducer<Text, IntWritable, Text, IntWritable> 
 			sumOfYear += occ.get();
 		}
 		outputValue.set(sumOfYear);
-		mos.write(inputKey, outputValue, "TF");
+		mos.write(inputKey, outputValue, "YearOccurences");
 	}
 
 }

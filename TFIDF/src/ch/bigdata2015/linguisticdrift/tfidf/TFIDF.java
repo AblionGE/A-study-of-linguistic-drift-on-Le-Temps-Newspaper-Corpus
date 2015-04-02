@@ -1,4 +1,4 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -42,7 +42,7 @@ public class TFIDF {
 		{
 			// Delete existing output dir
 			Configuration conf = new Configuration();
-			Path outputPathTmp = new Path(args[1] + "-tmp");
+			Path outputPathTmp = new Path(args[1] + "-TotOccurenceYear");
 			outputPathTmp.getFileSystem(conf).delete(outputPathTmp, true);
 			Path outputPath = new Path(args[1]);
 			outputPath.getFileSystem(conf).delete(outputPath, true);
@@ -61,7 +61,7 @@ public class TFIDF {
 
 			// define input and output folders
 			FileInputFormat.addInputPath(job, new Path(args[0]));
-			FileOutputFormat.setOutputPath(job, new Path(args[1] + "-tmp"));
+			FileOutputFormat.setOutputPath(job, new Path(args[1] + "-TotOccurenceYear"));
 
 			// launch job with verbose output and wait until it finishes
 			job.waitForCompletion(true);
@@ -73,7 +73,7 @@ public class TFIDF {
 			// Create a HashMap that links a year with its total number of words
 			HashMap<String, Double> yearFreqMap = new HashMap<String, Double>();
 			try {
-				Path pt = new Path(args[1] + "-tmp/TF-r-00000");
+				Path pt = new Path(args[1] + "-TotOccurenceYear/YearOccurences-r-00000");
 				FileSystem fs = FileSystem.get(conf);
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						fs.open(pt)));
@@ -92,6 +92,7 @@ public class TFIDF {
 			String mapToString = json.toJson(yearFreqMap);
 			// Save the HashMap in order to have acces in the mapper
 			conf.set("yearFreq", mapToString);
+			
 			/*
 			 * Start the second Map
 			 */
@@ -230,6 +231,17 @@ public class TFIDF {
 					"mapreduce.fileoutputcommitter.marksuccessfuljobs", false);
 
 			int result = job.waitForCompletion(true) ? 0 : 1;
+			
+			/*
+			 * Delete output Folder
+			 */
+			Path computePath = new Path(args[1] + "-tmpCompute");
+			Path IDFPath = new Path(args[1] + "-tmpTFIDF-IDF");
+			Path TFPath = new Path(args[1] + "-tmpTFIDF-TF");
+			computePath.getFileSystem(conf).delete(outputPath, true);
+			IDFPath.getFileSystem(conf).delete(outputPath, true);
+			TFPath.getFileSystem(conf).delete(outputPath, true);
+			
 			if (result != 0) {
 				System.exit(result);
 			}

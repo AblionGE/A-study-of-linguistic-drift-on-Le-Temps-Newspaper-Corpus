@@ -1,4 +1,4 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -36,8 +36,8 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 			// We burn the word
 			
 			//FIXME : I swap the next 2 lines to have them working on the cluster
-			token.nextToken();
 			int numberOcc = new Integer(token.nextToken());
+			token.nextToken();
 			
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(fileName);
