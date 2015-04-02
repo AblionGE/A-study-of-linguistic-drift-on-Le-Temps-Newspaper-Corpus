@@ -35,7 +35,6 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 		while (token.hasMoreTokens()) {
 			// We burn the word
 			
-			//FIXME : I swap the next 2 lines to have them working on the cluster
 			int numberOcc = new Integer(token.nextToken());
 			token.nextToken();
 			

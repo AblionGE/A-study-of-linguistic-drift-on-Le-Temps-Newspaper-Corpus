@@ -27,7 +27,7 @@ public class TFIDF {
 	/**
 	 * Number of reducers.
 	 */
-	private static final int NBOFREDUCERS = 3;
+	private static final int NBOFREDUCERS = 50;
 
 	/**
 	 * Main function.
@@ -51,6 +51,7 @@ public class TFIDF {
 			Job job = Job.getInstance();
 			job.setJarByClass(TFIDF.class);
 			job.setJobName("TF1");
+			job.setNumReduceTasks(TFIDF.NBOFREDUCERS);
 
 			// set mapper/reducer classes
 			job.setMapperClass(TfMapperTot.class);
@@ -100,6 +101,7 @@ public class TFIDF {
 			Job job2 = new Job(conf);
 			job2.setJarByClass(TFIDF.class);
 			job2.setJobName("TF2");
+			job2.setNumReduceTasks(TFIDF.NBOFREDUCERS);
 
 			// set mapper/reducer classes
 			job2.setMapperClass(TfMapperVal.class);
