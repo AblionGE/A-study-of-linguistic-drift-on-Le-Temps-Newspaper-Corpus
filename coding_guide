@@ -5,7 +5,7 @@
     This configuration file was written by the eclipse-cs plugin configuration editor
 -->
 <!--
-    Checkstyle-Configuration: bigdata_guide
+    Checkstyle-Configuration: big_data
     Description: none
 -->
 <module name="Checker">
@@ -14,6 +14,8 @@
     <property name="tabWidth" value="4"/>
     <module name="JavadocMethod">
       <property name="scope" value="public"/>
+      <property name="allowThrowsTagsForSubclasses" value="true"/>
+      <property name="allowMissingThrowsTags" value="true"/>
       <property name="suppressLoadErrors" value="true"/>
     </module>
     <module name="JavadocType"/>
@@ -57,7 +59,10 @@
     <module name="WhitespaceAround"/>
     <module name="ModifierOrder"/>
     <module name="RedundantModifier"/>
-    <module name="AvoidNestedBlocks"/>
+    <module name="AvoidNestedBlocks">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
     <module name="EmptyBlock"/>
     <module name="LeftCurly">
       <property name="maxLineLength" value="120"/>
