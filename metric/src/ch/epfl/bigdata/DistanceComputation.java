@@ -1,21 +1,19 @@
 package ch.epfl.bigdata;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -38,8 +36,9 @@ public class DistanceComputation {
 
 
 	/**
-	 * Mapper to compute distance: takes a directory with all 1-gram files as input.
-	 * For one year y1 and for each words in y1, it returns a tuple for each y2 in [1840,1998]: (y1:y2, word).
+	 * Mapper to compute distance: takes a directory with all 1-gram files as
+	 * input. For one year y1 and for each words in y1, it returns a tuple for
+	 * each y2 in [1840,1998]: (y1:y2, word).
 	 * 
 	 * @author Cynthia, Farah
 	 * 
@@ -59,12 +58,14 @@ public class DistanceComputation {
 			String year = fileName.replaceAll("-r-[0-9]+", "");
 			String[] tokens = line.toString().split("\\s+");
 
-			if(tokens.length == 2) {
+			if (tokens.length == 2) {
 				for (int i = firstYear; i <= lastYear; i++) {
-					if(Integer.parseInt(year) < i){
-						context.write(new Text(year+":"+i) , new Text(tokens[1]));
-					} else { 
-						context.write(new Text(i+":"+year) , new Text(tokens[1]));
+					if (Integer.parseInt(year) < i) {
+						context.write(new Text(year + ":" + i), new Text(
+								tokens[1]));
+					} else {
+						context.write(new Text(i + ":" + year), new Text(
+								tokens[1]));
 					}
 
 				}
@@ -80,49 +81,43 @@ public class DistanceComputation {
 	 * 
 	 */
 	private static class CDistanceReducer extends
-	Reducer<Text, Text, Text, IntWritable> {
+			Reducer<Text, Text, Text, DoubleWritable> {
 
-		private MultipleOutputs<Text, IntWritable> mout;
-		private HashMap<Integer,Integer> yearOccurences;
+		private HashMap<Integer, Integer> yearOccurences;
+		double distance = 3000;
 
 		@Override
-		public void setup(Context context) {
-			mout = new MultipleOutputs<Text, IntWritable>(context);
-
-			BufferedReader br = null;
-
-			try{
-				Path pt=new Path("/projects/linguistic-shift/tfidf/1-grams-TotOccurenceYear/YearOccurences");
-				FileSystem fs = FileSystem.get(new Configuration());
-				br = new BufferedReader(new InputStreamReader(fs.open(pt)));
-				
+		public void setup(Context context) throws IOException {
+			Path pt = new Path(
+					"/projects/linguistic-shift/tfidf/1-grams-TotOccurenceYear/YearOccurences");
+			FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
+			if (hdfs.isFile(pt)) {
+				distance = 2000;
+				FSDataInputStream fis = hdfs.open(pt);
+				BufferedReader br = new BufferedReader(new InputStreamReader(
+						fis));
 				String line = br.readLine();
-				yearOccurences = new HashMap<Integer,Integer>();
+				yearOccurences = new HashMap<Integer, Integer>();
 				int year;
 				int occurences;
-				while (line != null){
-					String[] elements = line.toString().split("\\s+");
 
+				while (line != null) {
+					String[] elements = line.toString().split("\\s+");
 					year = Integer.parseInt(elements[0]);
 					occurences = Integer.parseInt(elements[1]);
 					yearOccurences.put(year, occurences);
 
 					line = br.readLine();
 				}
-			}catch(IOException e){
-				e.printStackTrace();
-			}  finally {
-				try {
-					if (br != null) br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				br.close();
+				fis.close();
 			}
+
 		}
 
 		@Override
-		public void reduce(Text key, Iterable<Text> values,
-				Context context) throws IOException, InterruptedException {
+		public void reduce(Text key, Iterable<Text> values, Context context)
+				throws IOException, InterruptedException {
 			Iterator<Text> valuesIt = values.iterator();
 			List<String> valuesList = new ArrayList<String>();
 
@@ -132,29 +127,25 @@ public class DistanceComputation {
 			}
 
 			Set valuesSet = new HashSet(valuesList);
-			int numCommonWords = valuesList.size() - valuesSet.size();
+			double numCommonWords = valuesList.size() - valuesSet.size();
 
 			String[] years = key.toString().split(":");
-			int distance = 3000; // si ça ne marche pas
-			if(yearOccurences != null) {
-				int occurences1 = yearOccurences.get(Integer.parseInt(years[0]));
-				int occurences2 = yearOccurences.get(Integer.parseInt(years[1]));
-				distance = 1 - (2*numCommonWords / (occurences1+occurences2));
+//			double distance = 3000; // si ça ne marche pas
+			if (yearOccurences != null) {
+				int occurences1 = yearOccurences
+						.get(Integer.parseInt(years[0]));
+				int occurences2 = yearOccurences
+						.get(Integer.parseInt(years[1]));
+				distance = 1 - (2 * numCommonWords / (occurences1 + occurences2));
 			}
 
-			context.write(key, new IntWritable(distance));
-			
+			context.write(key, new DoubleWritable(distance));
+
 		}
 
 		@Override
 		public void cleanup(Context context) {
-			try {
-				mout.close();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
@@ -167,7 +158,7 @@ public class DistanceComputation {
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws IOException,
-	ClassNotFoundException, InterruptedException {
+			ClassNotFoundException, InterruptedException {
 
 		Configuration conf = new Configuration();
 
@@ -181,14 +172,14 @@ public class DistanceComputation {
 		job.setReducerClass(CDistanceReducer.class);
 
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputValueClass(DoubleWritable.class);
 
 		FileInputFormat.setInputDirRecursive(job, true);
 
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		MultipleOutputs.addNamedOutput(job, "Metric1", TextOutputFormat.class,
-				Text.class, IntWritable.class);
+				Text.class, DoubleWritable.class);
 
 		boolean done = job.waitForCompletion(true);
 
