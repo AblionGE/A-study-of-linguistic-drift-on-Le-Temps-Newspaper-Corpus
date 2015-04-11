@@ -52,14 +52,14 @@ public class YearCardinality {
 				throws IOException, InterruptedException {
 
 			Iterator<Text> valuesIt = values.iterator();
-			List<String> valuesList = new ArrayList<String>();
-
+			
+			int size = 0;
 			while (valuesIt.hasNext()) {
-				String val = valuesIt.next().toString();
-				valuesList.add(val);
+				valuesIt.next();
+				size++;
 			}
 
-			cardinality.set(new HashSet<String>(valuesList).size());
+			cardinality.set(size);
 			mos.write("Output", key, cardinality, "YearCardinality");
 		}
 		

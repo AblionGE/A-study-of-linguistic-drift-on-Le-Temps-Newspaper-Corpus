@@ -83,13 +83,13 @@ public class DistanceComputation {
 	private static class CDistanceReducer extends
 			Reducer<Text, Text, Text, DoubleWritable> {
 
-		private HashMap<Integer, Integer> yearOccurences;
+		private HashMap<Integer, Integer> yearCardinals;
 		double distance = 3000;
 
 		@Override
 		public void setup(Context context) throws IOException {
 			Path pt = new Path(
-					"/projects/linguistic-shift/tfidf/1-grams-TotOccurenceYear/YearOccurences");
+					"/projects/linguistic-shift/distances/YearCardinality");
 			FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
 			if (hdfs.isFile(pt)) {
 				distance = 2000;
@@ -97,15 +97,15 @@ public class DistanceComputation {
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						fis));
 				String line = br.readLine();
-				yearOccurences = new HashMap<Integer, Integer>();
+				yearCardinals = new HashMap<Integer, Integer>();
 				int year;
-				int occurences;
+				int cardinals;
 
 				while (line != null) {
 					String[] elements = line.toString().split("\\s+");
 					year = Integer.parseInt(elements[0]);
-					occurences = Integer.parseInt(elements[1]);
-					yearOccurences.put(year, occurences);
+					cardinals = Integer.parseInt(elements[1]);
+					yearCardinals.put(year, cardinals);
 
 					line = br.readLine();
 				}
@@ -131,12 +131,12 @@ public class DistanceComputation {
 
 			String[] years = key.toString().split(":");
 //			double distance = 3000; // si ça ne marche pas
-			if (yearOccurences != null) {
-				int occurences1 = yearOccurences
+			if (yearCardinals != null) {
+				int cardinal1 = yearCardinals
 						.get(Integer.parseInt(years[0]));
-				int occurences2 = yearOccurences
+				int cardinal2 = yearCardinals
 						.get(Integer.parseInt(years[1]));
-				distance = 1 - (2 * numCommonWords / (occurences1 + occurences2));
+				distance = 1 - (2 * numCommonWords / (cardinal1 + cardinal2));
 			}
 
 			context.write(key, new DoubleWritable(distance));
