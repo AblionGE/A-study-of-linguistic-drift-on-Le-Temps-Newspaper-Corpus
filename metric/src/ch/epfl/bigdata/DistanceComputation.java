@@ -34,6 +34,7 @@ import java.util.List;
 
 public class DistanceComputation {
 
+	private static final int NUM_REDUCERS = 50;
 
 	/**
 	 * Mapper to compute distance: takes a directory with all 1-gram files as
@@ -83,7 +84,7 @@ public class DistanceComputation {
 	private static class CDistanceReducer extends
 			Reducer<Text, Text, Text, DoubleWritable> {
 
-		private HashMap<Integer, Integer> yearCardinals;
+		private HashMap<Integer, Integer> yearCardinals = null;
 		double distance = 3000;
 
 		@Override
@@ -119,18 +120,18 @@ public class DistanceComputation {
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
 			Iterator<Text> valuesIt = values.iterator();
-			List<String> valuesList = new ArrayList<String>();
+			HashSet<String> valuesSet = new HashSet<String>();
+			int valuesSize = 0;
 
 			while (valuesIt.hasNext()) {
 				String val = valuesIt.next().toString();
-				valuesList.add(val);
+				valuesSize++;
+				valuesSet.add(val);
 			}
 
-			Set valuesSet = new HashSet(valuesList);
-			double numCommonWords = valuesList.size() - valuesSet.size();
+			double numCommonWords = valuesSize - valuesSet.size();
 
 			String[] years = key.toString().split(":");
-//			double distance = 3000; // si ça ne marche pas
 			if (yearCardinals != null) {
 				int cardinal1 = yearCardinals
 						.get(Integer.parseInt(years[0]));
@@ -164,6 +165,7 @@ public class DistanceComputation {
 
 		Job job = Job.getInstance(conf, "DistanceComputation");
 		job.setJarByClass(DistanceComputation.class);
+		job.setNumReduceTasks(NUM_REDUCERS);
 
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(Text.class);
