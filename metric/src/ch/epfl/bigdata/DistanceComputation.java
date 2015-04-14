@@ -34,7 +34,7 @@ import java.util.List;
 
 public class DistanceComputation {
 
-	private static final int NUM_REDUCERS = 50;
+	private static final int NUM_REDUCERS = 25;
 
 	/**
 	 * Mapper to compute distance: takes a directory with all 1-gram files as
@@ -61,10 +61,11 @@ public class DistanceComputation {
 
 			if (tokens.length == 2) {
 				for (int i = firstYear; i <= lastYear; i++) {
-					if (Integer.parseInt(year) < i) {
+					if (Integer.parseInt(year) <= i) {
 						context.write(new Text(year + ":" + i), new Text(
 								tokens[1]));
-					} else {
+					}
+					if (Integer.parseInt(year) >= i) {
 						context.write(new Text(i + ":" + year), new Text(
 								tokens[1]));
 					}
