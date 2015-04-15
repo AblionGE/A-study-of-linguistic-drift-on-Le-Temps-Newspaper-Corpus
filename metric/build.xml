@@ -1,0 +1,50 @@
+<project name="distanceCompution" basedir="." default="main">
+
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
+	 <property name="lib.dir"     value="lib"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+    
+    <property name="main-class-DistComp"  value="ch.epfl.bigdata.DistanceComputation"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+
+    <target name="jar-metric" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/Metric.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class-DistComp}"/>
+            </manifest>
+        </jar>
+    </target>
+<!--  
+	run shell script
+    <target name="run" depends="jar">
+        <exec executable="sh">
+	    <arg value="runner-wordcount.sh"/>
+  		</exec>
+    </target>
+-->
+	
+	<target name="run" depends="jar-metric">
+        <exec executable="echo">
+	    <arg value="All Set. Ready to run."/>
+	    </exec>
+    </target>
+    
+    <target name="clean-build" depends="clean,jar-metric"/>
+    <target name="main" depends="clean,run"/>
+
+</project>
