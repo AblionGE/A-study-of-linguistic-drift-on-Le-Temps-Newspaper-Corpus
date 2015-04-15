@@ -109,6 +109,12 @@
       <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
     </module>
     <module name="RightCurly"/>
+    <module name="NonEmptyAtclauseDescription">
+      <property name="severity" value="ignore"/>
+    </module>
+    <module name="AtclauseOrder">
+      <property name="severity" value="ignore"/>
+    </module>
   </module>
   <module name="JavadocPackage">
     <property name="severity" value="ignore"/>
