@@ -11,3 +11,5 @@ input/
 output/
 temp/
 metric/lib/
+project/
+target/
