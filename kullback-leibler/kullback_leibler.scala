@@ -27,26 +27,23 @@ object KullbackLeibler {
     }
 
     /*
-     * Help function for computing Kullback-Leibler distance
+     * Help function for compute kl distance for one word
+     * Take a word of one year and the liste of this word for each year and compute all combinations of them
      */
-    def compute_kl_help(l: List[(String, String)]) : Double = {
-      val temp = l.sortBy(e => e._2)
-      if (temp.head._1.toDouble > 0.0) {
-        temp.head._1.toDouble * Math.log(temp.tail.head._1.toDouble / temp.head._1.toDouble)
-      }
-      else 0.0
+    def compute_kl_one_word_help(w: List[String], l: List[List[String]]) : List[(String, String)] = l match {
+      case List() => List()
+      case _ if (w.tail.head.toDouble > 0.0) => ((w.tail.head.toDouble * 
+        Math.log(l.head.tail.head.toDouble / w.tail.head.toDouble)).toString, w.tail.tail.head + "-" + l.head.tail.tail.head) :: compute_kl_one_word_help(w, l.tail)
+      case _ => ("0.0", w.tail.tail.head + "-" + l.head.tail.tail.head) :: compute_kl_one_word_help(w, l.tail)
     }
     
     /**
      * Compute the Kullback-Leibler distance
+     * Arg : list of one word for all years
      */
-    def compute_kl(y1: List[List[String]], y2: List[List[String]]) : Double = {
-      val temp_list = y1 ++ y2
-      val pair_of_value = temp_list.groupBy(e => e.head).map(e => e._2.toList).map(e => e.map(f => (f.tail.head, f.tail.tail.head)))
-      - pair_of_value.map(compute_kl_help).sum
+    def compute_kl_one_word(w: List[List[String]]) : List[List[(String, String)]] = {
+      w.map(e => compute_kl_one_word_help(e, w))
     }
-
-    def go_through_all(l1: List[List[String]], )
 
     // Read all files
     val lines = sc.wholeTextFiles("/home/marc/temp/test*")
@@ -61,7 +58,11 @@ object KullbackLeibler {
 
     val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head.head, 1, 2))
 
-    val grouped_by_year = completed.flatMap(e => e).groupBy(e => e.tail.tail.head).map(e => e._2.toList)
+    val vectors_of_values = completed.flatMap(compute_kl_one_word).flatMap(e => e).groupBy(e => e._2).map(e => (e._1, e._2.toList)).map(e => (e._1, e._2.map(f => f._1.toDouble)))
+
+    val results = vectors_of_values.map(e => (e._1, -e._2.sum)).sortBy(e => e._1)
+    results.saveAsTextFile("/home/marc/temp/results")
+
 
     sc.stop()
   }
