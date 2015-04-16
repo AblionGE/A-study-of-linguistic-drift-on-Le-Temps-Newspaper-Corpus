@@ -26,20 +26,42 @@ object KullbackLeibler {
       case _ => List(word, "0.0", year.toString) :: add_missed_word(l, word, year+1, maxYear)
     }
 
+    /*
+     * Help function for computing Kullback-Leibler distance
+     */
+    def compute_kl_help(l: List[(String, String)]) : Double = {
+      val temp = l.sortBy(e => e._2)
+      if (temp.head._1.toDouble > 0.0) {
+        temp.head._1.toDouble * Math.log(temp.tail.head._1.toDouble / temp.head._1.toDouble)
+      }
+      else 0.0
+    }
+    
+    /**
+     * Compute the Kullback-Leibler distance
+     */
+    def compute_kl(y1: List[List[String]], y2: List[List[String]]) : Double = {
+      val temp_list = y1 ++ y2
+      val pair_of_value = temp_list.groupBy(e => e.head).map(e => e._2.toList).map(e => e.map(f => (f.tail.head, f.tail.tail.head)))
+      - pair_of_value.map(compute_kl_help).sum
+    }
+
+    def go_through_all(l1: List[List[String]], )
+
     // Read all files
-    val lines = sc.wholeTextFiles("/home/marc/temp/1*-r-*")
+    val lines = sc.wholeTextFiles("/home/marc/temp/test*")
+    //val lines = sc.wholeTextFiles("/home/marc/temp/1*-r-*")
     //val lines = sc.wholeTextFiles("hdfs:///user/maschaer/input/*")
 
     // format all triplets as a List containing word, value, year
-    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0)))).flatMap(e => e)
+    //val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0)))).flatMap(e => e)
+    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("test")(1)))).flatMap(e => e)
 
     val grouped_and_ordered = all_triplets.groupBy(e => e.head).map(e => e._2.toList).map(e => e.sortBy(f => f.tail.tail.head))
 
     val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head.head, 1, 2))
 
     val grouped_by_year = completed.flatMap(e => e).groupBy(e => e.tail.tail.head).map(e => e._2.toList)
-
-    // TODO : Compute the Kullback-Leibler "metric"
 
     sc.stop()
   }
