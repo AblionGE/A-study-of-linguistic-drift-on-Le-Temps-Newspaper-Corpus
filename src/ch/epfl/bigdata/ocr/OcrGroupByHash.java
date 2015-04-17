@@ -5,7 +5,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -74,6 +78,10 @@ public class OcrGroupByHash {
 		Job job = createGroupByHashJob(new Path(args[0]), new Path(args[1]));
 		job.waitForCompletion(true);
 		Job job1 = OcrAlternatives.createAlternativesJob(new Path(args[1]), new Path(args[2]));
-		System.exit(job1.waitForCompletion(true) ? 0 : 1);
+		job1.waitForCompletion(true);
+		ApplyCorrectionJob.setCorrectionPath(new Path(args[2]));
+		Job job2 = ApplyCorrectionJob.createCorrectionJob(new Path(args[0]), new Path(args[3]));
+		System.exit(job2.waitForCompletion(true) ? 0 : 1);
+		
 	}
 }

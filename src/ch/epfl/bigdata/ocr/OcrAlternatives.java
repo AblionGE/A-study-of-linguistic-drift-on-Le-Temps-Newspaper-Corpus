@@ -11,6 +11,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 /**
  * Using the result of {@link OcrGroupByHash}, list the replacement alternatives for every rare word
@@ -56,6 +58,7 @@ public class OcrAlternatives {
 	}
 
 	public static class AlternativesReducer extends Reducer<Text, Text, Text, Text> {
+		
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
 			
@@ -68,6 +71,7 @@ public class OcrAlternatives {
 			}
 			context.write(key,new Text(max.toString()));
 		}
+	
 	}
 
 	public static Job createAlternativesJob(Path in, Path out) throws IOException {
