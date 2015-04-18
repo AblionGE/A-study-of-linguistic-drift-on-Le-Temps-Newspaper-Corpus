@@ -14,7 +14,7 @@ object KullbackLeibler {
 
     // Read all files
     //val file = "/home/marc/temp/19*"
-    //val probabilityOfAWordFile = "/home/marc/temp/proba"
+    //val probabilityOfAWordFile = "/home/marc/temp/proba/*"
     val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWord/" + nbOfGrams + "-grams/*"
     val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
     val splitter = file.split('/').size
@@ -60,22 +60,22 @@ object KullbackLeibler {
       w.map(e => compute_kl_one_word_help(e, w, proba))
     }
 
-    /*def add_proba(w: List[(String, String, String)], proba: Double) : List[(String, String, String, String)] = w.head match {
-      case List() => List()
-      case triplet if (triplet._3 == "0000") => add_proba(w.tail)
-      case (word, value, year) => (word, value, year, proba) :: add_proba(w.tail)
-    }*/
-
     // format all triplets as a List containing value, word, year
     val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
-    val grouped_and_ordered = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head).map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
+    val grouped_and_ordered_temp = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head)
+
+    val grouped_and_ordered = grouped_and_ordered_temp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
 
     val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head._1, 1840, 1998))
 
-    val vectors_of_values = completed.flatMap(e => compute_kl_one_word(e.tail, e.head._2.toDouble)).flatMap(e => e).groupBy(e => e._2).map(e => (e._1, e._2.toList)).map(e => (e._1, e._2.map(f => f._1.toDouble)))
+    val vectors_of_values_temp = completed.flatMap(e => compute_kl_one_word(e.tail, e.head._2.toDouble)).flatMap(e => e)
 
-    val results = vectors_of_values.map(e => (e._1, e._2.sum)).sortBy(e => e._1)
+    val vectors_of_values = vectors_of_values_temp.map(e => (e._2, e._1.toDouble))
+
+    val results_temp = vectors_of_values.reduceByKey(_+_)
+
+    val results = results_temp.sortBy(e => e._1)
 
     results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler")
     //results.saveAsTextFile("/home/marc/temp/results")
