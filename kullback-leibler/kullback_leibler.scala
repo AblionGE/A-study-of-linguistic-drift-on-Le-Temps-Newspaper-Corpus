@@ -47,8 +47,8 @@ object KullbackLeibler {
      */
     def compute_kl_one_word_help(w: (String, String, String), l: List[(String, String, String)], proba: Double) : List[(String, String)] = l match {
       case List() => List()
-      case _ if (w._2.toDouble == 0.0 && l.head._2.toDouble == 0.0) => ("0.0", w._3 + ":" + l.head._3) :: compute_kl_one_word_help(w, l.tail, proba)
-      case _ /*if (w.head.toDouble > 0.0)*/ => (((w._2.toDouble + mu*proba) * 
+      case _ if (w._2.toDouble == l.head._2.toDouble) => compute_kl_one_word_help(w, l.tail, proba)
+      case _ => (((w._2.toDouble + mu*proba) * 
         Math.log((w._2.toDouble + mu*proba) / (l.head._2.toDouble + mu*proba))).toString, w._3 + ":" + l.head._3) :: compute_kl_one_word_help(w, l.tail, proba)
     }
     
