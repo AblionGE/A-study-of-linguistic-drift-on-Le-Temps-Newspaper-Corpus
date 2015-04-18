@@ -77,7 +77,7 @@ object KullbackLeibler {
 
     val results = results_temp.sortBy(e => e._1)
 
-    results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler")
+    results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/" + nbOfGrams + "-grams")
     //results.saveAsTextFile("/home/marc/temp/results")
 
 
