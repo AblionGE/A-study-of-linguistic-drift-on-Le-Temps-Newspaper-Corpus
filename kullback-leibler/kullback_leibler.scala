@@ -39,7 +39,7 @@ object KullbackLeibler {
       case _ => (word, "0.0", year.toString) :: add_missed_word(l, word, year+1, maxYear)
     }
 
-    val mu = 1E-50
+    val mu = 1E-25
 
     /*
      * Help function for compute kl distance for one word
@@ -60,6 +60,15 @@ object KullbackLeibler {
       w.map(e => compute_kl_one_word_help(e, w, proba))
     }
 
+    /**
+     *  Create a list of pairs for distance between the same year (useful for plotting)
+     * Args : the min year and the max year
+     */
+    def create_identity_distances(startYear: Integer, maxYear: Integer) : List[(String, Double)] = startYear match {
+      case _ if (startYear > maxYear) => List()
+      case other => (startYear.toString + ":" + startYear.toString, 0.0) :: create_identity_distances(startYear+1, maxYear)
+    }
+
     // format all triplets as a List containing value, word, year
     val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
@@ -73,7 +82,7 @@ object KullbackLeibler {
 
     val vectors_of_values = vectors_of_values_temp.map(e => (e._2, e._1.toDouble))
 
-    val results_temp = vectors_of_values.reduceByKey(_+_)
+    val results_temp = vectors_of_values.reduceByKey(_+_).union(sc.parallelize(create_identity_distances(1840, 1998)))
 
     val results = results_temp.sortBy(e => e._1)
 
