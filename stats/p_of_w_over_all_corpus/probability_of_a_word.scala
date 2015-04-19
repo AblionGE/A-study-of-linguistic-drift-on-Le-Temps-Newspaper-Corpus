@@ -6,10 +6,10 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 
-object ProbabilityOfAWord {
+object ProbabilityOfAWordInAllCorpus {
   def main(args: Array[String]) {
-    val sc = new SparkContext(new SparkConf().setAppName("ProbabilityOfAWord"))
-    
+    val sc = new SparkContext(new SparkConf().setAppName("ProbabilityOfAWordInAllCorpus"))
+
     val nbOfGrams = "1"
 
     // Read all files

@@ -1,4 +1,4 @@
-name := "ProbabilityOfAWordInAllCorpus"
+name := "ProbabilityOfAWordPerYear"
 
 version := "1.0"
 
