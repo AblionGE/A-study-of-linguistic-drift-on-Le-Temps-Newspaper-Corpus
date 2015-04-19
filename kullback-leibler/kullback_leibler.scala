@@ -11,12 +11,21 @@ object KullbackLeibler {
     val sc = new SparkContext(new SparkConf().setAppName("Kullback-Leibler"))
 
     val nbOfGrams = "1"
+    val minYear = 1840
+    val maxYear = 1998
 
     // Read all files
-    //val file = "/home/marc/temp/19*"
     //val probabilityOfAWordFile = "/home/marc/temp/proba/*"
-    val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWord/" + nbOfGrams + "-grams/*"
-    val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
+    val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
+
+    //TFIDF - Java
+    //val file = "/home/marc/temp/19*"
+    //val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
+
+    //Probability of a word per year - Spark
+    //val file = "/home/marc/temp/ProbabilityOfAWordPerYear/*/*"
+    val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
+
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
     val probabilityOfAWord = sc.textFile(probabilityOfAWordFile)
@@ -49,7 +58,7 @@ object KullbackLeibler {
       case List() => List()
       case _ if (w._2.toDouble == l.head._2.toDouble) => compute_kl_one_word_help(w, l.tail, proba)
       case _ => (((w._2.toDouble + mu*proba) * 
-        Math.log((w._2.toDouble + mu*proba) / (l.head._2.toDouble + mu*proba))).toString, w._3 + ":" + l.head._3) :: compute_kl_one_word_help(w, l.tail, proba)
+        Math.log((w._2.toDouble + mu*proba) / (l.head._2.toDouble + mu*proba))).toString, w._3 + "," + l.head._3) :: compute_kl_one_word_help(w, l.tail, proba)
     }
     
     /**
@@ -70,25 +79,34 @@ object KullbackLeibler {
     }
 
     // format all triplets as a List containing value, word, year
-    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
+
+    //Manage files from Spark output
+    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1).map(l => l.split("-grams/")(1).split('/')(0)))).flatMap(e => e).map(e => e.toList)
+
+    //Manage files from MapReduce Java output
+    //val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
     val grouped_and_ordered_temp = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head)
 
     val grouped_and_ordered = grouped_and_ordered_temp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
 
-    val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head._1, 1840, 1998))
+    val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head._1, minYear, maxYear))
 
     val vectors_of_values_temp = completed.flatMap(e => compute_kl_one_word(e.tail, e.head._2.toDouble)).flatMap(e => e)
 
     val vectors_of_values = vectors_of_values_temp.map(e => (e._2, e._1.toDouble))
 
-    val results_temp = vectors_of_values.reduceByKey(_+_).union(sc.parallelize(create_identity_distances(1840, 1998)))
+    val results_temp = vectors_of_values.reduceByKey(_+_).union(sc.parallelize(create_identity_distances(minYear, maxYear)))
 
     val results = results_temp.sortBy(e => e._1)
 
-    results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/" + nbOfGrams + "-grams")
-    //results.saveAsTextFile("/home/marc/temp/results")
+    //Probability of a word per year
+    results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams")
 
+    //TFIDF
+    //results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/tfidf/" + nbOfGrams + "-grams")
+    
+    //results.saveAsTextFile("/home/marc/temp/results")
 
     sc.stop()
   }
