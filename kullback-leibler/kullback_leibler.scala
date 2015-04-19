@@ -75,7 +75,7 @@ object KullbackLeibler {
      */
     def create_identity_distances(startYear: Integer, maxYear: Integer) : List[(String, Double)] = startYear match {
       case _ if (startYear > maxYear) => List()
-      case other => (startYear.toString + ":" + startYear.toString, 0.0) :: create_identity_distances(startYear+1, maxYear)
+      case other => (startYear.toString + "," + startYear.toString, 0.0) :: create_identity_distances(startYear+1, maxYear)
     }
 
     // format all triplets as a List containing value, word, year
