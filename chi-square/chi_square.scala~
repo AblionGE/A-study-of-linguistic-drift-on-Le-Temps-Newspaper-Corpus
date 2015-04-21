@@ -5,6 +5,7 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
 
 object ChiSquare {
   def main(args: Array[String]) {
@@ -32,30 +33,58 @@ object ChiSquare {
     val grouped_by_words = all_triplets.groupBy(el => el._2)
     
     // Tupples (year, number of words)
-    val words_per_year = grouped_by_year.mapValues(el => el.foldLeft(0.0)((acc,num) => acc + num._3)).collect.toList
+    val words_per_year = grouped_by_year.mapValues(el => el.foldLeft(0.0)((acc,num) => acc + num._3))//.map(x => (1, List(x))).reduceByKey((a,b) => a ++ b).map(x => x._2)
     
-    // Tupples (word, frequency over all years)
-    val overall_word_frequency = grouped_by_words.mapValues(el => el.foldLeft(0.0)((acc,num) => acc + num._3)).collect.toList
+    // (year, Iterable(year, word, frequency, words_per_year))
+    val r1 = grouped_by_year.mapValues(el => {
+    	val total = el.foldLeft(0.0)((acc,num) => acc + num._3)
+    	el.map{case (y, w, f) => (y, w, f, total)}
+    })
+    
+    // List of tupples (word, frequency over all years)
+    val overall_word_frequency = grouped_by_words.mapValues(el => el.foldLeft(0.0)((acc,num) => acc + num._3))//.map(x => (1, List(x))).reduceByKey((a,b) => a ++ b).map(x => x._2)
     
     
     
     
-		def get_frequency1(year: Iterable[(Int, String, Double)], word: String): Double = year.find(tupple => tupple._2 == word) match {
-			case Some((y, w, freq)) => freq
-			case None => 0
-		}
-    
+	def get_frequency1(year: Iterable[(Int, String, Double)], word: String): Double = year.find(tupple => tupple._2 == word) match {
+		case Some((y, w, freq)) => freq
+		case None => 0
+	}
+     
     def get_frequency2(tupples: List[(Any, Double)], key:Any): Double = tupples.find(t => t._1 == key) match {
-    	case Some((key, freq)) => freq
-    	case None => 0
+		case Some((k, freq)) => freq
+		case None => 0.0
+	}
+    
+    def chi_square(year1:(Int, Iterable[(Int, String, Double)]), year2:(Int, Iterable[(Int, String, Double)])): RDD[RDD[Double]] =
+    	overall_word_frequency.map(list_word => words_per_year.map(list_year => list_word
+    		.map(word => math.pow(
+    			(get_frequency1(year1._2,word._1)/get_frequency2(list_word,year1._1)
+    			-get_frequency1(year2._2,word._1)/word._2), 2)
+    			/get_frequency2(list_word, word._1))
+    		.foldLeft(0.0)((acc,num) => acc + num)))
+    		
+    def chi_square(year1:(Int, Iterable[(Int, String, Double, Double)]), year2:(Int, Iterable[(Int, String, Double, Double)])) = {
+    	val y1 = year1._1
+    	val y2 = year2._1
+    	val t1 = sc.parallelize(year1._2.toSeq)
+    	val t2 = sc.parallelize(year2._2.toSeq)
+    	
+    	val t3 = t1.groupBy(_._2)
+    	val t4 = t2.groupBy(_._2) // (word, Iterable(year, word, frequency, words_per_year))
+    	
+    	val t5 = t3.cartesian(overall_word_frequency).filter{case (a,b) => a._1 == b._1}.map{case (a,b) => a._2.map(el => el->b._2)}
+    	t4.cartesian(overall_word_frequency).filter{case (a,b) => a._1 == b._1}.map{case (a,b) => a.map{case (w,it) => it.map(el => el->b._2)}} //Iterable avec tout
+    	
     }
+    																														
+    /*def chi_square(year1:(Int, Iterable[(Int, String, Double)]), year2:(Int, Iterable[(Int, String, Double)])) = overall_word_frequency.map(list_word => words_per_year.map(list_year => list_word
+    																																.map(word => 1.0))
+    																															.foldLeft(0.0)((acc,num) => acc + num))
+    																														.reduceByKey((a,b) => a+b).map(x => x._2)*/
     
-    def chi_square(year1:(Int, Iterable[(Int, String, Double)]), year2:(Int, Iterable[(Int, String, Double)])): Double = overall_word_frequency.map(word => math.pow((get_frequency1(year1._2,word._1)/get_frequency2(words_per_year,year1._1) - get_frequency1(year2._2,word._1)/word._2),2) / get_frequency2(overall_word_frequency, word._1)).foldLeft(0.0)((acc,num) => acc + num)
-    
-
-   
-    
-    //val result = grouped_by_year.map(year1 => grouped_by_year.map(year2 => overall_word_frequency.map(word => math.pow((get_frequency1(year1._2,word._1)/get_frequency2(words_per_year,year1._1) - get_frequency1(year2._2,word._1)/word._2),2) / get_frequency2(overall_word_frequency, word._1))))
+     
     
     val result = grouped_by_year.cartesian(grouped_by_year).filter{case (a, b) => a._1 < b._1}.map{case (year1, year2) => (year1._1, year2._1, chi_square(year1, year2))}
 

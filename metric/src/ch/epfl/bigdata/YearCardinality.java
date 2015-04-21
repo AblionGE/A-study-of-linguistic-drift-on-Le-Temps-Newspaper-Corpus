@@ -1,4 +1,4 @@
-
+package ch.epfl.bigdata;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,8 +14,18 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
+/**
+ * Computes the number of distinct words per year
+ * @author Cynthia
+ *
+ */
 public class YearCardinality {
 
+	/**
+	 * Mapper: takes a directory with 1-grams files and outputs a key/value pair of (year, word) for each word and each years
+	 * @author Cynthia
+	 *
+	 */
 	public static class CardinalityMapper extends Mapper<LongWritable, Text, Text, Text> {
 		private Text word = new Text();
 		private Text year = new Text();
@@ -39,6 +49,11 @@ public class YearCardinality {
 		}
 	} 
 
+	/**
+	 * Reducer: outputs a year as key and the number of distinct words as value 
+	 * @author cynthia
+	 *
+	 */
 	public static class CardinalityReducer extends Reducer<Text, Text, Text, IntWritable> {
 
 		private MultipleOutputs<Text, IntWritable> mos;
