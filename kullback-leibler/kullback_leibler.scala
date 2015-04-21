@@ -15,16 +15,13 @@ object KullbackLeibler {
     val maxYear = 1998
 
     // Read all files
-    //val probabilityOfAWordFile = "/home/marc/temp/proba/*"
     val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
 
     //TFIDF - Java
-    //val file = "/home/marc/temp/19*"
-    //val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
+    val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
 
-    //Probability of a word per year - Spark
-    //val file = "/home/marc/temp/ProbabilityOfAWordPerYear/*/*"
-    val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
+    //Probability of a word per year - Spark - Scala
+    //val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
 
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
@@ -81,10 +78,10 @@ object KullbackLeibler {
     // format all triplets as a List containing value, word, year
 
     //Manage files from Spark output
-    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1).map(l => l.split("-grams/")(1).split('/')(0)))).flatMap(e => e).map(e => e.toList)
+    //val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1).map(l => l.split("-grams/")(1).split('/')(0)))).flatMap(e => e).map(e => e.toList)
 
     //Manage files from MapReduce Java output
-    //val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
+    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
     val grouped_and_ordered_temp = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head)
 
@@ -100,13 +97,17 @@ object KullbackLeibler {
 
     val results = results_temp.sortBy(e => e._1)
 
+    //Normalization
+    val max = results.map(e => e._2).top(1)
+
+    val results_normalized = results.map(e => (e._1, e._2/max(0)))
+
+
     //Probability of a word per year
-    results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams")
+    //results_normalized.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams")
 
     //TFIDF
-    //results.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/tfidf/" + nbOfGrams + "-grams")
-    
-    //results.saveAsTextFile("/home/marc/temp/results")
+    results_normalized.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/tfidf/" + nbOfGrams + "-grams")
 
     sc.stop()
   }
