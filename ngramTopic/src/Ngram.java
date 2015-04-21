@@ -40,7 +40,7 @@ public class Ngram {
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
 		private String preProcess(String s) {
-			return s.replaceAll("[^a-zA-ZÃ€Ã‚Ã„ÃˆÃ‰ÃŠÃ‹ÃŽÃ�Ã”Å’Ã™Ã›ÃœÅ¸Ã Ã¢Ã¤Ã¨ÃªÃ©Ã«Ã®Ã¯Ã´Å“Ã¹Ã»Ã¼Ã¿Ã‡Ã§]", " ").toLowerCase();
+			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
@@ -70,7 +70,7 @@ public class Ngram {
 			String separator = conf.get("separator", "\\s+");
 			ngramSeparator = conf.get("ngramSeparator", ",");
 			Random rand = new Random();
-			int articleID = rand.nextInt(Integer.MAX_VALUE);
+			int articleID = rand.nextInt(Long.MAX_VALUE);
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
  			String[] splittedArticle = tempArticle.split(separator);
