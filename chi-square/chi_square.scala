@@ -52,10 +52,6 @@ object ChiSquare {
     
     def chi_square(year1:(Int, Iterable[(Int, String, Double)]), year2:(Int, Iterable[(Int, String, Double)])): Double = overall_word_frequency.map(word => math.pow((get_frequency1(year1._2,word._1)/get_frequency2(words_per_year,year1._1) - get_frequency1(year2._2,word._1)/word._2),2) / get_frequency2(overall_word_frequency, word._1)).foldLeft(0.0)((acc,num) => acc + num)
     
-
-   
-    
-    //val result = grouped_by_year.map(year1 => grouped_by_year.map(year2 => overall_word_frequency.map(word => math.pow((get_frequency1(year1._2,word._1)/get_frequency2(words_per_year,year1._1) - get_frequency1(year2._2,word._1)/word._2),2) / get_frequency2(overall_word_frequency, word._1))))
     
     val result = grouped_by_year.cartesian(grouped_by_year).filter{case (a, b) => a._1 < b._1}.map{case (year1, year2) => (year1._1, year2._1, chi_square(year1, year2))}
 
