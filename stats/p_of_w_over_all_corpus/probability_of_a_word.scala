@@ -25,7 +25,7 @@ object ProbabilityOfAWordInAllCorpus {
 
     val results = occurrences_per_words.map(e => (e._1, e._2/total_words(0)))
 
-    results.saveAsTextFile("hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWord/" + nbOfGrams + "-grams")
+    results.saveAsTextFile("hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams")
 
     sc.stop()
   }
