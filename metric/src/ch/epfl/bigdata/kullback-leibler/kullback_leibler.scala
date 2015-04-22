@@ -26,7 +26,7 @@ object KullbackLeibler {
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
     val probabilityOfAWord = sc.textFile(probabilityOfAWordFile)
-    val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => (e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000"))
+    val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else (e(0), e(e.size), "0000"))
 
     /**
      * This function takes a List of List of String where the inner list contains 3 elements : a word, a value and a year.
