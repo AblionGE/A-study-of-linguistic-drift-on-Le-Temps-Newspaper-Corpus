@@ -30,7 +30,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
  */
 public class Ngram {
 	
-	private static final int NUM_REDUCERS = 25;
+	//private static final int NUM_REDUCERS = 25;
 	
 	/**
 	 * A simple mapper. Takes a full article and returns a <key/value> pair with key = "{year}word" and value = 1
@@ -70,7 +70,8 @@ public class Ngram {
 			String separator = conf.get("separator", "\\s+");
 			ngramSeparator = conf.get("ngramSeparator", ",");
 			Random rand = new Random();
-			int articleID = rand.nextInt(Long.MAX_VALUE);
+			
+			long articleID = (long)(rand.nextDouble()*(Long.MAX_VALUE));
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
  			String[] splittedArticle = tempArticle.split(separator);
@@ -79,7 +80,7 @@ public class Ngram {
  			list.removeAll(Arrays.asList(""));
  			splittedArticle = list.toArray(new String[0]);
  			
-			Deque<String> currentNgram = new ArrayDeque<>();
+			Deque<String> currentNgram = new ArrayDeque<String>();
 			int counter = 0;
 			
 			
@@ -159,7 +160,7 @@ public class Ngram {
 		public void cleanup(Context context) {
 			try {
 				mout.close();
-			} catch (IOException | InterruptedException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -178,7 +179,7 @@ public class Ngram {
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		Job job = Job.getInstance(conf, "Ngram");
 		job.setJarByClass(Ngram.class);
-		job.setNumReduceTasks(NUM_REDUCERS);
+		//job.setNumReduceTasks(NUM_REDUCERS);
 		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);

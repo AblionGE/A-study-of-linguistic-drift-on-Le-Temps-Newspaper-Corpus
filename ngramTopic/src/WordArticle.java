@@ -79,14 +79,14 @@ public class WordArticle {
 			String[] parts = key.toString().split("//", 2);
 			String year = parts[0];
 			String articleID = parts[1];
-			mout.write("Output", new Text(articleID),new Text(listWordOcc) , year);
+			mout.write("Output", new Text(year+"//"+articleID),new Text(listWordOcc) , year);
 		}
 		
 		@Override
 		public void cleanup(Context context) {
 			try {
 				mout.close();
-			} catch (IOException | InterruptedException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
