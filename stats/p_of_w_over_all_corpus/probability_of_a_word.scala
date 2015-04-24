@@ -20,11 +20,11 @@ object ProbabilityOfAWordInAllCorpus {
     val nbOfGrams = args(0)
 
     // Read all files
-    val YearOccurrencesFile = "hdfs:///projects/linguistic-shift/stats/" + nbOfGrams + "-grams-Tot*"
+    //val YearOccurrencesFile = "hdfs:///projects/linguistic-shift/stats/" + nbOfGrams + "-grams-Tot*"
     //val wordsFile = "hdfs:///projects/linguistic-shift/corrected_ngrams/" + nbOfGrams + "-grams/*"
     val wordsFile = args(1)
 
-    val YearOccurrences = sc.textFile(YearOccurrencesFile)
+    //val YearOccurrences = sc.textFile(YearOccurrencesFile)
     val words = sc.textFile(wordsFile)
 
     val total_words = words.flatMap(e => e.split(", ").map(f => f.split('\t')).map(e => (1, e(1).toDouble))).reduceByKey(_+_).map(e => e._2).collect
