@@ -28,7 +28,7 @@ object KullbackLeiblerArticle {
     val sc = new SparkContext(new SparkConf().setAppName("Kullback-Leibler-article"))
 
     val nbOfGrams = args(0)
-    val minYear = 1840
+    val minYear = 1839
     val maxYear = 1998
 
     // Read all files
@@ -56,7 +56,7 @@ object KullbackLeiblerArticle {
     //val formatted_article_temp = sample_article.map(e => List(e)).flatMap(e => e.flatMap(f => f.split(",").map(g => g.split('\t'))))
     val formatted_article = sample_article.flatMap(e => e.map(f => (f(0), f(1)))).reduceByKey(_+_)
     val total_words_article = formatted_article.map(e => (1, e._2)).reduceByKey(_+_).collect
-    val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "0001"))
+    val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
 
     /**
      * This function takes a List of List of String where the inner list contains 3 elements : a word, a value and a year.
@@ -93,7 +93,7 @@ object KullbackLeiblerArticle {
      * Args : list of one word for all years and the probability to have this word over all years
      */
     def compute_kl_one_word(w: List[(String, String, String)], proba: Double) : List[List[(String, String)]] = {
-      w.map(e => if (e._3 == "0001") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, List(), proba))
+      w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, List(), proba))
     }
 
     /**
