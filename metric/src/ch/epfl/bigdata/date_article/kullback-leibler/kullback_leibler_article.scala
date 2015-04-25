@@ -1,5 +1,9 @@
 /*
  *  Big Data 2015 - A Study of linguistic drift - Date a set of article with Kullback-Leibler Divergence
+ * Example of use
+ * spark-submit --class "KullbackLeiblerArticle" --master yarn-cluster --executor-memory 8g --num-executors 100 target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/1-grams/ hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordPerYear/1-grams "Spark" hdfs:///user/maschaer/out/ "1997" 30 hdfs:///projects/linguistic-shift/corrected_nGramArticle/ 2>err
+ * nbOfGrams : 1 to 3
+ * directory of articles : (corrected_)nGramArticle/nGram
  */
 
 import org.apache.spark.SparkContext
@@ -9,15 +13,15 @@ import org.apache.spark.SparkConf
 object KullbackLeiblerArticle {
   def main(args: Array[String]) {
 
-    if (args.size != 7) {
+    if (args.size != 8) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles")
+        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
         exit(1)
     }
 
     if (args(3) != "Java" && args(3) != "Spark") {
-        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles")
+        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
         exit(1)
     }
 
@@ -28,16 +32,17 @@ object KullbackLeiblerArticle {
     val maxYear = 1998
 
     // Read all files
-    val probabilityOfAWordFile = args(1)
+    val probabilityOfAWordFile = args(1) + "/*"
     //val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
 
-    val file = args(2)
-    val articlesFile = args(2) + "/" + args(5) + "*"
+    val file = args(2) + "/*"
     //Probability of a word per year - Spark - Scala
     //val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
 
     //TFIDF - Java
     //val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
+
+    val articlesFile = args(7) + "/" + args(5) + "*"
 
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
@@ -45,12 +50,13 @@ object KullbackLeiblerArticle {
     val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('(')(1).split(')')(0).split(','))
         .map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else {(e(0), e(e.size), "0000")})
 
-    val articles = sc.wholeTextFiles(articlesFile)
-    val sample_article = sc.parallelize(articles.map(e => e._2).takeSample(true, args(6).toInt, scala.util.Random.nextInt(1000)))
-    val formatted_article_temp = sample_article.map(e => List(e)).flatMap(e => e.flatMap(f => f.split(",").map(g => g.split('\t'))))
-    val formatted_article = formatted_article_temp.map(e => e.takeRight(2)).map(e => (e(0), e(1).toInt)).groupBy(e => e._1).map(e => e._2.toList).map(e => e.foldLeft(e.head._1, 0)((a,b) => (a._1, a._2+b._2))).map(e => (e._1,e._2,"0001"))
+    val articles = sc.textFile(articlesFile)
+    val articles_temp = articles.map(e => e.split(", ")).map(e => e.flatMap(f => f.split('\t'))).groupBy(e => e(2)).map(e => e._2.toArray)
+    val sample_article = sc.parallelize(articles_temp.takeSample(true, args(6).toInt, scala.util.Random.nextInt(1000)))
+    //val formatted_article_temp = sample_article.map(e => List(e)).flatMap(e => e.flatMap(f => f.split(",").map(g => g.split('\t'))))
+    val formatted_article = sample_article.flatMap(e => e.map(f => (f(0), f(1)))).reduceByKey(_+_)
     val total_words_article = formatted_article.map(e => (1, e._2)).reduceByKey(_+_).collect
-    val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, e._3))
+    val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "0001"))
 
     /**
      * This function takes a List of List of String where the inner list contains 3 elements : a word, a value and a year.
@@ -118,7 +124,6 @@ object KullbackLeiblerArticle {
 
     val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head._1, minYear, maxYear))
 
-    //TODO : Ne pas faire flatMap mais appliquer la fonction aux articles selectionnes
     val vectors_of_values_temp = completed.flatMap(e => compute_kl_one_word(e.tail, e.head._2.toDouble)).flatMap(e => e)
 
     val vectors_of_values = vectors_of_values_temp.map(e => (e._2, e._1.toDouble))
