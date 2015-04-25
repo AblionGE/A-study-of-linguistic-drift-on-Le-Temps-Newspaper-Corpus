@@ -15,17 +15,15 @@ object ProbabilityOfAWordInAllCorpus {
   def main(args: Array[String]) {
     val sc = new SparkContext(new SparkConf().setAppName("ProbabilityOfAWordInAllCorpus"))
 
-    if (args.size != 3) {
+    if (args.size != 2) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 3 args : nbOfGrams, input directory, output directory")
+        println("Use with 2 args : input directory, output directory")
         exit(1)
     }
 
-    val nbOfGrams = args(0)
-
     // Read all files
-    val wordsFile = args(1)
+    val wordsFile = args(0)
 
     val words = sc.textFile(wordsFile)
 
@@ -36,7 +34,7 @@ object ProbabilityOfAWordInAllCorpus {
 
     val results = occurrences_per_words.map(e => (e._1, e._2/total_words(0)))
 
-    results.saveAsTextFile(args(2))
+    results.saveAsTextFile(args(1))
 
     sc.stop()
   }
