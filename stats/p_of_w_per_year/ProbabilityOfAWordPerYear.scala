@@ -36,6 +36,7 @@ object ProbabilityOfAWordPerYear {
             val total_words = words.flatMap(e => e.split(", ").map(f => f.split('\t')).map(e => (1, e(1).toDouble))).reduceByKey(_+_).map(e => e._2).collect
             //val total_words = YearOccurrences.map(e => e.split('\t')).filter(e => e(0).toInt == year).map(e => e(1)).collect
 
+            //TODO : not sure it is OK (order of args)
             val results = words.map(e => e.split(", ")).map(e => e(0).split('\t')).map(e => e(0) -> e(1).toDouble/total_words(0))
 
             //results.saveAsTextFile("hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/"+year)

@@ -1,5 +1,10 @@
 /*
  *  Big Data 2015 - A Study of linguistic drift - Probability to have a Word w in all the corpus
+ *
+ * Example of call :
+ * spark-submit --class "ProbabilityOfAWordInAllCorpus" --master yarn-cluster --executor-memory 8g --num-executors 50 \
+ * target/scala-2.10/probabilityofawordinallcorpus_2.10-1.0.jar \
+ * 1 hdfs:///projects/linguistic-shift/corrected_ngrams/1-grams/ hdfs:///user/maschaer/outputTest/ 2>err
  */
 
 import org.apache.spark.SparkContext
@@ -20,11 +25,8 @@ object ProbabilityOfAWordInAllCorpus {
     val nbOfGrams = args(0)
 
     // Read all files
-    //val YearOccurrencesFile = "hdfs:///projects/linguistic-shift/stats/" + nbOfGrams + "-grams-Tot*"
-    //val wordsFile = "hdfs:///projects/linguistic-shift/corrected_ngrams/" + nbOfGrams + "-grams/*"
     val wordsFile = args(1)
 
-    //val YearOccurrences = sc.textFile(YearOccurrencesFile)
     val words = sc.textFile(wordsFile)
 
     val total_words = words.flatMap(e => e.split(", ").map(f => f.split('\t')).map(e => (1, e(1).toDouble))).reduceByKey(_+_).map(e => e._2).collect
@@ -34,7 +36,6 @@ object ProbabilityOfAWordInAllCorpus {
 
     val results = occurrences_per_words.map(e => (e._1, e._2/total_words(0)))
 
-    //results.saveAsTextFile("hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams")
     results.saveAsTextFile(args(2))
 
     sc.stop()
