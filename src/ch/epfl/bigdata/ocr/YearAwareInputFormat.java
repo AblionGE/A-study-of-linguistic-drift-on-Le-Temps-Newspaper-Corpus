@@ -46,7 +46,7 @@ public class YearAwareInputFormat extends FileInputFormat<Text, Text>{
 				Path inputPath = ((FileSplit)split).getPath();
 				fsIs = inputPath.getFileSystem(attempt.getConfiguration()).open(inputPath);
 				fullInputPath = new Text(inputPath.toString());
-				fileName = new Text(inputPath.getName().replaceAll("[a-zA-z]+", ""));
+				fileName = new Text(inputPath.getName().replaceAll("[^\\d]+", "").substring(0, 4));
 			}
 			private boolean next = true;
 			@Override
