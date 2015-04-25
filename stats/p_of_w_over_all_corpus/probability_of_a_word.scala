@@ -18,7 +18,7 @@ object ProbabilityOfAWordInAllCorpus {
     if (args.size != 3) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 3 args : nbOfGrams, input file, output file")
+        println("Use with 3 args : nbOfGrams, input directory, output directory")
         exit(1)
     }
 
