@@ -31,7 +31,13 @@ object KullbackLeibler {
     //val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
     val probabilityOfAWordFile = args(1) + "/*"
 
-    val file = args(2) + "/*"
+    val fileTemp = args(2)
+    var file = ""
+    if (fileTemp(fileTemp.size-1) == '/') {
+      file = fileTemp + "*"
+    } else {
+      file = fileTemp + "/*"
+    }
     //Probability of a word per year - Spark - Scala
     //val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
 

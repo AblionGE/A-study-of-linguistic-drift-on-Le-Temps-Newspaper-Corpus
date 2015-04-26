@@ -86,7 +86,8 @@ object KullbackLeiblerArticle {
      * Args : list of one word for all years and the probability to have this word over all years
      */
     def compute_kl_one_word(w: List[(String, String, String)], proba: Double) : List[List[(String, String)]] = {
-      w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, w.filter(f => f._3 == "1839"), proba))
+      //w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, w.filter(f => f._3 == "1839"), proba))
+      w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, List(), proba))
     }
 
     /**
