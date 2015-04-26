@@ -16,12 +16,12 @@ object KullbackLeiblerArticle {
     if (args.size != 8) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
+        println("Use with 8 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
         exit(1)
     }
 
     if (args(3) != "Java" && args(3) != "Spark") {
-        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
+        println("Use with 8 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
         exit(1)
     }
 
@@ -33,14 +33,8 @@ object KullbackLeiblerArticle {
 
     // Read all files
     val probabilityOfAWordFile = args(1) + "/*"
-    //val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
 
     val file = args(2) + "/*"
-    //Probability of a word per year - Spark - Scala
-    //val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
-
-    //TFIDF - Java
-    //val file = "hdfs:///projects/linguistic-shift/tfidf/" + nbOfGrams + "-grams/*"
 
     val articlesFile = args(7) + "/" + args(5) + "*"
 
@@ -53,7 +47,6 @@ object KullbackLeiblerArticle {
     val articles = sc.textFile(articlesFile)
     val articles_temp = articles.map(e => e.split(", ")).map(e => e.flatMap(f => f.split('\t'))).groupBy(e => e(2)).map(e => e._2.toArray)
     val sample_article = sc.parallelize(articles_temp.takeSample(true, args(6).toInt, scala.util.Random.nextInt(1000)))
-    //val formatted_article_temp = sample_article.map(e => List(e)).flatMap(e => e.flatMap(f => f.split(",").map(g => g.split('\t'))))
     val formatted_article = sample_article.flatMap(e => e.map(f => (f(0), f(1)))).reduceByKey(_+_)
     val total_words_article = formatted_article.map(e => (1, e._2)).reduceByKey(_+_).collect
     val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
@@ -93,7 +86,7 @@ object KullbackLeiblerArticle {
      * Args : list of one word for all years and the probability to have this word over all years
      */
     def compute_kl_one_word(w: List[(String, String, String)], proba: Double) : List[List[(String, String)]] = {
-      w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, List(), proba))
+      w.map(e => if (e._3 == "1839") compute_kl_one_word_help(e, w, proba) else compute_kl_one_word_help(e, w.filter(f => f._3 == "1839"), proba))
     }
 
     /**
@@ -122,29 +115,25 @@ object KullbackLeiblerArticle {
 
     val grouped_and_ordered = grouped_and_ordered_temp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
 
+    // Add missed words in each year
     val completed = grouped_and_ordered.map(e => add_missed_word(e, e.head._1, minYear, maxYear))
 
+    // Get a List of List of pairs (value, year1:year2)
     val vectors_of_values_temp = completed.flatMap(e => compute_kl_one_word(e.tail, e.head._2.toDouble)).flatMap(e => e)
 
+    // Get the same List as before but with inversion of year1:year2 and value
     val vectors_of_values = vectors_of_values_temp.map(e => (e._2, e._1.toDouble))
 
     val results_temp = vectors_of_values.reduceByKey(_+_)//.union(sc.parallelize(create_identity_distances(minYear, maxYear)))
 
-    val results = results_temp.sortBy(e => e._1)
+    val results = results_temp.sortBy(e => e._1).map(e => if (e._2.toDouble <0) (e._1, -e._2.toDouble) else e)
 
     //Normalization
-    val max = results.map(e => e._2).top(1)
+    val max = results.map(e => e._2.toDouble).top(1)
 
-    val results_normalized = results.map(e => (e._1, e._2/max(0)))
-
+    val results_normalized = results.map(e => (e._1, e._2.toDouble/max(0)))
 
     results_normalized.saveAsTextFile(args(4))
-
-    //Probability of a word per year
-    //results_normalized.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams")
-
-    //TFIDF
-    //results_normalized.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/tfidf/" + nbOfGrams + "-grams")
 
     sc.stop()
   }
