@@ -9,15 +9,15 @@ import org.apache.spark.SparkConf
 object KullbackLeibler {
   def main(args: Array[String]) {
 
-    if (args.size != 4) {
+    if (args.size != 5) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 4 args : nbOfGrams, input file, input fomat (\"Java\" or \"Spark\"), output file")
+        println("Use with 5 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, format (\"Java\" or \"Spark\"), output file")
         exit(1)
     }
 
-    if (args(2) != "Java" && args(2) != "Spark") {
-        println("Use with 4 args : nbOfGrams, input file, input fomat (\"Java\" or \"Spark\"), output file")
+    if (args(3) != "Java" && args(3) != "Spark") {
+        println("Use with 5 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, format (\"Java\" or \"Spark\"), output file")
         exit(1)
     }
 
@@ -28,9 +28,10 @@ object KullbackLeibler {
     val maxYear = 1998
 
     // Read all files
-    val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
+    //val probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
+    val probabilityOfAWordFile = args(1) + "/*"
 
-    val file = args(1)
+    val file = args(2) + "/*"
     //Probability of a word per year - Spark - Scala
     //val file = "hdfs:///projects/linguistic-shift/stats/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*/*"
 
@@ -93,7 +94,7 @@ object KullbackLeibler {
     // format all triplets as a List containing value, word, year
     var all_triplets : org.apache.spark.rdd.RDD[List[String]] = sc.parallelize(List())
 
-    if (args(2) == "Spark") {
+    if (args(3) == "Spark") {
             //Manage files from Spark output
             all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1)
                 .map(l => l.split("-grams/")(1).split('/')(0)))
@@ -123,7 +124,7 @@ object KullbackLeibler {
     val results_normalized = results.map(e => (e._1, e._2/max(0)))
 
 
-    results_normalized.saveAsTextFile(args(3))
+    results_normalized.saveAsTextFile(args(4))
 
     //Probability of a word per year
     //results_normalized.saveAsTextFile("hdfs:///projects/linguistic-shift/Kullback-Leibler/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams")
