@@ -45,7 +45,7 @@ object KullbackLeiblerArticle {
         .map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else {(e(0), e(e.size), "0000")})
 
     val articles = sc.textFile(articlesFile)
-    val formatted_articles = article.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => e.flatMap(f => f.split(", "))).map(e => (e(0), e(1).toInt))
+    val formatted_articles = articles.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => e.flatMap(f => f.split(", "))).map(e => (e(0), e(1).toInt))
     val total_words_article = formatted_articles.map(e => (1, e._2)).reduceByKey(_+_).collect
     val normalized_article = formatted_articles.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
 
