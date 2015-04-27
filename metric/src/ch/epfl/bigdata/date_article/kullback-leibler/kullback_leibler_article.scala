@@ -13,15 +13,15 @@ import org.apache.spark.SparkConf
 object KullbackLeiblerArticle {
   def main(args: Array[String]) {
 
-    if (args.size != 8) {
+    if (args.size != 6) {
         // the input format is important to parse the data because they are not the same if the input file
         // was create with MapReduce or with Spark
-        println("Use with 8 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
+        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, directory of articles")
         exit(1)
     }
 
     if (args(3) != "Java" && args(3) != "Spark") {
-        println("Use with 8 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, the year of articles, number of articles, directory of articles")
+        println("Use with 6 args : nbOfGrams, ProbabilityOverAllYears directory, input directory, input format (\"Java\" or \"Spark\"), output directory, directory of articles")
         exit(1)
     }
 
@@ -36,7 +36,7 @@ object KullbackLeiblerArticle {
 
     val file = args(2) + "/*"
 
-    val articlesFile = args(7) + "/" + args(5) + "*"
+    val articlesFile = args(5) + "/*"
 
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
@@ -45,11 +45,9 @@ object KullbackLeiblerArticle {
         .map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else {(e(0), e(e.size), "0000")})
 
     val articles = sc.textFile(articlesFile)
-    val articles_temp = articles.map(e => e.split(", ")).map(e => e.flatMap(f => f.split('\t'))).groupBy(e => e(2)).map(e => e._2.toArray)
-    val sample_article = sc.parallelize(articles_temp.takeSample(true, args(6).toInt, scala.util.Random.nextInt(1000)))
-    val formatted_article = sample_article.flatMap(e => e.map(f => (f(0), f(1)))).reduceByKey(_+_)
-    val total_words_article = formatted_article.map(e => (1, e._2)).reduceByKey(_+_).collect
-    val normalized_article = formatted_article.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
+    val formatted_articles = article.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => e.flatMap(f => f.split(", "))).map(e => (e(0), e(1).toInt))
+    val total_words_article = formatted_articles.map(e => (1, e._2)).reduceByKey(_+_).collect
+    val normalized_article = formatted_articles.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
 
     /**
      * This function takes a List of List of String where the inner list contains 3 elements : a word, a value and a year.
@@ -129,7 +127,7 @@ object KullbackLeiblerArticle {
 
     val results = results_temp.sortBy(e => e._1).map(e => if (e._2.toDouble <0) (e._1, -e._2.toDouble) else e)
 
-    //Normalization
+    // Normalization
     val max = results.map(e => e._2.toDouble).top(1)
 
     val results_normalized = results.map(e => (e._1, e._2.toDouble/max(0)))
