@@ -1,7 +1,7 @@
 /*
  *  Big Data 2015 - A Study of linguistic drift - Select a subset of articles in a year
  * Example of use
- * 
+ * spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 target/scala-2.10/selectarticle_2.10-1.0.jar 1995 1000 hdfs:///projects/linguistic-shift/corrected_nGramArticle/ hdfs:///user/your_username/
  */
 
 import org.apache.spark.SparkContext
