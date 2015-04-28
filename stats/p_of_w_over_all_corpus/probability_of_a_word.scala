@@ -1,6 +1,5 @@
 /*
- * Big Data 2015 - A Study of linguistic drift - Probability to have a Word w in all the corpus
- * Marc Schaer
+ * Big Data 2015 - A Study of linguistic drift - Probability to have a Word w in all the corpus - Marc Schaer
  *
  * Example of call :
  * spark-submit --class "ProbabilityOfAWordInAllCorpus" --master yarn-cluster --executor-memory 8g --num-executors 50 \

@@ -1,10 +1,8 @@
 /*
- * Big Data 2015 - A Study of linguistic drift - Date a set of article with Kullback-Leibler Divergence
- * Marc Schaer
+ * Big Data 2015 - A Study of linguistic drift - Date a set of article with Kullback-Leibler Divergence - Marc Schaer
  * Example of use
  * spark-submit --class "KullbackLeiblerArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 Corrected Spark hdfs:///projects/linguistic-shift/Kullback-Leibler/article/Corrected/1-grams/1840/ hdfs:///projects/linguistic-shift/articles_samples/15/Corrected/1840/ 2>err
  * nbOfGrams : 1 for the moment
- * directory of articles : (corrected_)nGramArticle/nGram
  */
 
 import org.apache.spark.SparkContext

@@ -1,5 +1,5 @@
 /*
- * Big Data 2015 - A Study of linguistic drift - Probability to have a Word w per year
+ * Big Data 2015 - A Study of linguistic drift - Probability to have a Word w per year - Marc Schaer
  *
  * spark-submit --class "ProbabilityOfAWordPerYear" --master yarn-cluster --executor-memory 8g --num-executors 50 \
  * target/scala-2.10/probabilityofawordperyear_2.10-1.0.jar 1 hdfs:///projects/linguistic-shift/ngrams/1-grams/ \
