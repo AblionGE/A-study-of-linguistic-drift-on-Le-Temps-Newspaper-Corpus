@@ -19,32 +19,33 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
 import java.util.List;
 
-
 /**
- * Computes Chi-Square distance
+ * Computes a cosine based distance between years.
  * 
  * @author Cynthia
  *
  */
-public class ChiSquare {
+public class Cosine {
 	private static final int NUM_REDUCERS = 50;
 
 	/**
-	 * Mapper to compute chi-square distance: takes a directory with all 1-gram files as
+	 * Mapper to compute cosine similarity: takes a directory with all 1-gram files as
 	 * input. For one year y1 and for each words in y1, it returns a tuple for
 	 * each y2 in [1840,1998]: (y1:y2, y1/word/frequency).
 	 * 
 	 * @author Cynthia
 	 * 
 	 */
-	private static class CSMapper extends
+	private static class CosMapper extends
 	Mapper<LongWritable, Text, Text, Text> {
 
 		private final int firstYear = 1840;
@@ -85,77 +86,18 @@ public class ChiSquare {
 	}
 
 	/**
-	 * Reducer to compute chi-square distance: returns the distance for each pair of years.
+	 * Reducer to compute distance 1-cos_similarity: returns the distance for each pair of years.
 	 * 
 	 * @author Cynthia
 	 * 
 	 */
-	private static class CSReducer extends
+	private static class CosReducer extends
 	Reducer<Text, Text, Text, DoubleWritable> {
 
-		private HashMap<Integer, Integer> yearOccurences = null;
-		private HashMap<String, Integer> wordOccurences = null;
 		private DoubleWritable distance = new DoubleWritable();
 
 		/**
-		 * Read the files containing the terms needed for chi-square:
-		 * - yearOccurences are the number of words appearing in each year
-		 * - wordOccurences are the number of times each word appear in the whole corpus
-		 */
-		@Override
-		public void setup(Context context) throws IOException {
-			Path pt = new Path(
-					"/projects/linguistic-shift/stats/1-grams-TotOccurenceYear/YearOccurences");
-			FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
-			if (hdfs.isFile(pt)) {
-				FSDataInputStream fis = hdfs.open(pt);
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						fis));
-				String line = br.readLine();
-				yearOccurences = new HashMap<Integer, Integer>();
-				int year;
-				int wordCount;
-
-				while (line != null) {
-					String[] elements = line.toString().split("\\s+");
-					year = Integer.parseInt(elements[0]);
-					wordCount = Integer.parseInt(elements[1]);
-					yearOccurences.put(year, wordCount);
-
-					line = br.readLine();
-				}
-				br.close();
-				fis.close();
-			}
-
-			pt = new Path(
-					"/projects/linguistic-shift/stats/WordOccurenceOverAllYears");
-			hdfs = pt.getFileSystem(context.getConfiguration());
-			if (hdfs.isFile(pt)) {
-				FSDataInputStream fis = hdfs.open(pt);
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						fis));
-				String line = br.readLine();
-				wordOccurences = new HashMap<String, Integer>();
-				String word;
-				int occurences;
-
-				while (line != null) {
-					String[] elements = line.toString().split("\\s+");
-					word = elements[0];
-					occurences = Integer.parseInt(elements[1]);
-					wordOccurences.put(word, occurences);
-
-					line = br.readLine();
-				}
-				br.close();
-				fis.close();
-			}
-
-		}
-
-		/**
-		 * Outputs the chi-square distance
+		 * Outputs the distance: 1-cos_similarity
 		 */
 		@Override
 		public void reduce(Text key, Iterable<Text> values, Context context)
@@ -167,48 +109,51 @@ public class ChiSquare {
 
 			// Store the frequencies for each words in both years in tables
 			// Store the distinct words in a HashSet
+			// Compute the norm for each year
 			Iterator<Text> valuesIt = values.iterator();
 			String[] years = key.toString().split(":");
 			String year1 = years[0];
 			String year2 = years[1];
 
+			int frequency = 0;
+			double norm1 = 0.0;
+			double norm2 = 0.0;
 			while (valuesIt.hasNext()) {
 				String[] val = valuesIt.next().toString().split("/");
 				words.add(val[1]);
+				frequency = Integer.parseInt(val[2]);
 				if(val[0].equals(year1)) {
-					freqYear1.put(val[1], Integer.parseInt(val[2]));
+					freqYear1.put(val[1], frequency);
+					norm1 += Math.pow(frequency, 2);
 				}
 				if(val[0].equals(year2)) {
-					freqYear2.put(val[1], Integer.parseInt(val[2]));
+					freqYear2.put(val[1], frequency);
+					norm2 += Math.pow(frequency, 2);
 				}
 			}
 
 			// Computes the distance only if both years contain words
 			if (!freqYear1.isEmpty() && !freqYear2.isEmpty()) {
-				double wordCount1 = (double)yearOccurences
-						.get(Integer.parseInt(year1));
-				double wordCount2 = (double)yearOccurences
-						.get(Integer.parseInt(year2));
-
-				Iterator<String> wordsIt = words.iterator();
-				double dist = 0.0;
+				double similarity = 0.0;
 				double freq1, freq2;
+				Iterator<String> wordsIt = words.iterator();
 				while (wordsIt.hasNext()) {
-					String word = wordsIt.next();
-					double wordOccurence = (double)wordOccurences.get(word);
 					freq1 = 0.0;
 					freq2 = 0.0;
+					String word = wordsIt.next();
 
-					// Chi-Square distance
+					// Cosine similarity:
 					if(freqYear1.containsKey(word)) {
 						freq1 = (double)freqYear1.get(word);
 					}
 					if(freqYear2.containsKey(word)) {
 						freq2 = (double)freqYear2.get(word);
 					}
-					dist += Math.pow(freq1/wordCount1 - freq2/wordCount2, 2) / wordOccurence;
+					similarity += freq1*freq2;
 				}
-				distance.set(dist);
+				similarity /= Math.sqrt(norm1)*Math.sqrt(norm2);
+
+				distance.set(1 - similarity);
 				context.write(key, distance);
 			}
 
@@ -229,15 +174,15 @@ public class ChiSquare {
 
 		Configuration conf = new Configuration();
 
-		Job job = Job.getInstance(conf, "ChiSquare");
-		job.setJarByClass(ChiSquare.class);
+		Job job = Job.getInstance(conf, "Cosine");
+		job.setJarByClass(Cosine.class);
 		job.setNumReduceTasks(NUM_REDUCERS);
 
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(Text.class);
 
-		job.setMapperClass(CSMapper.class);
-		job.setReducerClass(CSReducer.class);
+		job.setMapperClass(CosMapper.class);
+		job.setReducerClass(CosReducer.class);
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(DoubleWritable.class);
@@ -246,7 +191,7 @@ public class ChiSquare {
 
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		MultipleOutputs.addNamedOutput(job, "ChiSquare", TextOutputFormat.class,
+		MultipleOutputs.addNamedOutput(job, "CosineSimilarity", TextOutputFormat.class,
 				Text.class, DoubleWritable.class);
 
 		boolean done = job.waitForCompletion(true);

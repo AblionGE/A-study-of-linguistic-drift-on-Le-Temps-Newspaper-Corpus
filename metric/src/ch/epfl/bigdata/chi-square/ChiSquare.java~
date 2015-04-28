@@ -29,12 +29,11 @@ import java.util.List;
 
 /**
  * Computes Chi-Square distance
- * 
  * @author Cynthia
  *
  */
 public class ChiSquare {
-	private static final int NUM_REDUCERS = 50;
+	private static final int NUM_REDUCERS = 25;
 
 	/**
 	 * Mapper to compute chi-square distance: takes a directory with all 1-gram files as
@@ -49,35 +48,29 @@ public class ChiSquare {
 
 		private final int firstYear = 1840;
 		private final int lastYear = 1998;
-		private Text years = new Text();
-		private Text values = new Text();
 
-		/**
-		 * The function extracts the name of the file from which the line comes and determine the year corresponding to it.
-		 * Then a key-value pair is returned for each year in the corpus. It ensures that for every output key y1:y2, y1 <= y2.
-		 */
 		@Override
 		public void map(LongWritable key, Text line, Context context)
 				throws IOException, InterruptedException {
 
-			// Get file name informations
 			FileSplit splitInfo = (FileSplit) context.getInputSplit();
 			String fileName = splitInfo.getPath().getName();
 			String year = fileName.replaceAll("-r-[0-9]+", "");
 			String[] tokens = line.toString().split("\\s+");
 
-			// Order the elements of the key and output it with the word coming from the line
 			if (tokens.length == 2) {
 				String word = tokens[0];
 				String frequency = tokens[1];
-				values.set(year + "/" + word + "/" + frequency);
 				for (int i = firstYear; i <= lastYear; i++) {
 					if (Integer.parseInt(year) <= i) {
-						years.set(year + ":" + i);
-					} else {
-						years.set(i + ":" + year);
+						context.write(new Text(year + ":" + i), new Text(
+								year+"/"+word+"/"+frequency));
 					}
-					context.write(years,values);
+					if (Integer.parseInt(year) >= i) {
+						context.write(new Text(i + ":" + year), new Text(
+								year+"/"+word+"/"+frequency));
+					}
+
 				}
 			}
 
@@ -95,13 +88,8 @@ public class ChiSquare {
 
 		private HashMap<Integer, Integer> yearOccurences = null;
 		private HashMap<String, Integer> wordOccurences = null;
-		private DoubleWritable distance = new DoubleWritable();
+		double distance = 3000;
 
-		/**
-		 * Read the files containing the terms needed for chi-square:
-		 * - yearOccurences are the number of words appearing in each year
-		 * - wordOccurences are the number of times each word appear in the whole corpus
-		 */
 		@Override
 		public void setup(Context context) throws IOException {
 			Path pt = new Path(
@@ -127,11 +115,12 @@ public class ChiSquare {
 				br.close();
 				fis.close();
 			}
-
+			
 			pt = new Path(
-					"/projects/linguistic-shift/stats/WordOccurenceOverAllYears");
+					"/projects/linguistic-shift/distances/WordOccurenceOverAllYears");
 			hdfs = pt.getFileSystem(context.getConfiguration());
 			if (hdfs.isFile(pt)) {
+				distance = 2000;
 				FSDataInputStream fis = hdfs.open(pt);
 				BufferedReader br = new BufferedReader(new InputStreamReader(
 						fis));
@@ -154,9 +143,6 @@ public class ChiSquare {
 
 		}
 
-		/**
-		 * Outputs the chi-square distance
-		 */
 		@Override
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
@@ -165,8 +151,6 @@ public class ChiSquare {
 			HashMap<String,Integer> freqYear2 = new HashMap<String, Integer>();
 			HashSet<String> words = new HashSet<String>();
 
-			// Store the frequencies for each words in both years in tables
-			// Store the distinct words in a HashSet
 			Iterator<Text> valuesIt = values.iterator();
 			String[] years = key.toString().split(":");
 			String year1 = years[0];
@@ -174,44 +158,47 @@ public class ChiSquare {
 
 			while (valuesIt.hasNext()) {
 				String[] val = valuesIt.next().toString().split("/");
-				words.add(val[1]);
 				if(val[0].equals(year1)) {
 					freqYear1.put(val[1], Integer.parseInt(val[2]));
-				}
-				if(val[0].equals(year2)) {
+				} else if(val[0].equals(year2)) {
 					freqYear2.put(val[1], Integer.parseInt(val[2]));
 				}
+				words.add(val[1]);
 			}
 
-			// Computes the distance only if both years contain words
-			if (!freqYear1.isEmpty() && !freqYear2.isEmpty()) {
+
+			if (yearOccurences != null) {
 				double wordCount1 = (double)yearOccurences
 						.get(Integer.parseInt(year1));
-				double wordCount2 = (double)yearOccurences
+				double wordCount2 = yearOccurences
 						.get(Integer.parseInt(year2));
 
 				Iterator<String> wordsIt = words.iterator();
-				double dist = 0.0;
-				double freq1, freq2;
+				distance = 0;
+				int freq1, freq2;
 				while (wordsIt.hasNext()) {
 					String word = wordsIt.next();
 					double wordOccurence = (double)wordOccurences.get(word);
-					freq1 = 0.0;
-					freq2 = 0.0;
+					freq1 = 0;
+					freq2 = 0;
 
-					// Chi-Square distance
 					if(freqYear1.containsKey(word)) {
-						freq1 = (double)freqYear1.get(word);
+						freq1 = freqYear1.get(word);
 					}
 					if(freqYear2.containsKey(word)) {
-						freq2 = (double)freqYear2.get(word);
+						freq2 = freqYear2.get(word);
+
 					}
-					dist += Math.pow(freq1/wordCount1 - freq2/wordCount2, 2) / wordOccurence;
+					distance += Math.pow(freq1/wordCount1 - freq2/wordCount2, 2) / wordOccurence;
 				}
-				distance.set(dist);
-				context.write(key, distance);
 			}
 
+			context.write(key, new DoubleWritable(distance));
+
+		}
+
+		@Override
+		public void cleanup(Context context) {
 
 		}
 	}

@@ -19,6 +19,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -27,22 +28,25 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.util.List;
 
 /**
- * Computes a simple distance between years based on the common words used.
+ * Computes a simple distance between a subset of articles from a year with the years from the whole corpus.
+ * The distance is based on the common words used.
  * 
  * @author Cynthia, Farah
  * 
  */
 
-public class DistanceComputation {
+public class Distance1Articles {
 
 	private static final int NUM_REDUCERS = 25;
 
 	/**
-	 * Mapper to compute distance: takes a directory with all 1-gram files as
-	 * input. For one year y1 and for each words in y1, it returns a tuple for
+	 * Mapper: takes a directory with the n-gram files for the subset of articles and a directory with all n-gram files as
+	 * input.
+	 * For the year of the articles y1 and for each words in y1, it returns a tuple for
 	 * each y2 in [1840,1998]: (y1:y2, word).
+	 * For each year y2 and each words in y2, it returns a tuple: (y1:y2, word).
 	 * 
-	 * @author Cynthia, Farah
+	 * @author Cynthia
 	 * 
 	 */
 	private static class CDistanceMapper extends
@@ -50,10 +54,24 @@ public class DistanceComputation {
 
 		private final int firstYear = 1840;
 		private final int lastYear = 1998;
+		private String articlesDir;
+		private String yearsDir;
+		
+		/**
+		 * Setup the names of both input directories to differentiate words coming from the subset of articles and words coming from the corpus.
+		 */
+		@Override
+		public void setup(Context context) throws IOException {
+			String[] path1 = context.getConfiguration().get("inputDirArticles").split("/");
+			String[] path2 = context.getConfiguration().get("inputDirTotalYears").split("/");
+			articlesDir = path1[path1.length - 1];
+			yearsDir = path2[path2.length - 1];
+		}
 
 		/**
 		 * The function extracts the name of the file from which the line comes and determine the year corresponding to it.
-		 * Then a key-value pair is returned for each year in the corpus. It ensures that for every output key y1:y2, y1 <= y2.
+		 * If the line comes from the subset of articles, then a key-value pair is returned for each year in the corpus.
+		 * If the line comes from the corpus, a single key-value pair is returned.
 		 */
 		@Override
 		public void map(LongWritable key, Text line, Context context)
@@ -61,22 +79,28 @@ public class DistanceComputation {
 
 			// Get file name informations
 			FileSplit splitInfo = (FileSplit) context.getInputSplit();
-			String fileName = splitInfo.getPath().getName();
-			String year = fileName.replaceAll("-r-[0-9]+", "");
+			String[] filePath = splitInfo.getPath().toString().split("/");
+			String fileDir = filePath[filePath.length - 2];
+
+			// Extract the year of the line depending from which file it comes
+			String year = "";
+			if(fileDir.equals(articlesDir)) {
+				year = fileDir;
+			} else if(fileDir.equals(yearsDir)) {
+				String fileName = splitInfo.getPath().getName();
+				year = fileName.replaceAll("-r-[0-9]+", "");
+			}
+			
+			// Outputs (year1:year2, word) depending from which file the line comes
 			String[] tokens = line.toString().split("\\s+");
-
-			// Order the elements of the key and output it with the word coming from the line
 			if (tokens.length == 2) {
-				for (int i = firstYear; i <= lastYear; i++) {
-					if (Integer.parseInt(year) <= i) {
-						context.write(new Text(year + ":" + i), new Text(
-								tokens[0]));
+				String word = tokens[0];
+				if (fileDir.equals(articlesDir)) {
+					for (int i = firstYear; i <= lastYear; i++) {
+						context.write(new Text(year + ":" + i), new Text(word));
 					}
-					if (Integer.parseInt(year) >= i) {
-						context.write(new Text(i + ":" + year), new Text(
-								tokens[0]));
-					}
-
+				} else if (fileDir.equals(yearsDir)){
+					context.write(new Text(articlesDir + ":" + year), new Text(word));
 				}
 			}
 
@@ -84,7 +108,7 @@ public class DistanceComputation {
 	}
 
 	/**
-	 * Reducer to compute distance: returns the distance for each pair of years.
+	 * Reducer: returns the distance for each pair of years by looking at common words.
 	 * 
 	 * @author Cynthia, Farah
 	 * 
@@ -138,7 +162,7 @@ public class DistanceComputation {
 			HashSet<String> valuesSet = new HashSet<String>();
 			int valuesSize = 0;
 
-			// Count the number of elements and of common words
+			// Count the number of elements and common words
 			while (valuesIt.hasNext()) {
 				String val = valuesIt.next().toString();
 				valuesSize++;
@@ -159,6 +183,11 @@ public class DistanceComputation {
 			context.write(key, new DoubleWritable(distance));
 
 		}
+
+		@Override
+		public void cleanup(Context context) {
+
+		}
 	}
 
 	/**
@@ -171,11 +200,14 @@ public class DistanceComputation {
 	 */
 	public static void main(String[] args) throws IOException,
 			ClassNotFoundException, InterruptedException {
+		
+		String input1 = args[0];
+		String input2 = args[1];
 
 		Configuration conf = new Configuration();
 
 		Job job = Job.getInstance(conf, "DistanceComputation");
-		job.setJarByClass(DistanceComputation.class);
+		job.setJarByClass(Distance1Articles.class);
 		job.setNumReduceTasks(NUM_REDUCERS);
 
 		job.setMapOutputKeyClass(Text.class);
@@ -186,11 +218,14 @@ public class DistanceComputation {
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(DoubleWritable.class);
+		
+		job.getConfiguration().set("inputDirArticles", input1);
+		job.getConfiguration().set("inputDirTotalYears", input2);
 
 		FileInputFormat.setInputDirRecursive(job, true);
 
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		FileInputFormat.addInputPaths(job, input1+","+input2);
+		FileOutputFormat.setOutputPath(job, new Path(args[2]));
 		MultipleOutputs.addNamedOutput(job, "Metric1", TextOutputFormat.class,
 				Text.class, DoubleWritable.class);
 
