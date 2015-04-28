@@ -38,6 +38,9 @@ public class Ngram {
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
+		/**
+		 * Replaces everything that is not a letter (with accent or not) by a space.
+		 */
 		private String preProcess(String s) {
 			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
 		}
@@ -65,6 +68,7 @@ public class Ngram {
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
+			// The ngramSize to compute defaults to 2 if no parameter is given to the job.
 			ngramSize = conf.getInt("ngramSize", 2);
 			String separator = conf.get("separator", "\\s+");
 			ngramSeparator = conf.get("ngramSeparator", ",");
@@ -77,6 +81,11 @@ public class Ngram {
  			list.removeAll(Arrays.asList(""));
  			splittedArticle = list.toArray(new String[0]);
  			
+ 			/*
+ 			 * The Dequeue is first filled with n-1 1-grams. Then at each step, a new 1-gram is added at the tail of
+ 			 * the queue. The ngram is computed (all elements in queue) and the first element (head) of the queue
+ 			 * is removed, this is a simple optimization for the ngrams computation.
+ 			 */
 			Deque<String> currentNgram = new ArrayDeque<>();
 			int counter = 0;
 			
@@ -85,7 +94,7 @@ public class Ngram {
 			if (splittedArticle.length < ngramSize) {
 			    return;
 			}
-
+			
 			for (; counter < ngramSize - 1; counter++) {
 				 currentNgram.addLast(splittedArticle[counter]);
 			}
