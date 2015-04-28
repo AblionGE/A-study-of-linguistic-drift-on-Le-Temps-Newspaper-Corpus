@@ -1,7 +1,7 @@
 package ch.epfl.bigdata.synonyms;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -9,19 +9,28 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.util.StringUtils;
 
 import ch.epfl.bigdata.ocr.YearAwareInputFormat;
 
+/**
+ * @author nicolas
+ * Format temporal frequencies of ngrams in a more concise format instead of having an tuple for every
+ * pair of (ngram, year). Year are grouped by range of STEP years from START to END and a vector of
+ * frequencies is built by averaging each group. As this methods was used to gather the data about 
+ * synonyms only, a file with all the useful words is provided such as to avoid retrieving all the ngrams.
+ * 
+ * Input :  ngrams/x-grams
+ * 			a folder containing all the ngrams of interest (one per line)
+ * 			N, the maximum [N]grams that must be looked up
+ * Output : ngram	avg([freq(ngram,START), ... , freq(ngram, START+STEP)]);...;
+ */
 public class ExtractNgramVectors {
 	
 	public static class ExtractMapper extends Mapper<Text, Text, Text, Text> {
@@ -32,6 +41,7 @@ public class ExtractNgramVectors {
 		private HashSet<String> needed = new HashSet<>();
 		
 		@Override
+		@SuppressWarnings(value = { "deprecation" })
 		protected void setup(Context context) throws IOException ,InterruptedException {
 			Configuration conf = context.getConfiguration();
 			FileSystem fs = correctionPath.getFileSystem(conf);
@@ -103,7 +113,7 @@ public class ExtractNgramVectors {
 		out.getFileSystem(conf).delete(out, true);
 		String[] paths = new String[n];
 		for(int i=1; i<=n; i++){
-			paths[i-1] = in.toString()+in.SEPARATOR+i+"-grams";
+			paths[i-1] = in.toString()+Path.SEPARATOR+i+"-grams";
 		}
 		System.out.println(StringUtils.join(",", paths));
 		FileInputFormat.addInputPaths(job, StringUtils.join(",", paths));

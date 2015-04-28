@@ -20,6 +20,10 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 
+/**
+ * @author nicolas
+ * Load all ngrams and modify them according to the replacement mapping produced by {@link OcrAlternatives}
+ */
 public class ApplyCorrectionJob {
 	
 	private static Path correctionPath;
@@ -32,6 +36,7 @@ public class ApplyCorrectionJob {
 		
 		private HashMap<String, String> corrs = new HashMap<>();
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		protected void setup(Context context) throws IOException ,InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -66,6 +71,10 @@ public class ApplyCorrectionJob {
 		}
 	}
 	
+	/**
+	 * Aim at mirroring the initial ngrams folder directory and filenames.
+	 * @author nicolas
+	 */
 	public static class ReplacerReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		
 		private MultipleOutputs<Text, IntWritable> mout;

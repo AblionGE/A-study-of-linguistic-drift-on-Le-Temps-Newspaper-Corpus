@@ -1,7 +1,7 @@
 package ch.epfl.bigdata.synonyms;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -9,19 +9,22 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.util.StringUtils;
 
 import ch.epfl.bigdata.ocr.YearAwareInputFormat;
 
+/**
+ * @author nicolas
+ * Almost the exact same behaviour as {@link ExtractNgramVectors} except that is retrieves all the
+ * 1-grams regardless of whether they actually are part of the filter file.
+ * TODO : maybe not useful anymore
+ */
 public class ExtractNgramVectorsExtended {
 	
 	public static class ExtractMapper extends Mapper<Text, Text, Text, Text> {
@@ -31,6 +34,7 @@ public class ExtractNgramVectorsExtended {
 		
 		private HashSet<String> needed = new HashSet<>();
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		protected void setup(Context context) throws IOException ,InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -105,7 +109,7 @@ public class ExtractNgramVectorsExtended {
 		out.getFileSystem(conf).delete(out, true);
 		String[] paths = new String[n];
 		for(int i=1; i<=n; i++){
-			paths[i-1] = in.toString()+in.SEPARATOR+i+"-grams";
+			paths[i-1] = in.toString()+Path.SEPARATOR+i+"-grams";
 		}
 		System.out.println(StringUtils.join(",", paths));
 		FileInputFormat.addInputPaths(job, StringUtils.join(",", paths));
