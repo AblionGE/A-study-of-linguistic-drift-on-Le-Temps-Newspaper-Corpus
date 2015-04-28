@@ -20,6 +20,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
  * Main class which contains the mapper class, the reducer class and the main function.
+ * We seperate by the year by article
  * @author jweber
  *
  */
@@ -54,8 +55,8 @@ public class WordArticle {
 
 	
 	/**.
-	 * Reducer for the ngrams.
-	 * @author gbrechbu
+	 * Reducer for the ngrams by article.
+	 * @author jweber
 	 *
 	 */
 	private static class WordArticleReducer extends Reducer<Text, Text, Text, Text> {
@@ -98,6 +99,7 @@ public class WordArticle {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 * @throws InterruptedException
+	 * @author Jweber
 	 */
 	public static void main(String[] args) throws IOException, ClassNotFoundException, 
 			InterruptedException {
@@ -105,7 +107,7 @@ public class WordArticle {
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		Job job = Job.getInstance(conf, "WordArticle");
 		job.setJarByClass(WordArticle.class);
-		//job.setNumReduceTasks(NUM_REDUCERS);
+		job.setNumReduceTasks(NUM_REDUCERS);
 		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(Text.class);
