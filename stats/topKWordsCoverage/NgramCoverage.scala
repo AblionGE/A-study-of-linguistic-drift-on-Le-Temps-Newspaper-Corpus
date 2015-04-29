@@ -9,6 +9,7 @@ object NgramCoverage {
 
     var coverage = List[(Int, Double)]()
 
+    // The top most used percentage, in our list of 1-grams (word, count), of words.
     val percentOfTopWords = args(0).toInt
     
     for (i <- 1840 to 1998) {
@@ -21,13 +22,18 @@ object NgramCoverage {
 
       println("Data size : " + dataSize)
 
+      // this variable keeps only the count column of the data array
       val countOnlyData = data.map(_._1)
+      // Total numbers of words used in one year (cumulative : "hello hello" counts 2 words)
       val totalWordsCountInYear: Long = countOnlyData.reduce(_+_)
 
+      // The percentage of data we want to take (data is sorted by the count of words, so we will get the top k% most
+      // used words)
       val numberOfWordsToTake: Long = (percentOfTopWords * dataSize) / 100
       val topKWordsLocal = data.sortBy(_._1, false).take(numberOfWordsToTake.toInt)
       val topKWords = sc.parallelize(topKWordsLocal)
 
+      // The count of the top k% words.
       val countOnlyTopKWords = topKWords.map(_._1)
       val totWordsTopK: Long = countOnlyTopKWords.reduce(_+_)
 

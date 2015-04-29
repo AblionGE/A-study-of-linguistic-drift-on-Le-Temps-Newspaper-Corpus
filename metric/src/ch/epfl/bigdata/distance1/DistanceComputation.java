@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.util.List;
 
 /**
+ * Computes a simple distance between years based on the common words used.
  * 
  * @author Cynthia, Farah
  * 
@@ -50,24 +51,30 @@ public class DistanceComputation {
 		private final int firstYear = 1840;
 		private final int lastYear = 1998;
 
+		/**
+		 * The function extracts the name of the file from which the line comes and determine the year corresponding to it.
+		 * Then a key-value pair is returned for each year in the corpus. It ensures that for every output key y1:y2, y1 <= y2.
+		 */
 		@Override
 		public void map(LongWritable key, Text line, Context context)
 				throws IOException, InterruptedException {
 
+			// Get file name informations
 			FileSplit splitInfo = (FileSplit) context.getInputSplit();
 			String fileName = splitInfo.getPath().getName();
 			String year = fileName.replaceAll("-r-[0-9]+", "");
 			String[] tokens = line.toString().split("\\s+");
 
+			// Order the elements of the key and output it with the word coming from the line
 			if (tokens.length == 2) {
 				for (int i = firstYear; i <= lastYear; i++) {
 					if (Integer.parseInt(year) <= i) {
 						context.write(new Text(year + ":" + i), new Text(
-								tokens[1]));
+								tokens[0]));
 					}
 					if (Integer.parseInt(year) >= i) {
 						context.write(new Text(i + ":" + year), new Text(
-								tokens[1]));
+								tokens[0]));
 					}
 
 				}
@@ -88,10 +95,13 @@ public class DistanceComputation {
 		private HashMap<Integer, Integer> yearCardinals = null;
 		double distance = 3000;
 
+		/**
+		 * Read the file containing the cardinalities of each year
+		 */
 		@Override
 		public void setup(Context context) throws IOException {
 			Path pt = new Path(
-					"/projects/linguistic-shift/distances/YearCardinality");
+					"/projects/linguistic-shift/stats/YearCardinality");
 			FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
 			if (hdfs.isFile(pt)) {
 				distance = 2000;
@@ -117,6 +127,10 @@ public class DistanceComputation {
 
 		}
 
+		/**
+		 * The function deduce the number of common words by looking at words that appear twice in the input values.
+		 * It computes the distance between two years using their cardinalities and their common words.
+		 */
 		@Override
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
@@ -124,14 +138,15 @@ public class DistanceComputation {
 			HashSet<String> valuesSet = new HashSet<String>();
 			int valuesSize = 0;
 
+			// Count the number of elements and of common words
 			while (valuesIt.hasNext()) {
 				String val = valuesIt.next().toString();
 				valuesSize++;
 				valuesSet.add(val);
 			}
-
 			double numCommonWords = valuesSize - valuesSet.size();
 
+			// Compute the distance with the common words and the cardinality of each year
 			String[] years = key.toString().split(":");
 			if (yearCardinals != null) {
 				int cardinal1 = yearCardinals
@@ -142,11 +157,6 @@ public class DistanceComputation {
 			}
 
 			context.write(key, new DoubleWritable(distance));
-
-		}
-
-		@Override
-		public void cleanup(Context context) {
 
 		}
 	}
