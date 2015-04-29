@@ -16,3 +16,5 @@ spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g 
 The different directories for the input directory are :
         - /projects/linguistic-shift/corrected_nGramArticle/
         - /projects/linguistic-shift/nGramArticle/nGram/
+
+The output is of form : word \tab occurrences

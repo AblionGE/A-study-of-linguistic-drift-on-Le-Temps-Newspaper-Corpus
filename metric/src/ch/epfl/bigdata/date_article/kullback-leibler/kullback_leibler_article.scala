@@ -1,8 +1,5 @@
 /*
  * Big Data 2015 - A Study of linguistic drift - Date a set of article with Kullback-Leibler Divergence - Marc Schaer
- * Example of use
- * spark-submit --class "KullbackLeiblerArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 Corrected Spark hdfs:///projects/linguistic-shift/Kullback-Leibler/article/Corrected/1-grams/1840/ hdfs:///projects/linguistic-shift/articles_samples/15/Corrected/1840/ 2>err
- * nbOfGrams : 1 for the moment
  */
 
 import org.apache.spark.SparkContext
@@ -13,14 +10,12 @@ object KullbackLeiblerArticle {
   def main(args: Array[String]) {
 
     if (args.size != 5) {
-        // the input format is important to parse the data because they are not the same if the input file
-        // was create with MapReduce or with Spark
-        println("Use with 5 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", input format (\"Java\" or \"Spark\"), output directory, directory of articles")
+        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", output directory, directory of articles, true if you want to remove the articles from the year")
         exit(1)
     }
 
-    if ((args(2) != "Java" && args(2) != "Spark") || (args(1) != "Corrected" && args(1) != "WithoutCorrection")) {
-        println("Use with 5 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", input format (\"Java\" or \"Spark\"), output directory, directory of articles")
+    if (args(1) != "Corrected" && args(1) != "WithoutCorrection") {
+        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", output directory, directory of articles, true if you want to remove the articles from the year")
         exit(1)
     }
 
@@ -36,21 +31,23 @@ object KullbackLeiblerArticle {
     if (args(1) == "Corrected") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*"
+      file_source = "hdfs://projects/linguistic-shift/ngrams/" + nbOfGrams +"-grams/*"
+      }
     } else {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*"
+      file_source = "hdfs://projects/linguistic-shift/ngrams/" + nbOfGrams +"-grams/*"
     }
 
-    val articlesFile = args(4) + "/*"
+    val articlesFile = args(3) + "/*"
 
     val splitter = file.split('/').size
     val lines = sc.wholeTextFiles(file)
     val probabilityOfAWord = sc.textFile(probabilityOfAWordFile)
-    val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('(')(1).split(')')(0).split(','))
-        .map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else {(e(0), e(e.size), "0000")})
+    val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('\t')).map(e => (e(0), e(1), "0000"))
 
     val articles = sc.textFile(articlesFile)
-    val formatted_articles = articles.map(e => e.split('(')(1).split(')')(0).split(',')).map(e => e.flatMap(f => f.split(", "))).map(e => (e(0), e(1).toInt))
+    val formatted_articles = articles.map(e => e.split('\t')).map(e => (e(0), e(1).toInt))
     val total_words_article = formatted_articles.map(e => (1, e._2)).reduceByKey(_+_).collect
     val normalized_article = formatted_articles.map(e => (e._1, e._2.toDouble/total_words_article(0)._2.toDouble, "1839"))
 
@@ -102,17 +99,7 @@ object KullbackLeiblerArticle {
     }
 
     // format all triplets as a List containing word, value, year
-    var all_triplets : org.apache.spark.rdd.RDD[List[String]] = sc.parallelize(List())
-
-    if (args(2) == "Spark") {
-            //Manage files from Spark output
-            all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1)
-                .map(l => l.split("-grams/")(1).split('/')(0)))
-                .map(e => Array(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), e(nbOfGrams.toInt+1)))).flatMap(e => e).map(e => e.toList)
-    } else {
-            //Manage files from MapReduce Java output
-            all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
-    }
+    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('\t').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
     val grouped_and_ordered_temp = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).union(normalized_article.map(e => List(e._1, e._2+"", e._3))).groupBy(e => e.head)
     val grouped_and_ordered = grouped_and_ordered_temp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
@@ -132,7 +119,8 @@ object KullbackLeiblerArticle {
     // Normalization
     val max = results.map(e => e._2.toDouble).top(1)
     val results_normalized = results.map(e => (e._1, e._2.toDouble/max(0)))
-    results_normalized.saveAsTextFile(args(3))
+    val results_formatted = results_normalized.map(e => e._1 + "," + e._2)
+    results_formatted.saveAsTextFile(args(2))
 
     // Get the values where the articles are simulated by years
     val results_normalized_from_article = results_normalized.filter(e => e._1.split(',')(0) == "1839")
@@ -145,7 +133,8 @@ object KullbackLeiblerArticle {
     val best_estimation_to_article_with_year = results_normalized_to_article.filter(e => e._2.toDouble == best_estimation_to_article(0)).map(e => (e._1.split(',')(0), e._2))
 
     val combine_best_estimations = best_estimation_from_article_with_year.union(best_estimation_to_article_with_year)
-    combine_best_estimations.saveAsTextFile(args(3) + "/best_estimation/")
+    val combine_best_estimations_formatted = combine_best_estimations.map(e => e._1 + "," + e._2)
+    combine_best_estimations_formatted.saveAsTextFile(args(2) + "/best_estimation/")
 
     sc.stop()
   }

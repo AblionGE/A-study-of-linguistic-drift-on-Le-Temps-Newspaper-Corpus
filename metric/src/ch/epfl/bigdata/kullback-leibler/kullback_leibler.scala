@@ -10,14 +10,7 @@ object KullbackLeibler {
   def main(args: Array[String]) {
 
     if (args.size != 4) {
-        // the input format is important to parse the data because they are not the same if the input file
-        // was create with MapReduce or with Spark
-        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", format (\"Java\" or \"Spark\"), output file")
-        exit(1)
-    }
-
-    if (args(2) != "Java" && args(2) != "Spark") {
-        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", format (\"Java\" or \"Spark\"), output file")
+        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", \"TFIDF\" or \"Probability\", output directory")
         exit(1)
     }
 
@@ -30,13 +23,13 @@ object KullbackLeibler {
     // Read all files
     var probabilityOfAWordFile = ""
     var file = ""
-    if (args(1) == "Corrected" && args(2) == "Spark") {
+    if (args(1) == "Corrected" && args(2) == "Probability") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*"
-    } else if (args(1) == "Corrected" && args(2) == "Java") {
+    } else if (args(1) == "Corrected" && args(2) == "TFIDF") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/Corrected/TFIDF/" + nbOfGrams + "-grams/*"
-    } else if (args(1) == "WithoutCorrection" && args(2) == "Spark") {
+    } else if (args(1) == "WithoutCorrection" && args(2) == "Probability") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*"
     } else {
@@ -48,8 +41,7 @@ object KullbackLeibler {
     val lines = sc.wholeTextFiles(file)
 
     val probabilityOfAWord = sc.textFile(probabilityOfAWordFile)
-    val temp = probabilityOfAWord.map(e => e.split('(')(1).split(')')(0).split(','))
-    val probabilityOfAWordTemp = temp.map(e => if (e.size == nbOfGrams.toInt+1) {(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), "0000")} else {(e(0), e(e.size), "0000")})
+    val probabilityOfAWordTemp = probabilityOfAWord.map(e => e.split('\t')).map(e => (e(0), e(1), "0000"))
 
     /**
      * This function takes a List of List of String where the inner list contains 3 elements : a word, a value and a year.
@@ -99,17 +91,7 @@ object KullbackLeibler {
     }
 
     // format all triplets as a List containing value, word, year
-    var all_triplets : org.apache.spark.rdd.RDD[List[String]] = sc.parallelize(List())
-
-    if (args(2) == "Spark") {
-            //Manage files from Spark output
-            all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('(')(1).split(')')(0).split(',') ++ List(el._1)
-                .map(l => l.split("-grams/")(1).split('/')(0)))
-                .map(e => Array(e.take(nbOfGrams.toInt).mkString(","), e(nbOfGrams.toInt), e(nbOfGrams.toInt+1)))).flatMap(e => e).map(e => e.toList)
-    } else {
-            //Manage files from MapReduce Java output
-            all_triplets = lines.map(el => el._2.split('\n').map(t => t.split(' ').toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
-    }
+    val all_triplets = lines.map(el => el._2.split('\n').map(t => t.split('\t').flatMap(tt => tt.split(' ')).toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
 
     val grouped_and_ordered_temp = all_triplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head)
     val grouped_and_ordered = grouped_and_ordered_temp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
@@ -122,7 +104,8 @@ object KullbackLeibler {
     //Normalization
     val max = results.map(e => e._2).top(1)
     val results_normalized = results.map(e => (e._1, e._2/max(0)))
-    results_normalized.saveAsTextFile(args(3))
+    val results_formatted = results_normalized.map(e => e._1 + "," + e._2)
+    results_formatted.saveAsTextFile(args(3))
 
     sc.stop()
   }

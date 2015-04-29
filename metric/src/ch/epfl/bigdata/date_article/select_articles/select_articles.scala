@@ -23,7 +23,8 @@ object SelectArticle {
     val sample_article = sc.parallelize(articles_temp.takeSample(false, args(1).toInt, scala.util.Random.nextInt(10000)))
     val formatted_article = sample_article.flatMap(e => e.map(f => (f(0), f(1).toInt))).reduceByKey(_+_)
     
-    formatted_article.saveAsTextFile(args(3))
+    val general_formatted_article = formatted_article.map(e => e._1 + "\t" + e._2)
+    general_formatted_article.saveAsTextFile(args(3))
     
     sc.stop()
   }
