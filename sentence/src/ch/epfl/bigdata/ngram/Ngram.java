@@ -39,49 +39,31 @@ public class Ngram {
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
 		private String preProcess(String s) {
-			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
+			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
 		
 		private Text gram = new Text();
-		private int ngramSize;
-		private String ngramSeparator = ",";
-		
-		private String count(Collection<String> stringCollection) {
-		    return Integer.toString(stringCollection.size)
-		}
+		private int sentenceSize;
 		
 		@Override
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
-			ngramSize = conf.getInt("ngramSize", 1);
-			String separator = conf.get("separator", "[.!?]");
-			ngramSeparator = conf.get("ngramSeparator", ",");
+			String separator = conf.get("separator", "\\s+");
 			
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
- 			String[] splittedArticle = tempArticle.split(separator);
+ 			String[] splittedArticle = tempArticle.split("[.?!]");
  			
- 			List<String> list = new ArrayList<String>(Arrays.asList(splittedArticle));
- 			list.removeAll(Arrays.asList(""));
- 			splittedArticle = list.toArray(new String[0]);
- 			
-			Deque<String> currentNgram = new ArrayDeque<>();
-			int counter = 0;
-
-			for (; counter < ngramSize - 1; counter++) {
-				 currentNgram.addLast(splittedArticle[counter]);
-			}
-
-			String year = String.valueOf(key.get());
-
-			for (; counter < splittedArticle.length; counter++) {
-			    currentNgram.addLast(splittedArticle[counter]);
-				gram.set(year + "//" + concat(currentNgram));
-				context.write(gram, ONE);
-				currentNgram.removeFirst();
+ 			String year = String.valueOf(key.get()); 
+ 
+ 			for (int i = 0; i < splittedArticle.length; i++) {
+ 				String sentence = splittedArticle[i];
+				String[] words = sentence.split("//s+");
+				sentenceSize = words.length;
+				gram.set(year + "//" + Integer.toString(sentenceSize));
 			}
 		}
 	}
