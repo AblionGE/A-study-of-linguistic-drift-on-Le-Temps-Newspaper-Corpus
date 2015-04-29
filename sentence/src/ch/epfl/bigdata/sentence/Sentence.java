@@ -1,4 +1,4 @@
-package ch.epfl.bigdata.ngram;
+package ch.epfl.bigdata.sentence;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -27,7 +27,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
  * @author gbrechbu
  *
  */
-public class Ngram {
+public class Sentence {
 	
 	private static final int NUM_REDUCERS = 25;
 	
@@ -39,7 +39,15 @@ public class Ngram {
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
 		private String preProcess(String s) {
-			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
+			String toRet = s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
+			toRet = toRet.replaceAll("M.", "M");
+			toRet = toRet.replaceAll("Mr.", "Mr");
+			toRet = toRet.replaceAll("Mme.", "Mme");
+			toRet = toRet.replaceAll("Mlle.", "Mlle");
+			toRet = toRet.replaceAll("MM.", "MM");
+			toRet = toRet.replaceAll("Dr.", "Dr");
+			toRet = toRet.replaceAll("[A-Z]{1}\\.", "A");
+			return toRet;
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
@@ -61,9 +69,10 @@ public class Ngram {
  
  			for (int i = 0; i < splittedArticle.length; i++) {
  				String sentence = splittedArticle[i];
-				String[] words = sentence.split("//s+");
+				String[] words = sentence.split("\\s+");
 				sentenceSize = words.length;
 				gram.set(year + "//" + Integer.toString(sentenceSize));
+				context.write(gram, ONE);
 			}
 		}
 	}
@@ -114,8 +123,8 @@ public class Ngram {
 			}
 			String[] parts = key.toString().split("//", 2);
 			String year = parts[0];
-			String ngram = parts[1];
-			mout.write("Output", ngram, new IntWritable(sum), year);
+			String sentenceLength = parts[1];
+			mout.write("Output", sentenceLength, new IntWritable(sum), year);
 		}
 		
 		@Override
@@ -139,8 +148,8 @@ public class Ngram {
 			InterruptedException {
 		Configuration conf = new Configuration();
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		Job job = Job.getInstance(conf, "Ngram");
-		job.setJarByClass(Ngram.class);
+		Job job = Job.getInstance(conf, "Sentence Length");
+		job.setJarByClass(Sentence.class);
 		job.setNumReduceTasks(NUM_REDUCERS);
 		
 		job.setMapOutputKeyClass(Text.class);

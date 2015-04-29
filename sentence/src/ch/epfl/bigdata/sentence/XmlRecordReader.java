@@ -1,4 +1,4 @@
-package ch.epfl.bigdata.ngram;
+package ch.epfl.bigdata.sentence;
 
 import java.io.IOException;
 import java.io.InputStream;
