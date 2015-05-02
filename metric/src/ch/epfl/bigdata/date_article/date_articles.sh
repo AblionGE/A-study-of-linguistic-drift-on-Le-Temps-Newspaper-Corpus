@@ -63,6 +63,9 @@ do
         # Get Results and create results.csv
         hadoop fs -get $TEMPORARY_DIRECTORY/KL/$i/ && cat $i/* > results.csv
 
+        # Remove local directory
+        rm -r $i/
+
         # Find the smallest distance and add it into an array
         RES=`(cat results.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
         echo "Real year is $2 and predicted year is $RES"
@@ -86,7 +89,7 @@ do
         KL_SUM=$(($KL_SUM + ${KL_ERROR[$j]}))
 done
 
-KL_MEAN=$((${KL_SUM}/$3))
+KL_MEAN=$(echo "${KL_SUM}/$3" | bc -l)
 
 echo "Mean error for different metrics for $1 of articles in year $2 with $3 iterations" >> mean_error.txt
 echo "Mean error in KL : " $KL_MEAN >> mean_error.txt
