@@ -63,12 +63,9 @@ do
         # Get Results and create results.csv
         hadoop fs -get $TEMPORARY_DIRECTORY/KL/$i/ && cat $i/* > results.csv
 
-        # Remove temp directory
-        rm -r $TEMPORARY_DIRECTORY/KL/$i/
-
         # Find the smallest distance and add it into an array
         RES=`(cat results.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
-        echo $RES
+        echo "Real year is $2 and predicted year is $RES"
         KL_ERROR[$i]=$(($RES-$2))
         if [ ${KL_ERROR["$i"]} -lt 0 ]; then
                 KL_ERROR[$i]=$(($KL_ERROR[$i] * -1))
