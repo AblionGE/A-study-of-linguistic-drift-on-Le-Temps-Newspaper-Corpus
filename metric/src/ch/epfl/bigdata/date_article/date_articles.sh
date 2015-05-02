@@ -59,8 +59,9 @@ do
                 exit
         fi
 
-        echo "Getting results and parsing it..."
-        # Get Results and create results.csv
+        echo "Getting result and parsing it..."
+
+        # Get Result and create results.csv
         hadoop fs -get $TEMPORARY_DIRECTORY/KL/$i/ && cat $i/* > results.csv
 
         # Remove local directory
@@ -76,6 +77,7 @@ do
 
         # Rename the file to keep it for manual verification of minimum and other things in case of failure
         # mv results.csv results.csv_$i
+        rm results.csv
 done
 
 # Remove temp directory
