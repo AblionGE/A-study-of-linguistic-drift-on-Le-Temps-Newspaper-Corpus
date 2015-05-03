@@ -15,6 +15,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -82,7 +83,7 @@ public class Distance1Articles {
 			String[] filePath = splitInfo.getPath().toString().split("/");
 			String fileDir = filePath[filePath.length - 2];
 
-			// Extract the year of the line depending from which file it comes
+	    // Extract the year of the line depending from which file it comes
 			String year = "";
 			if(fileDir.equals(articlesDir)) {
 				year = fileDir;
@@ -114,10 +115,11 @@ public class Distance1Articles {
 	 * 
 	 */
 	private static class CDistanceReducer extends
-			Reducer<Text, Text, Text, DoubleWritable> {
+			Reducer<Text, Text, Text, NullWritable> {
 
 		private HashMap<Integer, Integer> yearCardinals = null;
 		double distance = 3000;
+		private Text output = new Text();
 
 		/**
 		 * Read the file containing the cardinalities of each year
@@ -179,8 +181,8 @@ public class Distance1Articles {
 						.get(Integer.parseInt(years[1]));
 				distance = 1 - (2 * numCommonWords / (cardinal1 + cardinal2));
 			}
-
-			context.write(key, new DoubleWritable(distance));
+			output.set(years[0]+","+years[1]+","+String.valueOf(distance));
+			context.write(output, NullWritable.get());
 
 		}
 
@@ -217,7 +219,7 @@ public class Distance1Articles {
 		job.setReducerClass(CDistanceReducer.class);
 
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(DoubleWritable.class);
+		job.setOutputValueClass(NullWritable.class);
 		
 		job.getConfiguration().set("inputDirArticles", input1);
 		job.getConfiguration().set("inputDirTotalYears", input2);
@@ -227,7 +229,7 @@ public class Distance1Articles {
 		FileInputFormat.addInputPaths(job, input1+","+input2);
 		FileOutputFormat.setOutputPath(job, new Path(args[2]));
 		MultipleOutputs.addNamedOutput(job, "Metric1", TextOutputFormat.class,
-				Text.class, DoubleWritable.class);
+				Text.class, NullWritable.class);
 
 		boolean done = job.waitForCompletion(true);
 
