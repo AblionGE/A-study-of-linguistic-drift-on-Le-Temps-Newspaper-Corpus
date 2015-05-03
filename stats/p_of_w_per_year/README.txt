@@ -12,4 +12,6 @@ The input directories can be :
 
 A call sample (You have to be in the directory where the code is and you have to compile it with 'sbt package') :
 
-spark-submit --class "ProbabilityOfAWordPerYear" --master yarn-cluster --executor-memory 8g --num-executors 50 target/scala-2.10/probabilityofawordperyear_2.10-1.0.jar 1 hdfs:///projects/linguistic-shift/ngrams/1-grams/ hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordPerYear/1-grams/
+spark-submit --class "ProbabilityOfAWordPerYear" --master yarn-cluster --executor-memory 8g --num-executors 50 target/scala-2.10/probabilityofawordperyear_2.10-1.0.jar hdfs:///projects/linguistic-shift/ngrams/1-grams/ hdfs:///projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordPerYear/1-grams/
+
+The output file is of form : word \tab value

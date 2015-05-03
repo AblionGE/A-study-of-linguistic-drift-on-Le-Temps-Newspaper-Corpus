@@ -28,7 +28,8 @@ object ProbabilityOfAWordInAllCorpus {
     val occurrences_per_words = words.flatMap(e => e.split(", ").map(f => f.split('\t'))).groupBy(e => e(0)).map(e => (e._1, (e._2.toArray.map(f => f(1).toDouble)).sum))
 
     val results = occurrences_per_words.map(e => (e._1, e._2/total_words(0)))
-    results.saveAsTextFile(args(1))
+    val results_formatted = results.map(e => e._1 + "\t" + e._2)
+    results_formatted.saveAsTextFile(args(1))
 
     sc.stop()
   }

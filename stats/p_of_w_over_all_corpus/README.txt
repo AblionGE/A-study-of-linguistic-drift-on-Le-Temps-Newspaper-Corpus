@@ -14,3 +14,5 @@ The input directory can be :
 A call sample (You have to be in the directory where the code is and you have to compile it with 'sbt package') :
 
 spark-submit --class "ProbabilityOfAWordInAllCorpus" --master yarn-cluster --executor-memory 8g --num-executors 50 * target/scala-2.10/probabilityofawordinallcorpus_2.10-1.0.jar hdfs:///projects/linguistic-shift/corrected_ngrams/1-grams/ hdfs:///user/your_username/ 2>err
+
+The output file is of form : word \tab value

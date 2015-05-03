@@ -5,13 +5,12 @@ This code computes the Kullback-Leibler Divergence between all years.
 It takes as arguments :
         - The number of grams considered (1,2 or 3, but only 1 for the moment)
         - If the corpus used is the corpus with the "Corrected" OCR or "WithoutCorrection"
-        - The input format of the file ("Java" or "Spark")
-                - You should set this argument to "Java" if you use the result from TFIDF
+        - If you want to compute with the "Probability" of each word or with its "TFIDF" value
         - The output directory
 
 A call sample (You have to be in the directory where the code is and you have to compile it with 'sbt package') :
 
-spark-submit --class "KullbackLeibler" --master yarn-cluster --executor-memory 8g --num-executors 100 target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 Corrected Spark hdfs:///user/your_username/ 2>err
+spark-submit --class "KullbackLeibler" --master yarn-cluster --executor-memory 8g --num-executors 100 target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 Corrected Probability hdfs:///user/your_username/ 2>err
 
 You have to assume that the articles directory exists and contains files.
 

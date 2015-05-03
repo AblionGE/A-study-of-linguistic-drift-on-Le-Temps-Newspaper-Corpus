@@ -32,8 +32,8 @@ object ProbabilityOfAWordPerYear {
             val total_words = words.flatMap(e => e.split(", ").map(f => f.split('\t')).map(e => (1, e(1).toDouble))).reduceByKey(_+_).map(e => e._2).collect
 
             val results = words.map(e => e.split('\t')).map(e => e(0) -> e(1).toDouble/total_words(0))
-
-            results.saveAsTextFile(args(1) + year)
+            val results_formatted = results.map(e => e._1 + "\t" + e._2)
+            results_formatted.saveAsTextFile(args(1) + year)
 
             compute_one_year(year+1)
         } else {
