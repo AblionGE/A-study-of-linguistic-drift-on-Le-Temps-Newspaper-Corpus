@@ -40,7 +40,7 @@ public class WordArticle {
 		public void map(LongWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
-			String year = ((FileSplit) context.getInputSplit()).getPath().getName().toString();
+			String year = ((FileSplit) context.getInputSplit()).getPath().getName().toString().substring(0, 4);
 			
 			String stringArticle = article.toString();
 			String[] element= stringArticle.split("\t");
@@ -72,15 +72,16 @@ public class WordArticle {
 		public void reduce(Text key, Iterable<Text> values, Context context) 
 				throws IOException, InterruptedException {
 			String listWordOcc = "";
-			Iterator<Text> valuesIt = values.iterator();
-			while (valuesIt.hasNext()) {
-				listWordOcc = listWordOcc + valuesIt.next().toString()+",";
-				
-			}
 			String[] parts = key.toString().split("//", 2);
 			String year = parts[0];
 			String articleID = parts[1];
-			mout.write("Output", new Text(year+"//"+articleID),new Text(listWordOcc) , year);
+			Iterator<Text> valuesIt = values.iterator();
+			while (valuesIt.hasNext()) {
+				listWordOcc = listWordOcc + year+"//"+articleID+"\t"+valuesIt.next().toString()+",";
+				
+			}
+			
+			mout.write("Output", new Text(""),new Text(listWordOcc) , year);
 		}
 		
 		@Override
