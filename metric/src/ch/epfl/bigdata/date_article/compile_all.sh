@@ -23,6 +23,13 @@ if [ -d "distance1" ]; then
     cd ..
 fi
 
+# OutOfPlace
+if [ -d "outofplace" ]; then
+    cd "outofplace"
+    ./compile.sh
+    cd ..
+fi
+
 # Kullback-Leibler
 if [ -d kullback-leibler ]; then
     cd "kullback-leibler"
