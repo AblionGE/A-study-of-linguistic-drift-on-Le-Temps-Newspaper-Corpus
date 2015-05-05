@@ -16,7 +16,7 @@ DISTANCE1_ERROR[$3]=0
 KL_ERROR[$3]=0
 COSINE_ERROR[$3]=0
 CHISQUARE_ERROR[$3]=0
-NB_OF_METRICS=4
+OUTOFPLACE_ERROR[$3]=0
 
 if [ "$#" -ne $EXPECTED_ARGS ] || [ "$1" -le 0 ]|| [ "$2" -lt 1840 ] || [ "$2" -gt 1995 ] || [ "$3" -le 0 ]; then
   echo "Use: ${0} nb_of_articles year(1840-1995) nb_of_loop(>0)"
@@ -38,6 +38,10 @@ fi
 
 if [ -f err_ChiSquare ]; then
         rm err_ChiSquare
+fi
+
+if [ -f err_OUTOFPLACE ]; then
+        rm err_OUTOFPLACE
 fi
 
 if [ -f err_choose_articles ]; then
@@ -103,7 +107,7 @@ do
         echo "Computing Cosine Metric..."
         if [ -d "cosine" ]; then
             if [ -f "cosine/CosineArticles.jar" ]; then
-                # Run Distance1
+                # Run Cosine
                 hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
             else
                 cd "cosine"
@@ -134,7 +138,7 @@ do
         echo "Computing ChiSquare..."
         if [ -d "chi-square" ]; then
             if [ -f "chi-square/ChiSquareArticles.jar" ]; then
-                # Run Distance1
+                # Run ChiSquare
                 hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
             else
                 cd "chi-square"
@@ -158,6 +162,36 @@ do
         CHISQUARE_ERROR[$i]=$(($RES-$2))
         if [ ${CHISQUARE_ERROR["$i"]} -lt 0 ]; then
                 CHISQUARE_ERROR[$i]=$(echo "${CHISQUARE_ERROR[$i]} * -1" | bc -l)
+        fi
+
+######################## OUTOFPLACE ##############################
+        echo "Computing OutOfPlace..."
+        if [ -d "outofplace" ]; then
+            if [ -f "outofplace/OutofplaceArticle.jar" ]; then
+                # Run Distance OutOfPlace
+                hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE       
+            else
+                cd "outofplace"
+                ./compile.sh
+                cd ..
+                hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE       
+            fi
+        else
+            echo "No jar for OutOfPlace"
+            hadoop fs -rm -r $TEMPORARY_DIRECTORY
+            exit
+        fi
+        echo "Getting result of OutOfPlace and parsing it..."
+        # Get Result and create results.csv for OUTOFPLACE
+        hadoop fs -get $TEMPORARY_DIRECTORY/OUTOFPLACE/$i/finalResult && cat finalResult/* > results_OUTOFPLACE.csv
+        rm -r "finalResult"
+
+        # Find the smallest distance and add it into an array for OutOfPlace
+        RES=`(cat results_OUTOFPLACE.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
+        echo "Real year is $2 and predicted year is $RES"
+        OUTOFPLACE_ERROR[$i]=$(($RES-$2))
+        if [ ${OUTOFPLACE_ERROR["$i"]} -lt 0 ]; then
+                OUTOFPLACE_ERROR[$i]=$(echo "${OUTOFPLACE_ERROR[$i]} * -1" | bc -l)
         fi
 
 ######################## KULLBACK-LEIBLER ##############################
@@ -198,21 +232,28 @@ D1_SUM=0
 KL_SUM=0
 COS_SUM=0
 CHI_SUM=0
+OUT_SUM=0
 for j in `seq "$3"`
 do
         KL_SUM=$(($KL_SUM + ${KL_ERROR[$j]}))
         D1_SUM=$(($D1_SUM + ${DISTANCE1_ERROR[$j]}))
         COS_SUM=$(($COS_SUM + ${COSINE_ERROR[$j]}))
         CHI_SUM=$(($CHI_SUM + ${CHISQUARE_ERROR[$j]}))
+        OUT_SUM=$(($OUT_SUM + ${OUTOFPLACE_ERROR[$j]}))
 done
 
 KL_MEAN=$(echo "${KL_SUM}/$3" | bc -l)
 D1_MEAN=$(echo "${D1_SUM}/$3" | bc -l)
 COS_MEAN=$(echo "${COS_SUM}/$3" | bc -l)
 CHI_MEAN=$(echo "${CHI_SUM}/$3" | bc -l)
+OUT_MEAN=$(echo "${OUT_SUM}/$3" | bc -l)
 
+echo "Writing in mean_error.txt..."
 echo "Mean error for different metrics for $1 articles in year $2 with $3 iterations" >> mean_error.txt
-echo "Mean error with Kullback Leibler : " $KL_MEAN >> mean_error.txt
-echo "Mean error with Distance1 : " $D1_MEAN >> mean_error.txt
-echo "Mean error with Cosine : " $COS_MEAN >> mean_error.txt
-echo "Mean error with Chi-Square : " $CHI_MEAN >> mean_error.txt
+echo "Distance1 :" $D1_MEAN >> mean_error.txt
+echo "Cosine :" $COS_MEAN >> mean_error.txt
+echo "Chi-Square :" $CHI_MEAN >> mean_error.txt
+echo "Kullback-Leibler :" $KL_MEAN >> mean_error.txt
+echo "OutOfPlace :" $OUT_MEAN >> mean_error.txt
+
+echo "Done!"
