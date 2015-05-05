@@ -40,13 +40,7 @@ public class Sentence {
 		
 		private String preProcess(String s) {
 			String toRet = s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
-			toRet = toRet.replaceAll("M.", "M");
-			toRet = toRet.replaceAll("Mr.", "Mr");
-			toRet = toRet.replaceAll("Mme.", "Mme");
-			toRet = toRet.replaceAll("Mlle.", "Mlle");
-			toRet = toRet.replaceAll("MM.", "MM");
-			toRet = toRet.replaceAll("Dr.", "Dr");
-			toRet = toRet.replaceAll("[A-Z]{1}\\.", "A");
+			toRet = toRet.replaceAll("[A-Z]{1,3}[a-z]{0,2} \\.|[A-Z]{1,3}[a-z]{0,2}\\.", "a");
 			return toRet;
 		}
 		
@@ -71,6 +65,8 @@ public class Sentence {
  				String sentence = splittedArticle[i];
 				String[] words = sentence.split("\\s+");
 				sentenceSize = words.length;
+				if ((sentenceSize < 2) || (sentenceSize > 100))
+					continue;
 				gram.set(year + "//" + Integer.toString(sentenceSize));
 				context.write(gram, ONE);
 			}
