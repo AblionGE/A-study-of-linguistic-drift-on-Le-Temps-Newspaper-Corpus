@@ -43,3 +43,10 @@ if [ -d select_articles ]; then
     sbt package
     cd ..
 fi
+
+# Punctuation and sentences length
+if [ -d punctuation_sentences ]; then
+	cd "punct-sentences-metric"
+	sbt package
+	cd ..
+fi
