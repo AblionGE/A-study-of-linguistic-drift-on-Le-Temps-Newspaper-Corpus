@@ -7,28 +7,28 @@ import org.apache.spark.mllib.linalg.{ Vector, Vectors }
 import org.apache.spark.mllib.clustering.LDA
 import org.apache.spark.SparkConf
 import scala.collection.immutable.Map
+import org.apache.spark.mllib.clustering.LDAModel
 
 object TermIndexing {
 
   def main(args: Array[String]) {
+    if(args.length!=3) throw new Exception("Arguments should be path of corpus, number of Topics, treshold for stop words")
 
     val sc = new SparkContext(new SparkConf().setAppName("Topic Clustering"))
-    val lines = sc.textFile(args(0)) // /projects/linguistic-shift/nGramArticle/nGramArticle/1998-r-00021
+    val lines = sc.textFile(args(0)) //"hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGramArticle/*"
 
     //get only the words from the nGramArticleFormat
     val words = lines.map(_.split("\t")).map(_.map(x => x.replaceAll("[^a-zA-Z]", "")))
     //get all distinct words with length at least equal to 2 and zip them with unique index that would be column number of term
     val withoutStop = words.flatMap(_.filter(elem => elem.length > 3)).distinct.zipWithIndex.cache()
-    withoutStop.saveAsTextFile("./withoutStop")
-    //    val articleGram = lines.map(_.split(",")).map(elem => elem.map(str => str.split("\t")).map(x => if (x.length == 3) Array(x(1), x(2)) else x)).zipWithIndex
-    //    val tuplesToJoin = articleGram.flatMap(x => x._1.map(y => (y(0), (y(1), x._2)))) //(word:String, (occ:String, articleId:Long))
-    //    val joined = withoutStop.join(tuplesToJoin).map(e => (e._2._2._2, (e._2._1.toInt, e._2._2._1.toDouble)))//(mot:String,(Column:Long, (Occ:String,artID:Long))) 
-    //    val tmp = joined.groupByKey //(Long, Iterable[(Int, Double)]
-    val tuplesToJoin = lines.map(_.split(",")).flatMap(elem => elem.map(str => str.split("\t")).map(x => (x(1), ((x(2), x(0))))))
-    val joined = withoutStop.join(tuplesToJoin).map(e => (e._2._2._2, (e._2._1.toInt, e._2._2._1.toDouble))).groupByKey //(mot, (numColm, (occ, artID)))
-    val doc_term_matrix = joined.map {
+   // withoutStop.saveAsTextFile("./withoutStop")
+    
+    val tuplesToJoin = lines.map(_.split(",")).flatMap(_.map(_.split("\t"))).map(x => if(x.length==3) (x(1), ((x(2), x(0)))) else (x(2),(x(3),x(1)))).filter(elem=>(elem._2._1).toInt<args(2).toInt)
+    val joined = withoutStop.join(tuplesToJoin).map(e => (e._2._2._2, (e._2._1.toInt, e._2._2._1.toDouble))).groupByKey //(artID, <(numColm, occ)>)
+   
+    val docTermMatrix = joined.map {
       case (artId, it) => {
-        val label = artId.replaceAll("//", "")
+        val label = artId.split("//")(1)
         val lists = it.foldRight(List[Int](), List[Double]())((acc, cur) => (acc._1 :: cur._1, acc._2 :: cur._2))
         (label.toLong, Vectors.sparse(it.size, lists._1.toArray, lists._2.toArray))
 
@@ -36,21 +36,33 @@ object TermIndexing {
     }
 
     val numTopics = args(1).toInt
-    val lda = new LDA().setK(numTopics).setMaxIterations(10)
-    val ldaModel = lda.run(doc_term_matrix)
-    //val vocabArray = withoutStop.keyBy(elem=>elem._2.toInt)
-    // Print topics, showing top-weighted 10 terms for each topic.
-    val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = 10)
-    topicIndices.foreach {
-      case (terms, termWeights) =>
-        println("TOPIC:")
-        val tmp = terms.zip(termWeights).foreach {
-          case (term, weight) => {
-            println(s"${term}\t$weight")
-          }
-        }
-        println()
-    }
+      //for(beta<-Range(1,17,4)){
+//    	println("Alpha= "+beta);
+	    val lda = new LDA().setK(numTopics).setMaxIterations(10).setBeta(3+0.1)
+	    val ldaModel = lda.run(docTermMatrix)
+	    val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = 10)
+	    for (topic <- Range(0,topicIndices.length)){
+	      println("TOPIC");
+	      for(term<- Range(0,topicIndices(0)._1.length)){
+	    	  println("("+topicIndices(topic)._1(term)+" , "+topicIndices(topic)._2(term)+")")
+	      }
+	    }
+      //}
+    
+
+//   
+//    topicIndices.foreach {
+//      
+//      case (terms, termWeights) =>
+//        println("TOPIC:")
+//        terms.zip(termWeights).foreach {
+//          case (term, weight) => {
+//        	val res = withoutStop.filter(elem=> elem._2.toInt == term)//.saveAsTextFile(path)
+//            println(s"${term}\t$weight")
+//          }
+//        }
+//        println()
+//    }
 
   }
 }
