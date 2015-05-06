@@ -10,18 +10,21 @@
 #
 # IMPORTANT : It's necessary to have the different executables of the metrics in the repository
 
-EXPECTED_ARGS=3
-TEMPORARY_DIRECTORY="hdfs:///projects/linguistic-shift/temp"
+EXPECTED_ARGS=4
+#TEMPORARY_DIRECTORY="hdfs:///projects/linguistic-shift/temp"
 DISTANCE1_ERROR[$3]=0
 KL_ERROR[$3]=0
 COSINE_ERROR[$3]=0
 CHISQUARE_ERROR[$3]=0
 OUTOFPLACE_ERROR[$3]=0
+PUNCT_ERROR[$3]=0
 
 if [ "$#" -ne $EXPECTED_ARGS ] || [ "$1" -le 0 ]|| [ "$2" -lt 1840 ] || [ "$2" -gt 1995 ] || [ "$3" -le 0 ]; then
-  echo "Use: ${0} nb_of_articles year(1840-1995) nb_of_loop(>0)"
+  echo "Use: ${0} nb_of_articles year(1840-1995) nb_of_loop(>0) temporary_directory"
   exit
 fi
+
+TEMPORARY_DIRECTORY="$4"
 
 # Removed old result and errors files
 if [ -f err_Distance1 ]; then
@@ -29,23 +32,27 @@ if [ -f err_Distance1 ]; then
 fi
 
 if [ -f err_KL ]; then
-        rm err_KL
+    rm err_KL
 fi
 
 if [ -f err_Cosine ]; then
-        rm err_Cosine
+    rm err_Cosine
 fi
 
 if [ -f err_ChiSquare ]; then
-        rm err_ChiSquare
+    rm err_ChiSquare
 fi
 
 if [ -f err_OUTOFPLACE ]; then
-        rm err_OUTOFPLACE
+    rm err_OUTOFPLACE
+fi
+
+if [ -f err_Punct ]; then
+    rm err_Punct
 fi
 
 if [ -f err_choose_articles ]; then
-        rm err_choose_articles
+    rm err_choose_articles
 fi
 
 # Rename previous results file to create a new one
@@ -194,6 +201,30 @@ do
                 OUTOFPLACE_ERROR[$i]=$(echo "${OUTOFPLACE_ERROR[$i]} * -1" | bc -l)
         fi
 
+######################## PUNCT-SENTENCES ##############################
+        echo "Computing Metric with punctuation..."
+        if [ -f "punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar" ]; then
+                # Run Punctuation metric
+                spark-submit --class "PunctSentencesMetric" --master yarn-cluster --num-executors 50 punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar $2 $1 $TEMPORARY_DIRECTORY/PUNCT/$i/ 2>err_Punct
+        else
+                echo "The compilated code of select_articles.scala should be in 'punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar'"
+                echo "In punct-sentences-metric directory, just execute the command 'sbt package'"
+                hadoop fs -rm -r $TEMPORARY_DIRECTORY
+                exit
+        fi
+        echo "Getting result of Punctuation and parsing it..."
+        # Get Result and create results.csv for Punctuation metric
+        hadoop fs -get $TEMPORARY_DIRECTORY/PUNCT/$i/ && cat $i/* > results_PUNCT.csv
+        rm -r $i/
+
+        # Find the smallest distance and add it into an array for Punctuation Metric
+        RES=`(cat results_PUNCT.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
+        echo "Real year is $2 and predicted year is $RES"
+        PUNCT_ERROR[$i]=$(($RES-$2))
+        if [ ${PUNCT_ERROR["$i"]} -lt 0 ]; then
+                PUNCT_ERROR[$i]=$(echo "${PUNCT_ERROR[$i]} * -1" | bc -l)
+        fi
+
 ######################## KULLBACK-LEIBLER ##############################
         echo "Computing Kullback-Leibler Divergence..."
         if [ -f "kullback-leibler/target/scala-2.10/kullback-leibler_2.10-1.0.jar" ]; then
@@ -233,6 +264,7 @@ KL_SUM=0
 COS_SUM=0
 CHI_SUM=0
 OUT_SUM=0
+PUNCT_SUM=0
 for j in `seq "$3"`
 do
         KL_SUM=$(($KL_SUM + ${KL_ERROR[$j]}))
@@ -240,6 +272,7 @@ do
         COS_SUM=$(($COS_SUM + ${COSINE_ERROR[$j]}))
         CHI_SUM=$(($CHI_SUM + ${CHISQUARE_ERROR[$j]}))
         OUT_SUM=$(($OUT_SUM + ${OUTOFPLACE_ERROR[$j]}))
+        PUNCT_SUM=$(($PUNCT_SUM + ${PUNCT_ERROR[$j]}))
 done
 
 KL_MEAN=$(echo "${KL_SUM}/$3" | bc -l)
@@ -247,6 +280,7 @@ D1_MEAN=$(echo "${D1_SUM}/$3" | bc -l)
 COS_MEAN=$(echo "${COS_SUM}/$3" | bc -l)
 CHI_MEAN=$(echo "${CHI_SUM}/$3" | bc -l)
 OUT_MEAN=$(echo "${OUT_SUM}/$3" | bc -l)
+PUNCT_MEAN=$(echo "${PUNCT_SUM}/$3" | bc -l)
 
 echo "Writing in mean_error.txt..."
 echo "Mean error for different metrics for $1 articles in year $2 with $3 iterations" >> mean_error.txt
@@ -255,5 +289,6 @@ echo "Cosine :" $COS_MEAN >> mean_error.txt
 echo "Chi-Square :" $CHI_MEAN >> mean_error.txt
 echo "Kullback-Leibler :" $KL_MEAN >> mean_error.txt
 echo "OutOfPlace :" $OUT_MEAN >> mean_error.txt
+echo "Punctuation :" $PUNCT_MEAN >> mean_error.txt
 
 echo "Done!"
