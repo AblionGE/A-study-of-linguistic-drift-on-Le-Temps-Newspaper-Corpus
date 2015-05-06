@@ -45,7 +45,7 @@ if [ -d select_articles ]; then
 fi
 
 # Punctuation and sentences length
-if [ -d punctuation_sentences ]; then
+if [ -d punct-sentences-metric ]; then
 	cd "punct-sentences-metric"
 	sbt package
 	cd ..
