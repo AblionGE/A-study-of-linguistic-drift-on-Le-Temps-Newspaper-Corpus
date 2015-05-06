@@ -21,7 +21,7 @@ object TermIndexing {
     val words = lines.map(_.split("\t")).map(_.map(x => x.replaceAll("[^a-zA-Z]", "")))
     //get all distinct words with length at least equal to 2 and zip them with unique index that would be column number of term
     val withoutStop = words.flatMap(_.filter(elem => elem.length > 3)).distinct.zipWithIndex.cache()
-   // withoutStop.saveAsTextFile("./withoutStop")
+	//withoutStop.saveAsTextFile("./withoutStop")
     
     val tuplesToJoin = lines.map(_.split(",")).flatMap(_.map(_.split("\t"))).map(x => if(x.length==3) (x(1), ((x(2), x(0)))) else (x(2),(x(3),x(1)))).filter(elem=>(elem._2._1).toInt<args(2).toInt)
     val joined = withoutStop.join(tuplesToJoin).map(e => (e._2._2._2, (e._2._1.toInt, e._2._2._1.toDouble))).groupByKey //(artID, <(numColm, occ)>)
@@ -36,9 +36,9 @@ object TermIndexing {
     }
 
     val numTopics = args(1).toInt
-      //for(beta<-Range(1,17,4)){
-//    	println("Alpha= "+beta);
-	    val lda = new LDA().setK(numTopics).setMaxIterations(10).setBeta(3+0.1)
+	for (sizeTopic <- Range(1,args(1).toInt,5)){
+	println("--ROUND--"+sizeTopic)
+	    val lda = new LDA().setK(numTopics).setMaxIterations(50)
 	    val ldaModel = lda.run(docTermMatrix)
 	    val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = 10)
 	    for (topic <- Range(0,topicIndices.length)){
@@ -47,22 +47,6 @@ object TermIndexing {
 	    	  println("("+topicIndices(topic)._1(term)+" , "+topicIndices(topic)._2(term)+")")
 	      }
 	    }
-      //}
-    
-
-//   
-//    topicIndices.foreach {
-//      
-//      case (terms, termWeights) =>
-//        println("TOPIC:")
-//        terms.zip(termWeights).foreach {
-//          case (term, weight) => {
-//        	val res = withoutStop.filter(elem=> elem._2.toInt == term)//.saveAsTextFile(path)
-//            println(s"${term}\t$weight")
-//          }
-//        }
-//        println()
-//    }
-
-  }
+       }
+	   }
 }
