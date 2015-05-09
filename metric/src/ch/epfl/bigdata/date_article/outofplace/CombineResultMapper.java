@@ -8,7 +8,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-/*
+/**
  * Map function
  * key:
  * 			firstKey: year pairs (e.g., year-article; article-year) 
@@ -19,6 +19,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 public class CombineResultMapper extends Mapper<LongWritable, Text, CombinationKey, Text> {
 	CombinationKey combinationKey = new CombinationKey();
 
+	/**
+	 * Map the word and its 'out of place' to corresponding year pars. 
+	 */
+	
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		String [] lineSplit = value.toString().split("\\s+");
 				
@@ -34,7 +38,11 @@ public class CombineResultMapper extends Mapper<LongWritable, Text, CombinationK
 		
 	}
 	
-	 // Get the name of input file in the correct format. 
+	 /**
+	  * Get the name of input file in the correct format. 
+	  * @param context
+	  * @return file Name
+	  */
 	private String getFileName(Context context){
 		// Get input file information
 		FileSplit splitInfo = (FileSplit) context.getInputSplit();
