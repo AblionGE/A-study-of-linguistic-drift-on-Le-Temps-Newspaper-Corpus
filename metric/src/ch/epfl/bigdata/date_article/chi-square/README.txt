@@ -13,7 +13,6 @@ hadoop jar ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles /projects/lin
 
 
 IMPORTANT : These files must exist in order to run the application :
-        - /projects/linguistic-shift/stats/1-grams-TotOccurenceYear/YearOccurences
         - /projects/linguistic-shift/stats/WordOccurenceOverAllYears
 
 The different directories for the articles are in /projects/linguistic-shift/articles_samples/.
