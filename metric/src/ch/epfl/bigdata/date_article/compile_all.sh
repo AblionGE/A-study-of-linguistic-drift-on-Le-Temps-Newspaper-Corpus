@@ -16,6 +16,13 @@ if [ -d "cosine" ]; then
     cd ..
 fi
 
+# Cosine with TFIDF
+if [ -d "cosine_tfidf" ]; then
+    cd "cosine_tfidf"
+    ./compile.sh
+    cd ..
+fi
+
 # distance1
 if [ -d "distance1" ]; then
     cd "distance1"
@@ -26,6 +33,13 @@ fi
 # OutOfPlace
 if [ -d "outofplace" ]; then
     cd "outofplace"
+    ./compile.sh
+    cd ..
+fi
+
+# TFIDF
+if [ -d TFIDF ]; then
+    cd "TFIDF"
     ./compile.sh
     cd ..
 fi
