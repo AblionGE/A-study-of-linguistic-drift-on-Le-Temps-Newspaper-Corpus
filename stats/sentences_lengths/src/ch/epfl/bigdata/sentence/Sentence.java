@@ -1,4 +1,4 @@
-package ch.epfl.bigdata.ngram;
+package ch.epfl.bigdata.sentence;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -27,7 +27,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
  * @author gbrechbu
  *
  */
-public class Ngram {
+public class Sentence {
 	
 	private static final int NUM_REDUCERS = 25;
 	
@@ -38,74 +38,37 @@ public class Ngram {
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
-		/**
-		 * Replaces everything that is not a letter (with accent or not) by a space.
-		 */
 		private String preProcess(String s) {
-			return s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç]", " ").toLowerCase();
+			String toRet = s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
+			toRet = toRet.replaceAll("[A-Z]{1,3}[a-z]{0,2} \\.|[A-Z]{1,3}[a-z]{0,2}\\.", "a");
+			return toRet;
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
 		
 		private Text gram = new Text();
-		private int ngramSize;
-		private String ngramSeparator = ",";
-		
-		private String concat(Collection<String> stringCollection) {
-			StringBuilder concatenator = new StringBuilder();
-			for (Iterator<String> iterator = stringCollection.iterator(); iterator
-					.hasNext();) {
-				String string = (String) iterator.next();
-				concatenator.append(string);
-				if (iterator.hasNext()) {
-					concatenator.append(ngramSeparator);
-				}
-			}
-			return concatenator.toString();
-		}
+		private int sentenceSize;
 		
 		@Override
 		public void map(IntWritable key, Text article, Context context) throws IOException, 
 			InterruptedException {
 			Configuration conf = context.getConfiguration();
-			// The ngramSize to compute defaults to 2 if no parameter is given to the job.
-			ngramSize = conf.getInt("ngramSize", 2);
 			String separator = conf.get("separator", "\\s+");
-			ngramSeparator = conf.get("ngramSeparator", ",");
 			
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
- 			String[] splittedArticle = tempArticle.split(separator);
+ 			String[] splittedArticle = tempArticle.split("[.?!]");
  			
- 			List<String> list = new ArrayList<String>(Arrays.asList(splittedArticle));
- 			list.removeAll(Arrays.asList(""));
- 			splittedArticle = list.toArray(new String[0]);
- 			
- 			/*
- 			 * The Dequeue is first filled with n-1 1-grams. Then at each step, a new 1-gram is added at the tail of
- 			 * the queue. The ngram is computed (all elements in queue) and the first element (head) of the queue
- 			 * is removed, this is a simple optimization for the ngrams computation.
- 			 */
-			Deque<String> currentNgram = new ArrayDeque<>();
-			int counter = 0;
-			
-			
-			//article is too small
-			if (splittedArticle.length < ngramSize) {
-			    return;
-			}
-			
-			for (; counter < ngramSize - 1; counter++) {
-				 currentNgram.addLast(splittedArticle[counter]);
-			}
-
-			String year = String.valueOf(key.get());
-
-			for (; counter < splittedArticle.length; counter++) {
-			    currentNgram.addLast(splittedArticle[counter]);
-				gram.set(year + "//" + concat(currentNgram));
+ 			String year = String.valueOf(key.get()); 
+ 
+ 			for (int i = 0; i < splittedArticle.length; i++) {
+ 				String sentence = splittedArticle[i];
+				String[] words = sentence.split("\\s+");
+				sentenceSize = words.length;
+				if ((sentenceSize < 2) || (sentenceSize > 100))
+					continue;
+				gram.set(year + "//" + Integer.toString(sentenceSize));
 				context.write(gram, ONE);
-				currentNgram.removeFirst();
 			}
 		}
 	}
@@ -156,8 +119,8 @@ public class Ngram {
 			}
 			String[] parts = key.toString().split("//", 2);
 			String year = parts[0];
-			String ngram = parts[1];
-			mout.write("Output", ngram, new IntWritable(sum), year);
+			String sentenceLength = parts[1];
+			mout.write("Output", sentenceLength, new IntWritable(sum), year);
 		}
 		
 		@Override
@@ -181,8 +144,8 @@ public class Ngram {
 			InterruptedException {
 		Configuration conf = new Configuration();
 		String[] userArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		Job job = Job.getInstance(conf, "Ngram");
-		job.setJarByClass(Ngram.class);
+		Job job = Job.getInstance(conf, "Sentence Length");
+		job.setJarByClass(Sentence.class);
 		job.setNumReduceTasks(NUM_REDUCERS);
 		
 		job.setMapOutputKeyClass(Text.class);
