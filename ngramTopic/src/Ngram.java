@@ -1,4 +1,4 @@
-
+package ch.epfl.bigdata;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -70,7 +70,8 @@ public class Ngram {
 			String separator = conf.get("separator", "\\s+");
 			ngramSeparator = conf.get("ngramSeparator", ",");
 			Random rand = new Random();
-			
+			//Generate the article ID randomly. The article ID stand between 0 et 2^63-1
+			//@author jweber
 			long articleID = (long)(rand.nextDouble()*(Long.MAX_VALUE));
 			String stringArticle = article.toString();
 			String tempArticle = preProcess(stringArticle).trim();
@@ -97,6 +98,7 @@ public class Ngram {
 
 			for (; counter < splittedArticle.length; counter++) {
 			    currentNgram.addLast(splittedArticle[counter]);
+				//Combine the year and article id such that we don't lose the relationship
 				gram.set(year +"//"+ articleID+"//" + concat(currentNgram));
 				context.write(gram, ONE);
 				currentNgram.removeFirst();

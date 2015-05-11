@@ -1,4 +1,4 @@
-
+package ch.epfl.bigdata.ngram;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
  * Main class which contains the mapper class, the reducer class and the main function.
- * We seperate by the year by article
+ * We seperate by the year and by article
  * @author jweber
  *
  */
@@ -77,6 +77,7 @@ public class WordArticle {
 			String articleID = parts[1];
 			Iterator<Text> valuesIt = values.iterator();
 			while (valuesIt.hasNext()) {
+				//We link every word with the articleID it will be simpler afterwards.
 				listWordOcc = listWordOcc + year+"//"+articleID+"\t"+valuesIt.next().toString()+",";
 				
 			}

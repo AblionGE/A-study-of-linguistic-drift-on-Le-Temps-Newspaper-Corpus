@@ -1,4 +1,4 @@
-
+package ch.epfl.bigdata.ngram;
 
 import java.io.IOException;
 
