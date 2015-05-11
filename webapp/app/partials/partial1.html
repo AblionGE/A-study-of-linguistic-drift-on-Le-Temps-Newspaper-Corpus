@@ -1,0 +1,42 @@
+<md-content class="md-padding">
+    <form name="userForm" style="width:{{width}}px;margin:auto;">
+        <md-autocomplete
+                ng-disabled="isDisabled"
+                md-no-cache="noCache"
+                md-selected-item="entrySelected"
+                md-search-text-change="searchTextChange(searchText)"
+                md-search-text="searchText"
+                md-selected-item-change="selectedItemChange(entry)"
+                md-items="entry in entries"
+                md-item-text="entry.display"
+                placeholder="Enter a word">
+            <span md-highlight-text="searchText" md-highlight-flags="^i"  class="md-display-1">{{entry.display}}</span>
+        </md-autocomplete>
+        </br>
+        <md-checkbox ng-if="graphDisplayed" class="standard" ng-checked="{{normalize}}" ng-click="changeNormalize()"/>
+            Normalize frequencies
+        </md-checkbox>
+        <div id="graph" style="margin-top:10px; margin-left: -50px;"></div>
+        </br>
+        <fieldset layout="row" ng-if="categories.length > 0">
+                        <legend>Catégories possibles</legend>
+                        <md-radio-group ng-model="categorySelected" ng-change="onCategoryChosen(categorySelected)">
+            <md-radio-button ng-repeat="category in categories" ng-class="{'md-primary':$index==0}"
+                             value="{{category.id}}">{{category.name}} ({{category.synonyms}})</md-radio-button>
+            </md-radio-group>
+        </fieldset>
+        <fieldset layout="row" layout-align="start start" ng-if="synonyms.length > 0">
+            <legend>Choose words to compare</legend>
+            <div layout="column" style="width:{{width}}px">
+                <div ng-repeat="synonym in synonyms">
+                    <md-checkbox class="standard" ng-checked="{{synonym.checked}}"
+                         ng-click="checkboxClicked(synonym)"/>{{synonym.word}}
+                    </md-checkbox>
+                </div>
+            </div>
+        </fieldset>
+        <div ng-if="synonyms.length === 0">
+            </br></br></br></br></br></br></br></br></br></br></br></br>
+        </div>
+    </form>
+</md-content>
