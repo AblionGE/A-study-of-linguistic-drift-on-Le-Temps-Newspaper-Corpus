@@ -8,12 +8,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 /**
- * The Mapper takes 1-grams and return each word with the value one to indicate
- * that the word appears in the year.
+ * The Mapper takesn1-grams and return each n-grams with the value one to indicate
+ * that the n-gram appears one time in the year.
  * 
  * @author Marc Schaer
- *
- *         TODO : Adapt the code for n-grams if needed
  */
 public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 
@@ -39,7 +37,6 @@ public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 		StringTokenizer itr = new StringTokenizer(value.toString());
 		while (itr.hasMoreTokens()) {
 			String w = itr.nextToken();
-			// Works only with 1-gram
 			if (!w.matches("[0-9]+")) {
 				word.set(w);
 				context.write(word, ONE);

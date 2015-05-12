@@ -12,8 +12,6 @@ import org.apache.hadoop.mapreduce.Mapper;
  * that the word appears in the year.
  * 
  * @author Marc Schaer
- *
- *         TODO : Adapt the code for n-grams if needed
  */
 public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 
