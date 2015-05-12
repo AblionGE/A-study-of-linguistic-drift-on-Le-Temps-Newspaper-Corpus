@@ -6,7 +6,7 @@ It takes as arguments :
         - A directory for all the corpus
         - An output directory
 
-The input directories can be :
+The input directories can be found in :
         - /projects/linguistic-shift/ngrams/
         - /projects/linguistic-shift/corrected_ngrams/
 
