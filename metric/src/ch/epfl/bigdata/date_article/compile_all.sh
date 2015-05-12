@@ -38,8 +38,8 @@ if [ -d "outofplace" ]; then
 fi
 
 # TFIDF
-if [ -d TFIDF ]; then
-    cd "TFIDF"
+if [ -d TFIDF_article ]; then
+    cd "TFIDF_article"
     ./compile.sh
     cd ..
 fi

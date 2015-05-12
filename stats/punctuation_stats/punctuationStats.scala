@@ -25,7 +25,7 @@ object PunctuationStats {
 
     val temp1 = linesByYearTemp.map(e => (e._1.substring(e._1.size - 4), e._2.replaceAll("<full_text>|</full_text>", "")))
     val temp2 = temp1.map(e => (e._1, e._2.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!,:;]", " ")))
-    val linesByYear = temp2.map(e => (e._1, e._2.replaceAll("[A-Z]{1,3}[a-z]{0,2} \\.|[A-Z]{1,3}[a-z]{0,2}\\.", "a")))
+    val linesByYear = temp2.map(e => (e._1, e._2.replaceAll("[A-Z]{1,2}[a-z]{0,3}[ ]?[.]", "a")))
 
     val sumPunctuation = linesByYear.map(e => mapSum(e))
 

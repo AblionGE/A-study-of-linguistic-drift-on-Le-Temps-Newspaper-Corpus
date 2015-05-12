@@ -50,8 +50,8 @@ public class TfMapperVal extends Mapper<LongWritable, Text, Text, Text> {
 		// For every line we take the word and its occurence
 		while (token.hasMoreTokens()) {
 			// We burn the word
-			int numberOcc = new Integer(token.nextToken());
 			String word = token.nextToken();
+			int numberOcc = new Integer(token.nextToken());
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(word);
 			double freqTotOcc = yearFreqMap.get(fileName);

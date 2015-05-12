@@ -9,7 +9,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
- * The reducer for IFD. Compute the number of year in which each word appears
+ * The reducer for IDF. Compute the number of year in which each word appears
  * 
  * @author Marc Schaer
  *

@@ -8,12 +8,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 /**
- * The Mapper takes 1-grams and return each word with the value one to indicate
- * that the word appears in the year.
+ * The Mapper takes n-grams and return each n-gram with the value one to indicate
+ * that the n-gram appears in the year.
  * 
  * @author Marc Schaer
- *
- *         TODO : Adapt the code for n-grams if needed
  */
 public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
 

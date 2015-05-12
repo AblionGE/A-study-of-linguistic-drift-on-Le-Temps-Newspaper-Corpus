@@ -1,6 +1,6 @@
 Big Data 2015 - A Study of linguistic drift - Probability to have a Word w in all the corpus - Marc Schaer
 
-This code computes the probability of a Word over all the corpus.
+This code computes the probability of a word over all the corpus.
 It simply sums all the words that are the same from each year and then it divides, for each word, the sum obtained by the total of words in the corpus.
 
 It takes as arguments :

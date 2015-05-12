@@ -3,7 +3,7 @@ Big Data 2015 - A Study of linguistic drift - Kullback-Leibler Divergence - Marc
 This code computes the Kullback-Leibler Divergence between all years.
 
 It takes as arguments :
-        - The number of grams considered (1,2 or 3, but only 1 for the moment)
+        - The number of grams considered (1,2 or 3)
         - If the corpus used is the corpus with the "Corrected" OCR or "WithoutCorrection"
         - If you want to compute with the "Probability" of each word or with its "TFIDF" value
         - The output directory

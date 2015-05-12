@@ -23,7 +23,7 @@ import org.xml.sax.SAXException;
 
 /**
  * The {@link RecordReader} going with {@link XmlFileInputFormat}. Splits at the <full_text> tag.
- * @author gbrechbu
+ * @author Gil Brechbühler
  *
  */
 public class XmlRecordReader extends RecordReader<IntWritable, Text> {
@@ -92,6 +92,7 @@ public class XmlRecordReader extends RecordReader<IntWritable, Text> {
 	public boolean nextKeyValue() throws IOException, InterruptedException {		
 		key = new IntWritable();
 		value = new Text();
+		// Keep the year in the filename.
 		String tempKey = filename.replaceAll("[^0-9]", "");
 		key.set(Integer.parseInt(tempKey));
 		

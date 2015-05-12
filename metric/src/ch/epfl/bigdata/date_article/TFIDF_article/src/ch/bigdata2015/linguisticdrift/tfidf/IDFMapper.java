@@ -1,0 +1,46 @@
+package ch.bigdata2015.linguisticdrift.tfidf;
+
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+/**
+ * The Mapper takesn1-grams and return each n-grams with the value one to indicate
+ * that the n-gram appears one time in the year.
+ * 
+ * @author Marc Schaer
+ */
+public class IDFMapper extends Mapper<Object, Text, Text, IntWritable> {
+
+	private static final IntWritable ONE = new IntWritable(1);
+	private Text word = new Text();
+
+	/**
+	 * Map Function. Goes through each line, consider only the word (drop the
+	 * number of occurrences) and do like a simple Word Count (assign value one
+	 * to the word to indicate that the word appears in this year
+	 * 
+	 * @param key
+	 *            : The key
+	 * @param value
+	 *            : the word and the number of occurrences
+	 * @param context
+	 *            : The context of the app
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void map(Object key, Text value, Context context)
+			throws IOException, InterruptedException {
+		StringTokenizer itr = new StringTokenizer(value.toString());
+		while (itr.hasMoreTokens()) {
+			String w = itr.nextToken();
+			if (!w.matches("[0-9]+")) {
+				word.set(w);
+				context.write(word, ONE);
+			}
+		}
+	}
+}

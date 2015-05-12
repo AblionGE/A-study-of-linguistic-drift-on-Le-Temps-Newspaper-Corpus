@@ -24,7 +24,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
  * Main class which contains the mapper class, the reducer class and the main function.
- * @author gbrechbu
+ * @author Gil Brechbühler and Malik Bougacha
  *
  */
 public class Sentence {
@@ -32,21 +32,22 @@ public class Sentence {
 	private static final int NUM_REDUCERS = 25;
 	
 	/**
-	 * A simple mapper. Takes a full article and returns a <key/value> pair with key = "{year}word" and value = 1
-	 * @author gbrechbu
+	 * Takes an article, removes characters we do not need, counts the words in each sentence and outputs
+	 * (year//sentenceLength, 1)
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
 		
 		private String preProcess(String s) {
 			String toRet = s.replaceAll("[^a-zA-ZÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèêéëîïôœùûüÿÇç.?!]", " ").toLowerCase();
-			toRet = toRet.replaceAll("[A-Z]{1,3}[a-z]{0,2} \\.|[A-Z]{1,3}[a-z]{0,2}\\.", "a");
+			toRet = toRet.replaceAll("[A-Z]{1,2}[a-z]{0,3}[ ]?[.]", "a");
 			return toRet;
 		}
 		
 		private static final IntWritable ONE = new IntWritable(1);
 		
-		private Text gram = new Text();
+		private Text length = new Text();
 		private int sentenceSize;
 		
 		@Override
@@ -65,17 +66,15 @@ public class Sentence {
  				String sentence = splittedArticle[i];
 				String[] words = sentence.split("\\s+");
 				sentenceSize = words.length;
-				if ((sentenceSize < 2) || (sentenceSize > 100))
-					continue;
-				gram.set(year + "//" + Integer.toString(sentenceSize));
-				context.write(gram, ONE);
+				length.set(year + "//" + Integer.toString(sentenceSize));
+				context.write(length, ONE);
 			}
 		}
 	}
 	
 	/**.
-	 * Combiner for the ngrams. Simply sums the values.
-	 * @author gbrechbu
+	 * Combiner for the sentences lengths. Simply sums the values.
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {		
@@ -94,8 +93,8 @@ public class Sentence {
 	}
 	
 	/**.
-	 * Reducer for the ngrams.
-	 * @author gbrechbu
+	 * Reducer for the sentences lengths.
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
