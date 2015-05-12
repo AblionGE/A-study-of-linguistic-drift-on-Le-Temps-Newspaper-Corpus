@@ -7,7 +7,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
-/*
+/**
  * Reduce function: Combine small article to be a big article; remove word's frequency of article from the year it belongs to	
  * key:		word
  * value:	modified frequency	 
@@ -17,15 +17,22 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 public class GetDataReducer extends Reducer<Text, Text, Text, Text> {
 	private MultipleOutputs<Text, Text> mos;
 	
+	/**
+	 * Setup function for multiple path output
+	 */
 	protected void setup(Context context) throws IOException, InterruptedException {	
 	    super.setup(context);	    
 	    mos = new MultipleOutputs(context);
 	}
 	
+	/**
+	 * Reduce function
+	 */
 	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {		
 		int [] articleInfoList= {0, 0};
 		HashMap<String, String> yearInfoList = new HashMap<String, String>();
 		
+		// obtain article Information and year information
 		for (Text val : values) {
 			String [] split = val.toString().split(";");
 			
@@ -43,6 +50,7 @@ public class GetDataReducer extends Reducer<Text, Text, Text, Text> {
 			}			
 		}
 		
+		// Remove word's frequency of article from the year it belongs to	
 		for(String ye : yearInfoList.keySet()){
 			int left = Integer.parseInt(yearInfoList.get(ye));
 			if(Integer.parseInt(ye) == articleInfoList[0]){				
@@ -56,6 +64,9 @@ public class GetDataReducer extends Reducer<Text, Text, Text, Text> {
 
 	}
 	
+	/**
+	 * Cleanup function for multiple path output
+	 */
 	protected void cleanup(Context context) throws IOException, InterruptedException{
 		super.cleanup(context);		
 		mos.close();

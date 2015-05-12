@@ -8,7 +8,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-/*
+/**
  * Map function:
  * key:
  * 			firstKey: word
@@ -20,6 +20,9 @@ public class CalMapper extends Mapper<LongWritable, Text, CombinationKey, Text> 
 
 	CombinationKey combinationKey = new CombinationKey();
 	
+	/**
+	 * Map
+	 */
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		
 		String [] lineSplit = value.toString().split("\\s+");
@@ -30,7 +33,11 @@ public class CalMapper extends Mapper<LongWritable, Text, CombinationKey, Text> 
 	}
 	
 	
-	 // Get the name of input file in the correct format. 
+	 /**
+	  * Get the name of input file in the correct format. 
+	  * @param context
+	  * @return file Name
+	  */
 	private String getFileName(Context context){
 		// Get input file information
 		FileSplit splitInfo = (FileSplit) context.getInputSplit();

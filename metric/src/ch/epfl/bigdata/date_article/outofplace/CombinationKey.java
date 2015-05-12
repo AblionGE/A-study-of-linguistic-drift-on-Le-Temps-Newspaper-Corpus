@@ -9,8 +9,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.IntWritable;
 
-/*
+/**
  * Define Combination Key
+ * @author Tao Lin
  */
 
 public class CombinationKey implements WritableComparable<CombinationKey> {
@@ -48,7 +49,7 @@ public class CombinationKey implements WritableComparable<CombinationKey> {
         this.secondKey.write(outPut);
     }
     
-    /*
+    /**
      * Define comparison strategy
      * Note: This comparison is applied to the first default sort of mapreduce, i.e., sort phase of map
      * @see java.lang.Comparable#compareTo(java.lang.Object)

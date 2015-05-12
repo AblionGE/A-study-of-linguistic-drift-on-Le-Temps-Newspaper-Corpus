@@ -107,8 +107,8 @@ public class Cosine {
 	public void reduce(Text key, Iterable<Text> values, Context context)
 		throws IOException, InterruptedException {
 
-	    HashMap<String, Integer> freqYear1 = new HashMap<String, Integer>();
-	    HashMap<String, Integer> freqYear2 = new HashMap<String, Integer>();
+	    HashMap<String, Double> freqYear1 = new HashMap<String, Double>();
+	    HashMap<String, Double> freqYear2 = new HashMap<String, Double>();
 	    HashSet<String> words = new HashSet<String>();
 
 	    // Store the frequencies for each words in both years in tables
@@ -119,13 +119,13 @@ public class Cosine {
 	    String year1 = years[0];
 	    String year2 = years[1];
 
-	    int frequency = 0;
+	    double frequency = 0.0;
 	    double norm1 = 0.0;
 	    double norm2 = 0.0;
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
 		words.add(val[1]);
-		frequency = Integer.parseInt(val[2]);
+		frequency = Double.parseDouble(val[2]);
 		if (val[0].equals(year1)) {
 		    freqYear1.put(val[1], frequency);
 		    norm1 += Math.pow(frequency, 2);
@@ -148,10 +148,10 @@ public class Cosine {
 
 		    // Cosine similarity:
 		    if (freqYear1.containsKey(word)) {
-			freq1 = (double) freqYear1.get(word);
+			freq1 = freqYear1.get(word);
 		    }
 		    if (freqYear2.containsKey(word)) {
-			freq2 = (double) freqYear2.get(word);
+			freq2 = freqYear2.get(word);
 		    }
 		    similarity += freq1 * freq2;
 		}

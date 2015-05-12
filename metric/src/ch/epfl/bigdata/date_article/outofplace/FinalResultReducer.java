@@ -7,7 +7,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-/*
+/**
  * Reduce function: output final result
  * key:	article
  * value: its "outofplace" distance with regard to other years (from 1840 - 1998)

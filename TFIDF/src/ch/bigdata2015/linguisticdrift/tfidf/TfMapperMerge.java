@@ -13,9 +13,7 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
 public class TfMapperMerge extends Mapper<LongWritable, Text, Text, Text> {
 
-	/**
-	 * 
-	 */
+
 	public void map(LongWritable inputKey, Text inputValue, Context context)
 			throws IOException, InterruptedException {
 		context.write(new Text("sameKey"), inputValue);

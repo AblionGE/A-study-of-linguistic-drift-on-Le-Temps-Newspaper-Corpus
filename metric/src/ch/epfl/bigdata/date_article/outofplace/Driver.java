@@ -13,20 +13,21 @@ import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 
-/*
- * Driver function of Map Reduce. It contains several jobs: 
- *	Job1: GetData -> Split Data and remove the articles from the year it belongs to
- * 	Job2: PrepareData -> Get the reverse rank of word in each file;
- * 	Job3: CalSim -> Calculate the distance between article and each year
- * 	Job4: CombineResult -> Combine the computation result obtained by Job3, i.e., for each article, get its distance with each year.
- * 	Job5: FinalResult -> Normalize the result
+/**
+ * Driver function of 'out of place' for dating article. It contains several jobs: 
+ *		Job1: GetData -> Split Data and remove the articles from the year it belongs to
+ * 		Job2: PrepareData -> Get the reverse rank of word in each file;
+ * 		Job3: CalSim -> Calculate the distance between article and each year
+ * 		Job4: CombineResult -> Combine the computation result obtained by Job3, i.e., for each article, get its distance with each year.
+ * 		Job5: FinalResult -> Normalize the result
+ * 
  * @author: Tao Lin
  */
 
 public class Driver {
 
 	public static void main(String[] args) throws Exception {
-		/* ----------- Initialization -------------- */
+		// ----------- Initialization -------------- //
 		// Configuration
 		Configuration conf = new Configuration();
 		
@@ -216,7 +217,6 @@ public class Driver {
         FileOutputFormat.setOutputPath(job_finalResult, new Path(otherArgs[2] + "/finalResult/"));
         
         // ---------- Set the number of reducer ---------//
-        
         job_getData.setNumReduceTasks(21);
         job_prepare.setNumReduceTasks(21);
         job_CalSim.setNumReduceTasks(21);

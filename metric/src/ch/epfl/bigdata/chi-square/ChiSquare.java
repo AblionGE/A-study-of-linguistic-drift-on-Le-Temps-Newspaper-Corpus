@@ -33,7 +33,7 @@ import java.util.List;
  * 
  */
 public class ChiSquare {
-    private static final int NUM_REDUCERS = 50;
+    private static final int NUM_REDUCERS = 25;
 
     /**
      * Mapper to compute chi-square distance: takes a directory with all 1-gram
@@ -43,8 +43,7 @@ public class ChiSquare {
      * @author Cynthia
      * 
      */
-    private static class CSMapper extends
-	    Mapper<LongWritable, Text, Text, Text> {
+    private static class CSMapper extends Mapper<LongWritable, Text, Text, Text> {
 
 	private final int firstYear = 1840;
 	private final int lastYear = 1998;
@@ -58,8 +57,7 @@ public class ChiSquare {
 	 * output key y1:y2, y1 <= y2.
 	 */
 	@Override
-	public void map(LongWritable key, Text line, Context context)
-		throws IOException, InterruptedException {
+	public void map(LongWritable key, Text line, Context context) throws IOException, InterruptedException {
 
 	    // Get file name informations
 	    FileSplit splitInfo = (FileSplit) context.getInputSplit();
@@ -93,10 +91,8 @@ public class ChiSquare {
      * @author Cynthia
      * 
      */
-    private static class CSReducer extends
-	    Reducer<Text, Text, Text, DoubleWritable> {
+    private static class CSReducer extends Reducer<Text, Text, Text, DoubleWritable> {
 
-	private HashMap<Integer, Integer> yearOccurences = null;
 	private HashMap<String, Integer> wordOccurences = null;
 	private DoubleWritable distance = new DoubleWritable();
 
@@ -108,37 +104,11 @@ public class ChiSquare {
 	 */
 	@Override
 	public void setup(Context context) throws IOException {
-	    Path pt = new Path(
-		    "/projects/linguistic-shift/stats/1-grams-TotOccurenceYear/YearOccurences");
+	    Path pt = new Path("/projects/linguistic-shift/stats/WordOccurenceOverAllYears");
 	    FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
 	    if (hdfs.isFile(pt)) {
 		FSDataInputStream fis = hdfs.open(pt);
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-			fis));
-		String line = br.readLine();
-		yearOccurences = new HashMap<Integer, Integer>();
-		int year;
-		int wordCount;
-
-		while (line != null) {
-		    String[] elements = line.toString().split("\\s+");
-		    year = Integer.parseInt(elements[0]);
-		    wordCount = Integer.parseInt(elements[1]);
-		    yearOccurences.put(year, wordCount);
-
-		    line = br.readLine();
-		}
-		br.close();
-		fis.close();
-	    }
-
-	    pt = new Path(
-		    "/projects/linguistic-shift/stats/WordOccurenceOverAllYears");
-	    hdfs = pt.getFileSystem(context.getConfiguration());
-	    if (hdfs.isFile(pt)) {
-		FSDataInputStream fis = hdfs.open(pt);
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-			fis));
+		BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 		String line = br.readLine();
 		wordOccurences = new HashMap<String, Integer>();
 		String word;
@@ -162,11 +132,10 @@ public class ChiSquare {
 	 * Outputs the chi-square distance
 	 */
 	@Override
-	public void reduce(Text key, Iterable<Text> values, Context context)
-		throws IOException, InterruptedException {
+	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-	    HashMap<String, Integer> freqYear1 = new HashMap<String, Integer>();
-	    HashMap<String, Integer> freqYear2 = new HashMap<String, Integer>();
+	    HashMap<String, Double> freqYear1 = new HashMap<String, Double>();
+	    HashMap<String, Double> freqYear2 = new HashMap<String, Double>();
 	    HashSet<String> words = new HashSet<String>();
 
 	    // Store the frequencies for each words in both years in tables
@@ -175,25 +144,26 @@ public class ChiSquare {
 	    String[] years = key.toString().split(":");
 	    String year1 = years[0];
 	    String year2 = years[1];
+	    double wordCount1 = 0.0;
+	    double wordCount2 = 0.0;
+	    double frequency = 0.0;
 
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
 		words.add(val[1]);
+		frequency = Double.parseDouble(val[2]);
 		if (val[0].equals(year1)) {
-		    freqYear1.put(val[1], Integer.parseInt(val[2]));
+		    freqYear1.put(val[1], frequency);
+		    wordCount1 += frequency;
 		}
 		if (val[0].equals(year2)) {
-		    freqYear2.put(val[1], Integer.parseInt(val[2]));
+		    freqYear2.put(val[1], frequency);
+		    wordCount2 += frequency;
 		}
 	    }
 
 	    // Computes the distance only if both years contain words
 	    if (!freqYear1.isEmpty() && !freqYear2.isEmpty()) {
-		double wordCount1 = (double) yearOccurences.get(Integer
-			.parseInt(year1));
-		double wordCount2 = (double) yearOccurences.get(Integer
-			.parseInt(year2));
-
 		Iterator<String> wordsIt = words.iterator();
 		double dist = 0.0;
 		double freq1, freq2;
@@ -205,14 +175,12 @@ public class ChiSquare {
 
 		    // Chi-Square distance
 		    if (freqYear1.containsKey(word)) {
-			freq1 = (double) freqYear1.get(word);
+			freq1 = freqYear1.get(word);
 		    }
 		    if (freqYear2.containsKey(word)) {
-			freq2 = (double) freqYear2.get(word);
+			freq2 = freqYear2.get(word);
 		    }
-		    dist += Math
-			    .pow(freq1 / wordCount1 - freq2 / wordCount2, 2)
-			    / wordOccurence;
+		    dist += Math.pow(freq1 / wordCount1 - freq2 / wordCount2, 2) / wordOccurence;
 		}
 		distance.set(dist);
 		context.write(key, distance);
@@ -229,8 +197,7 @@ public class ChiSquare {
      * @throws ClassNotFoundException
      * @throws InterruptedException
      */
-    public static void main(String[] args) throws IOException,
-	    ClassNotFoundException, InterruptedException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
 	Configuration conf = new Configuration();
 
@@ -251,8 +218,7 @@ public class ChiSquare {
 
 	FileInputFormat.addInputPath(job, new Path(args[0]));
 	FileOutputFormat.setOutputPath(job, new Path(args[1]));
-	MultipleOutputs.addNamedOutput(job, "ChiSquare",
-		TextOutputFormat.class, Text.class, DoubleWritable.class);
+	MultipleOutputs.addNamedOutput(job, "ChiSquare", TextOutputFormat.class, Text.class, DoubleWritable.class);
 
 	boolean done = job.waitForCompletion(true);
 

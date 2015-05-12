@@ -14,9 +14,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-/*
+/**
  * Reduce function: For each year pair, combine the "outofplace" result.
- * 					FinalResult = sum of "outofplace" for matched-pair + "maxOutOfPlace" * unmatched-pair	 
+ * 					FinalResult = sum of "outofplace" for matched-pair + "maxOutOfPlace" * unmatched-pair	
+ * 
+ * Key:		year pairs (e.g., 1840-1998)
+ * Value:	'out of place' 
  * @author: Tao Lin
  */
 
@@ -25,6 +28,9 @@ public class CombineResultReducer extends Reducer<CombinationKey, Text, NullWrit
 	private String filesPath = "";
 	HashMap<String, Long> countList = new HashMap<String, Long>();
 	
+	/**
+	 * Based on the formula, and calculate the final result
+	 */
 	public void reduce(CombinationKey key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 		
 		long max = 0;
@@ -51,6 +57,13 @@ public class CombineResultReducer extends Reducer<CombinationKey, Text, NullWrit
 		
 	}
 	
+	/**
+	 * Instead of using the output of reducer, here we directly read previous result through HDFS, and found out how many words per year. 
+	 * @param context
+	 * @param year
+	 * @return number of word for certain year.
+	 * @throws IOException
+	 */
 	private Long countLineForFile(Context context, String year) throws IOException{
 	    filesPath = FileOutputFormat.getOutputPath(context).getParent() + "/rankFrequency"; 
 	    

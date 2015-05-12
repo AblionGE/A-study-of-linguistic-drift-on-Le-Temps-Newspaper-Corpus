@@ -8,18 +8,22 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-/*
+/**
  * Map function: map the frequency of word, and obtain word's rank(descending). 	
  * key:
  * 			firstKey: fileName
  * 			secondKey: frequency
- * value:	word	 
+ * value:	word	
+ *  
  * @author: Tao Lin 
  */
 public class PrepareDataMapper extends Mapper<LongWritable, Text, CombinationKey, Text> {
 	CombinationKey combinationKey = new CombinationKey();
 	String[] lineSplit = null;
 	
+	/**
+	 * Map function
+	 */
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		String [] lineSplit = value.toString().split("\\s+");
 		
@@ -28,7 +32,14 @@ public class PrepareDataMapper extends Mapper<LongWritable, Text, CombinationKey
 		context.write(combinationKey, new Text(lineSplit[0]));
 	}
 
-	//Get the name of input file in the correct format.	
+	/**
+	 * Get the name of input file in the correct format.	
+	 * 	if the file is in the form of year, then output year (4 digits).
+	 * 	else output "100000" to identify it as an article.
+	 * 
+	 * @param context
+	 * @return fileName
+	 */
 	private String getFileName(Context context){
 		// Get input file information
 		FileSplit splitInfo = (FileSplit) context.getInputSplit();

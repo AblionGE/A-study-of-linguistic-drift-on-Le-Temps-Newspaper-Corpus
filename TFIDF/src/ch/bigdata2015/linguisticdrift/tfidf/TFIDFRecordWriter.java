@@ -1,7 +1,8 @@
-package ch.bigdata2015.linguisticdrift.tfidf;
+//package ch.bigdata2015.linguisticdrift.tfidf;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -20,7 +21,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 public class TFIDFRecordWriter extends
 		RecordWriter<IntWritable, Iterable<Text>> {
 
-	private DataOutputStream out;
+	private OutputStreamWriter out;
 	private Configuration conf;
 	private Path path;
 
@@ -54,14 +55,18 @@ public class TFIDFRecordWriter extends
 		Path file = new Path(this.path.getParent() + "/" + this.path.getName()
 				+ "/" + fileName);
 		FileSystem fs = file.getFileSystem(conf);
+		
 		try {
 			if (fs.exists(file)) {
-				out = fs.append(file);
+				
+				out = new OutputStreamWriter(fs.append(file), "UTF-8");
 			} else {
-				out = fs.create(file);
+				
+				out = new OutputStreamWriter(fs.create(file), "UTF-8");
 			}
 			for (Text t : textList) {
-				out.writeBytes(t.toString() + "\n");
+				byte[] tByte = t.getBytes();
+				out.write(t.toString() + "\n");
 			}
 		} finally {
 			if (out != null) {
