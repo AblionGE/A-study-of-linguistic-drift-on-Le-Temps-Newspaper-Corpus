@@ -1,9 +1,8 @@
 Big Data 2015 - A Study of linguistic drift - Creation of the topic clustering - jweber & fbouassid
 
 - INFORMATION: 
-NGramTopic is seperate into 3 different step : 
-First: Ngram which output a article with their word and the occurence of a word. We can then use this output to make some OCR correction. Then we run WordArticle
-which combine for every article all the words.
+NGramTopic is performed by 3 different steps : 
+First: Ngram which output an article with a unique article ID in the format year//uniqueId appended to the words and their occurences. We can then use this output to make some OCR correction. Then we run WordArticle which combine for every article all the words. The Ngram is different from the Ngram to which we apply directly the metrics as we need to keep track of the article Id during the whole process to classify it by topic later.
 
 Second: SparkTopicClustering/TopicClustering.scala creates the topics given the words by article.
 
@@ -46,23 +45,3 @@ Input Arguments:
 Call Sample:
 hadoop jar ComputeArticleTopic.jar ComputeArticleTopic Results/ParsedResult Results/gramOcc articleByTopNum
 
-
-
-
-
-The NGramTopic is used to keep a link between every words with their article.
-We re use the Ngram reader and add a few lines in order to have as output : 
-word <TAB> occurence <TAB> articleID
-This output allows us also to correct the word easily by keeping the same format (word <TAB> occurence)
-Next we use WordArticle to link an article with all the words they contain and the occurence of a word.
-
-LAUNCH :
-First Launch Ngram.java with Hadoop to obtain the first output. The two arguments of the method are simply all the articles and the output.
-hadoop jar Ngram Ngram /projects/dh-shared outputnGramNonCorrected
-
-Second we launch the final step on the corrected words. But we could have launch it over the non corrected
-hadoo jar WordArticle WordArticle /projects/linguistic-shift/corrected_nGramArticle/nGram nGramArticleCorrected
-
-Final:
-At the end of this procedure we have for every word their respective articleID. This output will be used as input of the 
-Spark job TopicClustering
