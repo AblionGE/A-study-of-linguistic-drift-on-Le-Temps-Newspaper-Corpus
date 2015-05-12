@@ -95,15 +95,15 @@ do
 
 ######################## TFIDF ##############################
     echo "Computing TF-IDF..."
-    if [ -d "TFIDF" ]; then
-        if [ -f "TFIDF/TFIDF.jar" ]; then
+    if [ -d "TFIDF_article" ]; then
+        if [ -f "TFIDF_article/TFIDF.jar" ]; then
             # Run TF-IDF
-            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            hadoop jar TFIDF_article/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
         else
             cd "TFIDF"
             ./compile.sh
             cd ..
-            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            hadoop jar TFIDF_article/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
         fi
     else
         echo "No jar for TF-IDF"
