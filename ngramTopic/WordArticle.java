@@ -78,7 +78,7 @@ public class WordArticle {
 			Iterator<Text> valuesIt = values.iterator();
 			while (valuesIt.hasNext()) {
 				//We link every word with the articleID it will be simpler afterwards.
-				listWordOcc = listWordOcc + year+"//"+articleID+"\t"+valuesIt.next().toString()+"\n";
+				listWordOcc = listWordOcc + year+"//"+articleID+"\t"+valuesIt.next().toString()+",";
 				
 			}
 			mout.write("Output", new Text(""),new Text(listWordOcc) , year);

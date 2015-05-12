@@ -21,8 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class ComputeArticleTopic {
 
-	private static final int NUM_REDUCERS = 75;
-	private static final String TAB = "\t";
+	private static final int NUM_REDUCERS = 50;
 	private static final Logger sLogger = Logger.getLogger(ComputeArticleTopic.class);
 	/**
 	 * INPUT: It takes in input : articleID,topicNumber or
@@ -45,7 +44,6 @@ public class ComputeArticleTopic {
 			String[] inputMapper = null;
 			String stringArticle = nonParsedData.toString();
 			
-			sLogger.info("Input Map "+stringArticle);
 			//System.out.println("We have receive "+stringArticle);
 			if (stringArticle.contains("CompactBuffer")) {
 				inputMapper = stringArticle.split(",CompactBuffer|, |\\(|\\)",
@@ -99,8 +97,11 @@ public class ComputeArticleTopic {
 					topicNumber = wordOcc;
 				}
 			}
-			context.write(new Text(topicNumber),
+			if(!wordInArticle.toString().isEmpty() && topicNumber != null){
+				
+				context.write(new Text(topicNumber),
 					new Text(wordInArticle.toString()));
+			}
 		}
 	}
 
@@ -119,7 +120,7 @@ public class ComputeArticleTopic {
 		public void map(LongWritable key, Text nonParsedData, Context context)
 				throws IOException, InterruptedException {
 			String allLine = nonParsedData.toString();
-			String[] element = allLine.split(TAB);
+			String[] element = allLine.split("\t");
 			// Get the topicNumber
 			String topicNumber = element[0];
 			context.write(new Text(topicNumber), new Text(element[1]));
