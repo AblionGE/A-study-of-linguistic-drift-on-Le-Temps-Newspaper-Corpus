@@ -1,0 +1,15 @@
+Big Data 2015 - A Study of linguistic drift - Sentences Length - Gil Brechbühler
+
+The code in the src folder is a mapreduce code which for each year outputs a file (actually one file by year by reducer)
+containing :
+sentence_length \t number_of_sentences_of_this_length
+
+It takes as argument :
+	- the input folder
+	- the output folder
+
+A call sample :
+
+hadoop jar Sentence.jar ch.epfl.bigdata.sentence.Sentence /projects/dh-shared/* /projects/linguistic-shift/stats/sentences-length-test 
+
+Note that the input folder is read recursively.

@@ -1,0 +1,13 @@
+Big Data 2015 - A Study of linguistic drift - Computes the mean of sentences lengths by year - Gil Brechbühler
+
+This scala/spark code takes as input the output folder of the sentences_length mapreduce job. This mapreduce job
+outputs (after manual merging) one file by year in format :
+sentence_length \t number_sentences_of_this_length
+
+So this spark code takes those files as input and outputs an average of sentences_lengths by year.
+
+year,average_commas_by_sentence,average_semicolons_by_sentence,average_colons_by_sentence
+
+A call sample :
+
+spark-submit --class "SentencesMeans" --master yarn-cluster --num-executors 25 target/scala-2.10/sentences-length-mean_2.10-1.0.jar 

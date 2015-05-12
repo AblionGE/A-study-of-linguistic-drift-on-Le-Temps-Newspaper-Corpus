@@ -1,0 +1,14 @@
+Big Data 2015 - A Study of linguistic drift - Ngrams extraction - Gil Brechbühler and Malik Bougacha
+
+This MapReduce code extracts the Ngrams from the articles and outputs them in the output folder sorted in different files by year.
+Those files need to be merged before being used (there is one file by year and by reducer, MultipleOutput is used).
+
+It takes as arguments :
+        - The input directory containg the n-grams for each year
+        - The output directory
+
+A call sample :
+
+hadoop jar Ngram.jar ch.epfl.bigdata.ngram.Ngram /projects/dh-shared/* /projects/linguistic-shift/ngrams/
+
+(Note that the input directory is read recursively).
