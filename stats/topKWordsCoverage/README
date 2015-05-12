@@ -1,0 +1,12 @@
+Big Data 2015 - A Study of linguistic drift - Coverage of top K words - Gil Brechbühler
+
+This scala/spark code takes all the 1-grams and computes the percentage of the text covered by the top k% most used
+1-grams.
+
+/projects/linguistic-shift/topKWordsCoverage/" + percentOfTopWords + "-percent"
+
+where percentOfTopWords is given as an input parameter.
+
+A call sample :
+
+spark-submit --class "NgramCoverage" --master yarn-cluster --executor-memory 4g --num-executors 200 target/scala-2.10/ngram-coverage_2.10-1.0.jar percentOfTopWords

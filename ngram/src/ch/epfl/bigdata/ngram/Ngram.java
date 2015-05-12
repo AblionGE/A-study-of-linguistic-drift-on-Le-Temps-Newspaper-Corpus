@@ -24,7 +24,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 /**
  * Main class which contains the mapper class, the reducer class and the main function.
- * @author gbrechbu
+ * @author Gil Brechbühler and Malik Bougacha
  *
  */
 public class Ngram {
@@ -32,8 +32,8 @@ public class Ngram {
 	private static final int NUM_REDUCERS = 25;
 	
 	/**
-	 * A simple mapper. Takes a full article and returns a <key/value> pair with key = "{year}word" and value = 1
-	 * @author gbrechbu
+	 * A simple mapper. Takes a full article and returns a <key/value> pair with key = "year//word" and value = 1
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramMapper extends  Mapper<IntWritable, Text, Text, IntWritable> {
@@ -112,7 +112,7 @@ public class Ngram {
 	
 	/**.
 	 * Combiner for the ngrams. Simply sums the values.
-	 * @author gbrechbu
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {		
@@ -132,7 +132,7 @@ public class Ngram {
 	
 	/**.
 	 * Reducer for the ngrams.
-	 * @author gbrechbu
+	 * @author Gil Brechbühler and Malik Bougacha
 	 *
 	 */
 	private static class NgramReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
@@ -171,7 +171,7 @@ public class Ngram {
 	}
 	
 	/**
-	 * 
+	 * Setup and running of the job.
 	 * @param args arguments
 	 * @throws IOException
 	 * @throws ClassNotFoundException

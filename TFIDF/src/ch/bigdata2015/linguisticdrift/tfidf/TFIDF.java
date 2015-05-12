@@ -37,6 +37,7 @@ public class TFIDF {
 	 * @throws Exception
 	 *             standard Exceptions
 	 */
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		// TF Parts
 		{
@@ -271,13 +272,13 @@ public class TFIDF {
 			 * Delete output Folder
 			 */
 			Path computePath = new Path(args[1] + "-tmpCompute");
-			Path IDFPath = new Path(args[1] + "-tmpTFIDF-IDF");
-			Path TFPath = new Path(args[1] + "-tmpTFIDF-TF");
-			Path TotOccurPathTmp = new Path(args[1] + "-TotOccurenceYear-tmp");
+			Path idfPath = new Path(args[1] + "-tmpTFIDF-IDF");
+			Path tfPath = new Path(args[1] + "-tmpTFIDF-TF");
+			Path totOccurPathTmp = new Path(args[1] + "-TotOccurenceYear-tmp");
 			computePath.getFileSystem(conf).delete(computePath, true);
-			IDFPath.getFileSystem(conf).delete(IDFPath, true);
-			TFPath.getFileSystem(conf).delete(TFPath, true);
-			TotOccurPathTmp.getFileSystem(conf).delete(TotOccurPathTmp, true);
+			idfPath.getFileSystem(conf).delete(idfPath, true);
+			tfPath.getFileSystem(conf).delete(tfPath, true);
+			totOccurPathTmp.getFileSystem(conf).delete(totOccurPathTmp, true);
 			
 			if (result != 0) {
 				System.exit(result);

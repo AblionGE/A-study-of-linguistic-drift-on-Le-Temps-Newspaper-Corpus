@@ -1,0 +1,10 @@
+Big Data 2015 - A Study of linguistic drift - Statistics on punctuation computation - Gil Brechbühler
+
+This scala/spark code takes all the articles (already seprated from the XML by year, in the format article\narticle\n....)
+and outputs the stats on punctuation by year (in one file, one line by year) in the following format :
+
+year,average_commas_by_sentence,average_semicolons_by_sentence,average_colons_by_sentence
+
+A call sample :
+
+spark-submit --class "PunctuationStats" --master yarn-cluster --executor-memory 4g --num-executors 200 target/scala-2.10/punctuation-statistics_2.10-1.0.jar 

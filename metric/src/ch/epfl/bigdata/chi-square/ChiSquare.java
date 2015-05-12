@@ -26,222 +26,206 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.util.List;
 
-
 /**
  * Computes Chi-Square distance
+ * 
  * @author Cynthia
- *
+ * 
  */
 public class ChiSquare {
-	private static final int NUM_REDUCERS = 25;
+    private static final int NUM_REDUCERS = 25;
+
+    /**
+     * Mapper to compute chi-square distance: takes a directory with all 1-gram
+     * files as input. For one year y1 and for each words in y1, it returns a
+     * tuple for each y2 in [1840,1998]: (y1:y2, y1/word/frequency).
+     * 
+     * @author Cynthia
+     * 
+     */
+    private static class CSMapper extends Mapper<LongWritable, Text, Text, Text> {
+
+	private final int firstYear = 1840;
+	private final int lastYear = 1998;
+	private Text years = new Text();
+	private Text values = new Text();
 
 	/**
-	 * Mapper to compute chi-square distance: takes a directory with all 1-gram files as
-	 * input. For one year y1 and for each words in y1, it returns a tuple for
-	 * each y2 in [1840,1998]: (y1:y2, y1/word/frequency).
-	 * 
-	 * @author Cynthia
-	 * 
+	 * The function extracts the name of the file from which the line comes
+	 * and determine the year corresponding to it. Then a key-value pair is
+	 * returned for each year in the corpus. It ensures that for every
+	 * output key y1:y2, y1 <= y2.
 	 */
-	private static class CSMapper extends
-	Mapper<LongWritable, Text, Text, Text> {
+	@Override
+	public void map(LongWritable key, Text line, Context context) throws IOException, InterruptedException {
 
-		private final int firstYear = 1840;
-		private final int lastYear = 1998;
+	    // Get file name informations
+	    FileSplit splitInfo = (FileSplit) context.getInputSplit();
+	    String fileName = splitInfo.getPath().getName();
+	    String year = fileName.replaceAll("-r-[0-9]+", "");
+	    String[] tokens = line.toString().split("\\s+");
 
-		@Override
-		public void map(LongWritable key, Text line, Context context)
-				throws IOException, InterruptedException {
-
-			FileSplit splitInfo = (FileSplit) context.getInputSplit();
-			String fileName = splitInfo.getPath().getName();
-			String year = fileName.replaceAll("-r-[0-9]+", "");
-			String[] tokens = line.toString().split("\\s+");
-
-			if (tokens.length == 2) {
-				String word = tokens[0];
-				String frequency = tokens[1];
-				for (int i = firstYear; i <= lastYear; i++) {
-					if (Integer.parseInt(year) <= i) {
-						context.write(new Text(year + ":" + i), new Text(
-								year+"/"+word+"/"+frequency));
-					}
-					if (Integer.parseInt(year) >= i) {
-						context.write(new Text(i + ":" + year), new Text(
-								year+"/"+word+"/"+frequency));
-					}
-
-				}
-			}
-
+	    // Order the elements of the key and output it with the word coming
+	    // from the line
+	    if (tokens.length == 2) {
+		String word = tokens[0];
+		String frequency = tokens[1];
+		values.set(year + "/" + word + "/" + frequency);
+		for (int i = firstYear; i <= lastYear; i++) {
+		    if (Integer.parseInt(year) <= i) {
+			years.set(year + ":" + i);
+		    } else {
+			years.set(i + ":" + year);
+		    }
+		    context.write(years, values);
 		}
+	    }
+
+	}
+    }
+
+    /**
+     * Reducer to compute chi-square distance: returns the distance for each
+     * pair of years.
+     * 
+     * @author Cynthia
+     * 
+     */
+    private static class CSReducer extends Reducer<Text, Text, Text, DoubleWritable> {
+
+	private HashMap<String, Integer> wordOccurences = null;
+	private DoubleWritable distance = new DoubleWritable();
+
+	/**
+	 * Read the files containing the terms needed for chi-square: -
+	 * yearOccurences are the number of words appearing in each year -
+	 * wordOccurences are the number of times each word appear in the whole
+	 * corpus
+	 */
+	@Override
+	public void setup(Context context) throws IOException {
+	    Path pt = new Path("/projects/linguistic-shift/stats/WordOccurenceOverAllYears");
+	    FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
+	    if (hdfs.isFile(pt)) {
+		FSDataInputStream fis = hdfs.open(pt);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+		String line = br.readLine();
+		wordOccurences = new HashMap<String, Integer>();
+		String word;
+		int occurences;
+
+		while (line != null) {
+		    String[] elements = line.toString().split("\\s+");
+		    word = elements[0];
+		    occurences = Integer.parseInt(elements[1]);
+		    wordOccurences.put(word, occurences);
+
+		    line = br.readLine();
+		}
+		br.close();
+		fis.close();
+	    }
+
 	}
 
 	/**
-	 * Reducer to compute chi-square distance: returns the distance for each pair of years.
-	 * 
-	 * @author Cynthia
-	 * 
+	 * Outputs the chi-square distance
 	 */
-	private static class CSReducer extends
-	Reducer<Text, Text, Text, DoubleWritable> {
+	@Override
+	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-		private HashMap<Integer, Integer> yearOccurences = null;
-		private HashMap<String, Integer> wordOccurences = null;
-		double distance = 3000;
+	    HashMap<String, Double> freqYear1 = new HashMap<String, Double>();
+	    HashMap<String, Double> freqYear2 = new HashMap<String, Double>();
+	    HashSet<String> words = new HashSet<String>();
 
-		@Override
-		public void setup(Context context) throws IOException {
-			Path pt = new Path(
-					"/projects/linguistic-shift/stats/1-grams-TotOccurenceYear/YearOccurences");
-			FileSystem hdfs = pt.getFileSystem(context.getConfiguration());
-			if (hdfs.isFile(pt)) {
-				FSDataInputStream fis = hdfs.open(pt);
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						fis));
-				String line = br.readLine();
-				yearOccurences = new HashMap<Integer, Integer>();
-				int year;
-				int wordCount;
+	    // Store the frequencies for each words in both years in tables
+	    // Store the distinct words in a HashSet
+	    Iterator<Text> valuesIt = values.iterator();
+	    String[] years = key.toString().split(":");
+	    String year1 = years[0];
+	    String year2 = years[1];
+	    double wordCount1 = 0.0;
+	    double wordCount2 = 0.0;
+	    double frequency = 0.0;
 
-				while (line != null) {
-					String[] elements = line.toString().split("\\s+");
-					year = Integer.parseInt(elements[0]);
-					wordCount = Integer.parseInt(elements[1]);
-					yearOccurences.put(year, wordCount);
-
-					line = br.readLine();
-				}
-				br.close();
-				fis.close();
-			}
-			
-			pt = new Path(
-					"/projects/linguistic-shift/distances/WordOccurenceOverAllYears");
-			hdfs = pt.getFileSystem(context.getConfiguration());
-			if (hdfs.isFile(pt)) {
-				distance = 2000;
-				FSDataInputStream fis = hdfs.open(pt);
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						fis));
-				String line = br.readLine();
-				wordOccurences = new HashMap<String, Integer>();
-				String word;
-				int occurences;
-
-				while (line != null) {
-					String[] elements = line.toString().split("\\s+");
-					word = elements[0];
-					occurences = Integer.parseInt(elements[1]);
-					wordOccurences.put(word, occurences);
-
-					line = br.readLine();
-				}
-				br.close();
-				fis.close();
-			}
-
+	    while (valuesIt.hasNext()) {
+		String[] val = valuesIt.next().toString().split("/");
+		words.add(val[1]);
+		frequency = Double.parseDouble(val[2]);
+		if (val[0].equals(year1)) {
+		    freqYear1.put(val[1], frequency);
+		    wordCount1 += frequency;
 		}
-
-		@Override
-		public void reduce(Text key, Iterable<Text> values, Context context)
-				throws IOException, InterruptedException {
-
-			HashMap<String,Integer> freqYear1 = new HashMap<String, Integer>();
-			HashMap<String,Integer> freqYear2 = new HashMap<String, Integer>();
-			HashSet<String> words = new HashSet<String>();
-
-			Iterator<Text> valuesIt = values.iterator();
-			String[] years = key.toString().split(":");
-			String year1 = years[0];
-			String year2 = years[1];
-
-			while (valuesIt.hasNext()) {
-				String[] val = valuesIt.next().toString().split("/");
-				if(val[0].equals(year1)) {
-					freqYear1.put(val[1], Integer.parseInt(val[2]));
-				} else if(val[0].equals(year2)) {
-					freqYear2.put(val[1], Integer.parseInt(val[2]));
-				}
-				words.add(val[1]);
-			}
-
-
-			if (yearOccurences != null) {
-				double wordCount1 = (double)yearOccurences
-						.get(Integer.parseInt(year1));
-				double wordCount2 = yearOccurences
-						.get(Integer.parseInt(year2));
-
-				Iterator<String> wordsIt = words.iterator();
-				distance = 0;
-				int freq1, freq2;
-				while (wordsIt.hasNext()) {
-					String word = wordsIt.next();
-					double wordOccurence = (double)wordOccurences.get(word);
-					freq1 = 0;
-					freq2 = 0;
-
-					if(freqYear1.containsKey(word)) {
-						freq1 = freqYear1.get(word);
-					}
-					if(freqYear2.containsKey(word)) {
-						freq2 = freqYear2.get(word);
-
-					}
-					distance += Math.pow(freq1/wordCount1 - freq2/wordCount2, 2) / wordOccurence;
-				}
-			}
-
-			context.write(key, new DoubleWritable(distance));
-
+		if (val[0].equals(year2)) {
+		    freqYear2.put(val[1], frequency);
+		    wordCount2 += frequency;
 		}
+	    }
 
-		@Override
-		public void cleanup(Context context) {
+	    // Computes the distance only if both years contain words
+	    if (!freqYear1.isEmpty() && !freqYear2.isEmpty()) {
+		Iterator<String> wordsIt = words.iterator();
+		double dist = 0.0;
+		double freq1, freq2;
+		while (wordsIt.hasNext()) {
+		    String word = wordsIt.next();
+		    double wordOccurence = (double) wordOccurences.get(word);
+		    freq1 = 0.0;
+		    freq2 = 0.0;
 
+		    // Chi-Square distance
+		    if (freqYear1.containsKey(word)) {
+			freq1 = freqYear1.get(word);
+		    }
+		    if (freqYear2.containsKey(word)) {
+			freq2 = freqYear2.get(word);
+		    }
+		    dist += Math.pow(freq1 / wordCount1 - freq2 / wordCount2, 2) / wordOccurence;
 		}
+		distance.set(dist);
+		context.write(key, distance);
+	    }
+
 	}
+    }
 
-	/**
-	 * 
-	 * @param args
-	 *            arguments
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 * @throws InterruptedException
-	 */
-	public static void main(String[] args) throws IOException,
-	ClassNotFoundException, InterruptedException {
+    /**
+     * 
+     * @param args
+     *            arguments
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws InterruptedException
+     */
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
-		Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-		Job job = Job.getInstance(conf, "ChiSquare");
-		job.setJarByClass(ChiSquare.class);
-		job.setNumReduceTasks(NUM_REDUCERS);
+	Job job = Job.getInstance(conf, "ChiSquare");
+	job.setJarByClass(ChiSquare.class);
+	job.setNumReduceTasks(NUM_REDUCERS);
 
-		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(Text.class);
+	job.setMapOutputKeyClass(Text.class);
+	job.setMapOutputValueClass(Text.class);
 
-		job.setMapperClass(CSMapper.class);
-		job.setReducerClass(CSReducer.class);
+	job.setMapperClass(CSMapper.class);
+	job.setReducerClass(CSReducer.class);
 
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(DoubleWritable.class);
+	job.setOutputKeyClass(Text.class);
+	job.setOutputValueClass(DoubleWritable.class);
 
-		FileInputFormat.setInputDirRecursive(job, true);
+	FileInputFormat.setInputDirRecursive(job, true);
 
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		MultipleOutputs.addNamedOutput(job, "ChiSquare", TextOutputFormat.class,
-				Text.class, DoubleWritable.class);
+	FileInputFormat.addInputPath(job, new Path(args[0]));
+	FileOutputFormat.setOutputPath(job, new Path(args[1]));
+	MultipleOutputs.addNamedOutput(job, "ChiSquare", TextOutputFormat.class, Text.class, DoubleWritable.class);
 
-		boolean done = job.waitForCompletion(true);
+	boolean done = job.waitForCompletion(true);
 
-		if (done) {
-			System.exit(0);
-		} else {
-			System.exit(1);
-		}
+	if (done) {
+	    System.exit(0);
+	} else {
+	    System.exit(1);
 	}
+    }
 }

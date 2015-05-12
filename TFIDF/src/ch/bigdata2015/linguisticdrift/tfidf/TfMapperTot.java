@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 /**
- * Tf computation to compute the total number of word
+ * Tf computation to compute the total number of word.
  * 
  * @author Jeremy Weber
  *
@@ -21,10 +21,10 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 	private Text outputKey = new Text();
 
 	private IntWritable outputValue = new IntWritable();
-	String fileName;
+	private String fileName;
 
 	/**
-	 * Map function that outputs : Key : Year Value : occurence for a word
+	 * Map function that outputs : Key : Year Value : occurence for a word.
 	 */
 	public void map(LongWritable inputKey, Text inputValue, Context context)
 			throws IOException, InterruptedException {
@@ -34,9 +34,8 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 		// For every line we take the word and its occurence
 		while (token.hasMoreTokens()) {
 			// We burn the word
-
-			int numberOcc = new Integer(token.nextToken());
 			token.nextToken();
+			int numberOcc = new Integer(token.nextToken());
 
 			// Output of the mapper (Year, Occurences of a word)
 			outputKey.set(fileName);
