@@ -144,24 +144,35 @@ public class CosineArticles {
 	public void reduce(Text key, Iterable<Text> values, Context context)
 		throws IOException, InterruptedException {
 
-	    HashMap<String, Integer> freqYearArticle = new HashMap<String, Integer>();
-	    HashMap<String, Integer> freqYearDataset = new HashMap<String, Integer>();
+	    HashMap<String, Double> freqYearArticle = new HashMap<String, Double>();
+	    HashMap<String, Double> freqYearDataset = new HashMap<String, Double>();
 	    HashSet<String> words = new HashSet<String>();
 
 	    // Store the frequencies for each words in both years in tables
 	    // Store the distinct words in a HashSet
 	    // Compute the norm for each year
 	    Iterator<Text> valuesIt = values.iterator();
-	    int frequency = 0;
+	    double frequency = 0.0;
+	    String w;
+	    double prev;
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
-		words.add(val[1]);
-		frequency = Integer.parseInt(val[2]);
+		w = val[1];
+		frequency = Double.parseDouble(val[2]);
+		words.add(w);
+		prev = 0.0;
 		if (val[0].equals("fromArticle")) {
-		    freqYearArticle.put(val[1], frequency);
+		    if(freqYearArticle.containsKey(w)) {
+			prev = freqYearArticle.get(w);
+		    }
+		    freqYearArticle.put(w, prev+frequency);
 		}
+		prev = 0.0;
 		if (val[0].equals("fromCorpus")) {
-		    freqYearDataset.put(val[1], frequency);
+		    if(freqYearDataset.containsKey(w)) {
+			prev = freqYearDataset.get(w);
+		    }
+		    freqYearDataset.put(w, prev+frequency);
 		}
 	    }
 
@@ -179,11 +190,11 @@ public class CosineArticles {
 
 		    // Cosine similarity:
 		    if (freqYearArticle.containsKey(word)) {
-			freq1 = (double) freqYearArticle.get(word);
+			freq1 = freqYearArticle.get(word);
 			norm1 += Math.pow(freq1, 2);
 		    }
 		    if (freqYearDataset.containsKey(word)) {
-			freq2 = (double) freqYearDataset.get(word) - freq1; // remove counts from articles to have distinct sets
+			freq2 = freqYearDataset.get(word) - freq1; // remove counts from articles to have distinct sets
 			norm2 += Math.pow(freq2, 2);
 		    }
 		    similarity += freq1 * freq2;

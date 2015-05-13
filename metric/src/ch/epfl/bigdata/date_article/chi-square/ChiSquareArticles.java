@@ -169,8 +169,8 @@ public class ChiSquareArticles {
 	@Override
 	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-	    HashMap<String, Integer> freqYearArticle = new HashMap<String, Integer>();
-	    HashMap<String, Integer> freqYearDataset = new HashMap<String, Integer>();
+	    HashMap<String, Double> freqYearArticle = new HashMap<String, Double>();
+	    HashMap<String, Double> freqYearDataset = new HashMap<String, Double>();
 	    HashSet<String> words = new HashSet<String>();
 
 	    // Store the frequencies for each words in both years in tables
@@ -178,18 +178,29 @@ public class ChiSquareArticles {
 	    Iterator<Text> valuesIt = values.iterator();
 	    double wordCountArticle = 0.0;
 	    double wordCountDataset = 0.0;
-	    int frequency = 0;
+	    double frequency = 0.0;
+	    double prev;
+	    String w;
 
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
+		w = val[1];
+		frequency = Double.parseDouble(val[2]);
 		words.add(val[1]);
-		frequency = Integer.parseInt(val[2]);
+		prev = 0.0;
 		if (val[0].equals("fromArticle")) {
-		    freqYearArticle.put(val[1], frequency);
+		    if(freqYearArticle.containsKey(w)) {
+			prev = freqYearArticle.get(w);
+		    }
+		    freqYearArticle.put(w, prev+frequency);
 		    wordCountArticle += frequency;
 		}
+		prev = 0.0;
 		if (val[0].equals("fromCorpus")) {
-		    freqYearDataset.put(val[1], frequency);
+		    if(freqYearDataset.containsKey(w)) {
+			prev = freqYearDataset.get(w);
+		    }
+		    freqYearDataset.put(w, prev+frequency);
 		    wordCountDataset += frequency;
 		}
 	    }
@@ -208,10 +219,10 @@ public class ChiSquareArticles {
 
 		    // Chi-Square distance:
 		    if (freqYearArticle.containsKey(word)) {
-			freq1 = (double) freqYearArticle.get(word);
+			freq1 = freqYearArticle.get(word);
 		    }
 		    if (freqYearDataset.containsKey(word)) {
-			freq2 = (double) freqYearDataset.get(word) - freq1; // -freq1 to not count the articles in the dataset
+			freq2 = freqYearDataset.get(word) - freq1; // -freq1 to not count the articles in the dataset
 		    }
 		    double wordOccurence = (double) wordOccurences.get(word);
 		    dist += Math.pow(freq1 / wordCountArticle - freq2 / wordCountDataset, 2) / wordOccurence;
