@@ -10,7 +10,7 @@ object KullbackLeibler {
   def main(args: Array[String]) {
 
     if (args.size != 4) {
-        println("Use with 4 args : nbOfGrams, \"Corrected\" or \"WithoutCorrection\", \"TFIDF\" or \"Probability\", output directory")
+        println("Use with 4 args : nbOfGrams or TopicNumber(0 to 14), \"Corrected\" or \"WithoutCorrection\", \"TFIDF\" or \"Probability\" or \"Topic\", output directory")
         exit(1)
     }
 
@@ -23,7 +23,10 @@ object KullbackLeibler {
     // Read all files
     var probabilityOfAWordFile = ""
     var file = ""
-    if (args(1) == "Corrected" && args(2) == "Probability") {
+    if (args(2) == "Topic") {
+       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
+       file = "hdfs:///projects/linguistic-shift/nGramArticle/TopicYearArticle/topic" + nbOfGrams + "/"
+    } else if (args(1) == "Corrected" && args(2) == "Probability") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
       file = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordPerYear/" + nbOfGrams + "-grams/*"
     } else if (args(1) == "Corrected" && args(2) == "TFIDF") {
@@ -37,7 +40,10 @@ object KullbackLeibler {
       file = "hdfs:///projects/linguistic-shift/stats/WithoutCorrection/TFIDF/" + nbOfGrams + "-grams/*"
     }
 
-    val splitter = file.split('/').size
+    var splitter = file.split('/').size
+    if (args(2) != "Topic") {
+        splitter = splitter - 1
+    }
     val lines = sc.wholeTextFiles(file)
 
     val probabilityOfAWord = sc.textFile(probabilityOfAWordFile)
@@ -91,7 +97,7 @@ object KullbackLeibler {
     }
 
     // format all triplets as a List containing value, word, year
-    val allTriplets = lines.map(el => el._2.split('\n').map(t => t.split('\t').flatMap(tt => tt.split(' ')).toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter-1)))).flatMap(e => e)
+    val allTriplets = lines.map(el => el._2.split('\n').map(t => t.split('\t').flatMap(tt => tt.split(' ')).toList).map(t => t ++ List(el._1.split("-r-")(0).split('/')(splitter)))).flatMap(e => e)
 
     val groupedAndOrderedTemp = allTriplets.union(probabilityOfAWordTemp.map(e => List(e._1, e._2, "0000"))).groupBy(e => e.head)
     val groupedAndOrdered = groupedAndOrderedTemp.map(e => e._2.toList.map(f => (f.head, f.tail.head, f.tail.tail.head))).map(e => e.sortBy(f => f._3))
