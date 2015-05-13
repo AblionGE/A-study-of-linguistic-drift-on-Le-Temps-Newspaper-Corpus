@@ -6,7 +6,7 @@
 #       - The number of articles defines the size of the test set
 #       - the year is the year where to take the articles (between 1840 and 1998)
 #       - The number of loop is how many times the metrics should be run on randomly selected articles
-#       - An directory for temporary files
+#       - A directory for temporary files on the HDFS (hdfs:///user/your_username/tmp)
 #       - The name of the output file that contains the results
 # OUTPUT : This script writes in the in the output file the mean error for each metric for the given year.
 #
