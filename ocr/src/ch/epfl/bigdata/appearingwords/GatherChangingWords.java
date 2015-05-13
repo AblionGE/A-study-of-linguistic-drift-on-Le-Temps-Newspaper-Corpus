@@ -1,4 +1,4 @@
-package ch.epfl.bigdata.synonyms.metrics;
+package ch.epfl.bigdata.appearingwords;
 
 import java.io.IOException;
 
