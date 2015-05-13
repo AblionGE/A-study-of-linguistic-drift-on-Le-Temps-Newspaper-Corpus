@@ -122,16 +122,27 @@ public class Cosine {
 	    double frequency = 0.0;
 	    double norm1 = 0.0;
 	    double norm2 = 0.0;
+	    String w;
+	    double prev;
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
-		words.add(val[1]);
+		w = val[1];
 		frequency = Double.parseDouble(val[2]);
+		words.add(val[1]);
+		prev = 0.0;
 		if (val[0].equals(year1)) {
-		    freqYear1.put(val[1], frequency);
+		    if(freqYear1.containsKey(w)) {
+			prev = freqYear1.get(w);
+		    }
+		    freqYear1.put(val[1], prev+frequency);
 		    norm1 += Math.pow(frequency, 2);
 		}
+		prev = 0.0;
 		if (val[0].equals(year2)) {
-		    freqYear2.put(val[1], frequency);
+		    if(freqYear2.containsKey(w)){
+			prev = freqYear2.get(w);
+		    }
+		    freqYear2.put(val[1], prev+frequency);
 		    norm2 += Math.pow(frequency, 2);
 		}
 	    }

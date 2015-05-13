@@ -12,7 +12,7 @@
 #
 # IMPORTANT : It's necessary to have the different executables of the metrics in the repository
 
-EXPECTED_ARGS=5
+EXPECTED_ARGS=6
 DISTANCE1_ERROR[$3]=0
 KL_ERROR[$3]=0
 COSINE_ERROR[$3]=0
@@ -27,6 +27,7 @@ if [ "$#" -ne $EXPECTED_ARGS ] || [ "$1" -le 0 ]|| [ "$2" -lt 1840 ] || [ "$2" -
 fi
 
 TEMPORARY_DIRECTORY="$4"
+TOPIC="$6"
 
 # Removed old result and errors files
 if [ -f err_Distance1 ]; then
@@ -79,7 +80,8 @@ do
     echo "Selecting articles..."
     if [ -f "select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar" ]; then
             # Create a subset of articles
-            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
+            #spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
+            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/nGramArticle/TopicnGramArticle/topic_$TOPIC/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
             hadoop fs -get $TEMPORARY_DIRECTORY/articles/${i}/${2}/
             cat ${2}/* > ${2}/${2}
             rm ${2}/part*
@@ -98,12 +100,14 @@ do
     if [ -d "TFIDF_article" ]; then
         if [ -f "TFIDF_article/TFIDF.jar" ]; then
             # Run TF-IDF
-            hadoop jar TFIDF_article/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            #hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC 2>err_TFIDF
         else
             cd "TFIDF"
             ./compile.sh
             cd ..
-            hadoop jar TFIDF_article/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            #hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
+            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC 2>err_TFIDF
         fi
     else
         echo "No jar for TF-IDF"
@@ -116,12 +120,14 @@ do
     if [ -d "distance1" ]; then
         if [ -f "distance1/Distance1Articles.jar" ]; then
             # Run Distance1
-            hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
+            #hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
+            hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
         else
             cd "distance1"
             ./compile.sh
             cd ..
-            hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
+            #hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
+            hadoop jar distance1/Distance1Articles.jar ch/epfl/bigdata/Distance1Articles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Distance1/$i 2>err_Distance1
         fi
     else
         echo "No jar for Distance1Articles"
@@ -146,12 +152,14 @@ do
     if [ -d "cosine" ]; then
         if [ -f "cosine/CosineArticles.jar" ]; then
             # Run Cosine
-            hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
+            #hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
+            hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
         else
             cd "cosine"
             ./compile.sh
             cd ..
-            hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
+            #hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
+            hadoop jar cosine/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine/$i 2>err_Cosine
         fi
     else
         echo "No jar for CosineArticles"
@@ -176,12 +184,14 @@ do
     if [ -d "cosine_tfidf" ]; then
         if [ -f "cosine_tfidf/CosineArticles.jar" ]; then
             # Run Cosine
-            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
+            #hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
+            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
         else
             cd "cosine_tfidf"
             ./compile.sh
             cd ..
-            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
+            #hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
+            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
         fi
     else
         echo "No jar for CosineArticles"
@@ -207,12 +217,14 @@ do
     if [ -d "chi-square" ]; then
         if [ -f "chi-square/ChiSquareArticles.jar" ]; then
             # Run ChiSquare
-            hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
+            #hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
+            hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
         else
             cd "chi-square"
             ./compile.sh
             cd ..
-            hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
+            #hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
+            hadoop jar chi-square/ChiSquareArticles.jar ch/epfl/bigdata/ChiSquareArticles $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/ChiSquare/$i 2>err_ChiSquare
         fi
     else
         echo "No jar for ChiSquare"
@@ -237,12 +249,14 @@ do
     if [ -d "outofplace" ]; then
         if [ -f "outofplace/OutofplaceArticle.jar" ]; then
             # Run Distance OutOfPlace
-            hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE       
+            #hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE   
+            hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE      
         else
             cd "outofplace"
             ./compile.sh
             cd ..
-            hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE       
+            #hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/corrected_ngrams/1-grams $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE   
+            hadoop jar outofplace/OutofplaceArticle.jar ch.epfl.bigdata.outofplace.Driver $TEMPORARY_DIRECTORY/articles/$i/$2 /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/OUTOFPLACE/$i 2>err_OUTOFPLACE 
         fi
     else
         echo "No jar for OutOfPlace"
@@ -262,53 +276,6 @@ do
             OUTOFPLACE_ERROR[$i]=$(echo "${OUTOFPLACE_ERROR[$i]} * -1" | bc -l)
     fi
 
-######################## PUNCT-SENTENCES ##############################
-    echo "Computing Metric with punctuation..."
-    if [ -f "punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar" ]; then
-            # Run Punctuation metric
-            spark-submit --class "PunctSentencesMetric" --master yarn-cluster --num-executors 50 punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar $2 $1 $TEMPORARY_DIRECTORY/PUNCT/$i/ 2>err_Punct
-    else
-            echo "The compilated code of select_articles.scala should be in 'punct-sentences-metric/target/scala-2.10/punctuation-sentences-metric_2.10-1.0.jar'"
-            echo "In punct-sentences-metric directory, just execute the command 'sbt package'"
-            hadoop fs -rm -r $TEMPORARY_DIRECTORY
-            exit
-    fi
-    echo "Getting result of Punctuation and parsing it..."
-    # Get Result and create results.csv for Punctuation metric
-    hadoop fs -get $TEMPORARY_DIRECTORY/PUNCT/$i/ && cat $i/* > results_PUNCT.csv
-    rm -r $i/
-
-    # Find the smallest distance and add it into an array for Punctuation Metric
-    RES=`(cat results_PUNCT.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
-    echo "Real year is $2 and predicted year is $RES"
-    PUNCT_ERROR[$i]=$(($RES-$2))
-    if [ ${PUNCT_ERROR["$i"]} -lt 0 ]; then
-            PUNCT_ERROR[$i]=$(echo "${PUNCT_ERROR[$i]} * -1" | bc -l)
-    fi
-
-######################## KULLBACK-LEIBLER ##############################
-    echo "Computing Kullback-Leibler Divergence..."
-    if [ -f "kullback-leibler/target/scala-2.10/kullback-leibler_2.10-1.0.jar" ]; then
-            # Run KL Divergence
-            spark-submit --class "KullbackLeiblerArticle" --master yarn-cluster --executor-memory 8g --num-executors 100 kullback-leibler/target/scala-2.10/kullback-leibler_2.10-1.0.jar 1 Corrected $TEMPORARY_DIRECTORY/KL/$i/ $TEMPORARY_DIRECTORY/articles/$i/ "$2" 2>err_KL
-    else
-            echo "The compilated code of select_articles.scala should be in 'kullback-leibler/target/scala-2.10/kullback-leibler_2.10-1.0.jar'"
-            echo "In kullback-leibler directory, just execute the command 'sbt package'"
-            hadoop fs -rm -r $TEMPORARY_DIRECTORY
-            exit
-    fi
-    echo "Getting result of KL and parsing it..."
-    # Get Result and create results.csv for KL
-    hadoop fs -get $TEMPORARY_DIRECTORY/KL/$i/ && cat $i/* > results_KL.csv
-    rm -r $i/
-
-    # Find the smallest distance and add it into an array for KL
-    RES=`(cat results_KL.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
-    echo "Real year is $2 and predicted year is $RES"
-    KL_ERROR[$i]=$(($RES-$2))
-    if [ ${KL_ERROR["$i"]} -lt 0 ]; then
-            KL_ERROR[$i]=$(echo "${KL_ERROR[$i]} * -1" | bc -l)
-    fi
 
     # Rename the file to keep it for manual verification of minimum and other things in case of failure
     # mv results.csv results.csv_$i

@@ -147,17 +147,28 @@ public class ChiSquare {
 	    double wordCount1 = 0.0;
 	    double wordCount2 = 0.0;
 	    double frequency = 0.0;
+	    double prev;
+	    String w;
 
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
-		words.add(val[1]);
+		w = val[1];
 		frequency = Double.parseDouble(val[2]);
+		words.add(val[1]);
+		prev = 0.0;
 		if (val[0].equals(year1)) {
-		    freqYear1.put(val[1], frequency);
+		    if(freqYear1.containsKey(w)){
+			prev = freqYear1.get(w);
+		    }
+		    freqYear1.put(w, prev+frequency);
 		    wordCount1 += frequency;
 		}
+		prev = 0.0;
 		if (val[0].equals(year2)) {
-		    freqYear2.put(val[1], frequency);
+		    if(freqYear2.containsKey(w)){
+			prev = freqYear2.get(w);
+		    }
+		    freqYear2.put(w, prev+frequency);
 		    wordCount2 += frequency;
 		}
 	    }
