@@ -24,7 +24,7 @@ object KullbackLeibler {
     var probabilityOfAWordFile = ""
     var file = ""
     if (args(2) == "Topic") {
-       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
+       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/1-grams/*"
        file = "hdfs:///projects/linguistic-shift/nGramArticle/TopicYearArticle/topic" + nbOfGrams + "/"
     } else if (args(1) == "Corrected" && args(2) == "Probability") {
       probabilityOfAWordFile = "hdfs:///projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordOverAllYears/" + nbOfGrams + "-grams/*"
