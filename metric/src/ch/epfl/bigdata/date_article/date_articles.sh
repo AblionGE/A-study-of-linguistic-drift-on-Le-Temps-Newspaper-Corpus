@@ -79,7 +79,7 @@ do
     echo "Selecting articles..."
     if [ -f "select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar" ]; then
             # Create a subset of articles
-            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
+            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} $RANDOM 2>err_choose_articles
             hadoop fs -get $TEMPORARY_DIRECTORY/articles/${i}/${2}/
             cat ${2}/* > ${2}/${2}
             rm ${2}/part*
