@@ -135,7 +135,6 @@ public class Cosine {
 			prev = freqYear1.get(w);
 		    }
 		    freqYear1.put(val[1], prev+frequency);
-		    norm1 += Math.pow(frequency, 2);
 		}
 		prev = 0.0;
 		if (val[0].equals(year2)) {
@@ -143,7 +142,6 @@ public class Cosine {
 			prev = freqYear2.get(w);
 		    }
 		    freqYear2.put(val[1], prev+frequency);
-		    norm2 += Math.pow(frequency, 2);
 		}
 	    }
 
@@ -159,10 +157,12 @@ public class Cosine {
 
 		    // Cosine similarity:
 		    if (freqYear1.containsKey(word)) {
-			freq1 = freqYear1.get(word);
+				freq1 = freqYear1.get(word);
+				norm1 += Math.pow(freq1,2);
 		    }
 		    if (freqYear2.containsKey(word)) {
-			freq2 = freqYear2.get(word);
+				freq2 = freqYear2.get(word);
+				norm2 += Math.pow(freq2,2);
 		    }
 		    similarity += freq1 * freq2;
 		}
