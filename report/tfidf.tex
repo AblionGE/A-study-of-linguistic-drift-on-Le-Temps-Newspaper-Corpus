@@ -1,0 +1,12 @@
+\section{TF-IDF}
+
+To try to accentuate the linguistic drift over the corpus, we thought it was a good idea to implement the \emph{Term Frequency} for each word in each year combined with the \emph{Inverse Document Frequency} which divides the number of documents in the corpus (years) by the number of documents where the word appears.
+
+\begin{eqnarray}
+    TF = \frac{\# \ of \ occurrences \ of \ a \ word \ in \ a \ year}{\# \ of \ words \ in \ a \ year}
+\end{eqnarray}
+
+\begin{eqnarray}
+    IDF(t,D) = log \frac{N}{|\{d \in D : t \in d\}|}
+\end{eqnarray}
+where $N$ is the total number of documents (years) and $|\{d \in D : t \in d\}|$ is the number of documents where the word $t$ appears. We will see in the next sections of this paper that the TF-IDF values can be useful or not depending on the metric used.
