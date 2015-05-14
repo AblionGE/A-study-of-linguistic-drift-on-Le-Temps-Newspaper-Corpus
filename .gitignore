@@ -13,3 +13,5 @@ temp/
 project/
 target/
 metric/lib/
+*~
+*.pdf

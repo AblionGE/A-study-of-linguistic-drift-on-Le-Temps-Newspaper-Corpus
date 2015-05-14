@@ -6,7 +6,7 @@
 #       - The number of articles defines the size of the test set
 #       - the year is the year where to take the articles (between 1840 and 1998)
 #       - The number of loop is how many times the metrics should be run on randomly selected articles
-#       - An directory for temporary files
+#       - A directory for temporary files on the HDFS (hdfs:///user/your_username/tmp)
 #       - The name of the output file that contains the results
 # OUTPUT : This script writes in the in the output file the mean error for each metric for the given year.
 #
@@ -79,7 +79,7 @@ do
     echo "Selecting articles..."
     if [ -f "select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar" ]; then
             # Create a subset of articles
-            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
+            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} $RANDOM 2>err_choose_articles
             hadoop fs -get $TEMPORARY_DIRECTORY/articles/${i}/${2}/
             cat ${2}/* > ${2}/${2}
             rm ${2}/part*

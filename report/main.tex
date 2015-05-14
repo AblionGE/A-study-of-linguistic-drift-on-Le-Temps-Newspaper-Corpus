@@ -1,0 +1,104 @@
+\documentclass[a4paper,11pt] {article}
+\usepackage[english]{babel}
+%\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{fancybox}
+\usepackage{verbatim}
+%Insertion du package pour les symboles mathématiques
+\usepackage{amssymb}
+\usepackage{amsmath}
+%\usepackage{hyperref}
+\usepackage[babel=true]{csquotes}
+\usepackage{ifthen}
+\usepackage{xltxtra}
+\usepackage{mathabx}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%entête
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\pagestyle{fancy}
+\lhead{A Study of Linguistic Drift}
+\chead{Big Data 2015}
+\rhead{\today}
+\fancyhfoffset{0pt}
+\usepackage[top=3cm,bottom=3cm,right=3cm,left=3cm]{geometry}
+
+\usepackage{graphicx}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\textsc{\LARGE Ecole Polytechnique Fédérale de Lausanne}
+\vskip 0.5cm
+\includegraphics[height=1.5cm]{Pictures/EPFL-Logo-CMJN.eps}
+\vskip 0.5cm
+\textsc{\Large Big Data\\
+ 2015}\\[1.5cm]
+
+\textsc{\Large Group Project Report}\\[3cm]
+
+% Title
+\HRule \\[0.4cm]
+{ \huge \bfseries A Study of Linguistic Drift\\[0.5cm] }
+{ \huge \bfseries On \emph{Le Temps} Newspaper Corpus\\[0.4cm] }
+
+\HRule \\[3.5cm]
+
+% Author and supervisor
+\begin{minipage}{0.5\textwidth}
+\begin{flushleft} \large
+\textit{Authors:}\\
+Gil \textsc{Brechbühler}
+
+Nicolas \textsc{Bornand}
+
+Farah \textsc{Bouassida}
+
+Malik \textsc{Bougacha}
+
+Tao \textsc{Lin}
+
+Cynthia \textsc{Oeschger}
+
+Marc \textsc{Schär}
+
+Jérémy \textsc{Weber}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\textit{Supervisor:} \\
+Immanuel \textsc{Trummer}
+
+Christoph \textsc{Koch}\\
+\end{flushright}
+\end{minipage}
+
+\vfill
+
+% Bottom of the page
+{\large \today}
+
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage{}
+
+% To add an external code, use 'input' or 'include' (include put the text in a new page)
+
+\input{introduction}
+
+\input{tfidf}
+
+\section{Metrics}
+
+\input{kullback_leibler}
+
+\include{conclusion}
+
+
+\end{document}
