@@ -88,7 +88,7 @@ Punctuation :& 33.13333333333333333333\\
     Punctuation :& 81.80000000000000000000\\
 \end{tabular}\\
 
-We observe that two metrics are in general better than the others. These two metrics are the \emph{Kullback-Leibler} Divergence and the Cosine with TF-IDF. Indeed, as explained in section \ref{metrics}, these two metrics are good and we know why. The other metrics are not so bad, even the basic distance which has surprisingly an error of 0 when dating articles from 1843. We think this distance was just lucky with the subset of articles. Indeed, we have run the dating of articles with the same options but with different subsets of articles and we can observe that the basic distance is not anymore equal to 0. For the other metrics, we can observe that they vary depending on the year or certainly on the subset of articles.\\
+We observe that two metrics are in general better than the others. These two metrics are the \emph{Kullback-Leibler} Divergence and the Cosine with TF-IDF. Indeed, as explained in section \ref{metrics}, these two metrics are good and we know why. The other metrics are not so bad, even the basic distance which has surprisingly an error of 0 when dating articles from 1843. We think this distance was just lucky with the subset of articles. TOOOOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDOOOOOOOOOOOOOOOOOOOOOOOOOOOO Indeed, we have run the dating of articles with the same options but with different subsets of articles and we can observe that the basic distance is not anymore equal to 0. For the other metrics, we can observe that they vary depending on the year or certainly on the subset of articles.\\
 
 To judge which metric is the best one, we can simply compute the mean error over all our samples. As it takes a lot of time to compute 15 times each metrics, we can't compute it for each year. Here is the overall mean over all the years we tested :\\
 
@@ -103,6 +103,6 @@ To judge which metric is the best one, we can simply compute the mean error over
     Punctuation :& 37.65025\\
 \end{tabular}\\
 
-We can observe that as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
+We can observe that, as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
 
 Finally, we made some tests to compare, for a given year, if the number of selected articles to date changes a lot the results of the metrics. And....
