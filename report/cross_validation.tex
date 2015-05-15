@@ -1,0 +1,108 @@
+To have stronger values when we date articles, we wrote a script that runs several times each metrics for a different subsets of article of the same year. The idea here is to have an average on the error of each metric to be able to compare them together. We obtained the following results for random years.\\
+
+\textbf{Mean error for different metrics for 15 articles in year 1843 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+Distance1 :& 0\\
+Cosine :& 10.73333333333333333333\\
+Cosine-TFIDF :& .40000000000000000000\\
+Chi-Square :& 112.40000000000000000000\\
+Kullback-Leibler :& 11.33333333333333333333\\
+OutOfPlace :& 3.00000000000000000000\\
+Punctuation :& 33.13333333333333333333\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1854 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 8.00000000000000000000\\
+    Cosine :& 9.86666666666666666666\\
+    Cosine-TFIDF :& 0\\
+    Chi-Square :& 111.86666666666666666666\\
+    Kullback-Leibler :& 0\\
+    OutOfPlace :& 8.00000000000000000000\\
+    Punctuation :& 15.80000000000000000000\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1888 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 42.00000000000000000000\\
+    Cosine :& 15.13333333333333333333\\
+    Cosine-TFIDF :& 0\\
+    Chi-Square :& 62.40000000000000000000\\
+    Kullback-Leibler :& .26666666666666666666\\
+    OutOfPlace :& 42.00000000000000000000\\
+    Punctuation :& 32.80000000000000000000\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1905 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 65.80000000000000000000\\
+    Cosine :& 17.13333333333333333333\\
+    Cosine-TFIDF :& .06666666666666666666\\
+    Chi-Square :& 48.40000000000000000000\\
+    Kullback-Leibler :& 3.06666666666666666666\\
+    OutOfPlace :& 59.00000000000000000000\\
+    Punctuation :& 21.06666666666666666666\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1918 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 78.93333333333333333333\\
+    Cosine :& 4.73333333333333333333\\
+    Cosine-TFIDF :& 0\\
+    Chi-Square :& 36.33333333333333333333\\
+    Kullback-Leibler :& 2.66666666666666666666\\
+    OutOfPlace :& 72.00000000000000000000\\
+    Punctuation :& 30.86666666666666666666\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1934 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 65.60000000000000000000\\
+    Cosine :& 17.46666666666666666666\\
+    Cosine-TFIDF :& .80000000000000000000\\
+    Chi-Square :& 128.93333333333333333333\\
+    Kullback-Leibler :& .33333333333333333333\\
+    OutOfPlace :& 88.00000000000000000000\\
+    Punctuation :& 37.66666666666666666666\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1954 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 44.00000000000000000000\\
+    Cosine :& 24.60000000000000000000\\
+    Cosine-TFIDF :& 0\\
+    Chi-Square :& 0\\
+    Kullback-Leibler :& .66666666666666666666\\
+    OutOfPlace :& 108.00000000000000000000\\
+    Punctuation :& 48.06666666666666666666\\
+\end{tabular}\\
+ 
+\textbf{Mean error for different metrics for 15 articles in year 1984 with 15 iterations}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 14.00000000000000000000\\
+    Cosine :& 7.20000000000000000000\\
+    Cosine-TFIDF :& 1.66666666666666666666\\
+    Chi-Square :& 3.73333333333333333333\\
+    Kullback-Leibler :& 0\\
+    OutOfPlace :& 138.00000000000000000000\\
+    Punctuation :& 81.80000000000000000000\\
+\end{tabular}\\
+
+We observe that two metrics are in general better than the others. These two metrics are the \emph{Kullback-Leibler} Divergence and the Cosine with TF-IDF. Indeed, as explained in section \ref{metrics}, these two metrics are good and we know why. The other metrics are not so bad, even the basic distance which has surprisingly an error of 0 when dating articles from 1843. We think this distance was just lucky with the subset of articles. Indeed, we have run the dating of articles with the same options but with different subsets of articles and we can observe that the basic distance is not anymore equal to 0. For the other metrics, we can observe that they vary depending on the year or certainly on the subset of articles.\\
+
+To judge which metric is the best one, we can simply compute the mean error over all our samples. As it takes a lot of time to compute 15 times each metrics, we can't compute it for each year. Here is the overall mean over all the years we tested :\\
+
+\textbf{Mean error for different metrics for 15 articles in the years selected above with 15 iterations per year}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 39.7875\\
+    Cosine :& 13.35875\\
+    Cosine-TFIDF :& 0.36675\\
+    Chi-Square :& 63.008625\\
+    Kullback-Leibler :& 2.292\\
+    OutOfPlace :& 64.75\\
+    Punctuation :& 37.65025\\
+\end{tabular}\\
+
+We can observe that as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
+
+Finally, we made some tests to compare, for a given year, if the number of selected articles to date changes a lot the results of the metrics. And....
