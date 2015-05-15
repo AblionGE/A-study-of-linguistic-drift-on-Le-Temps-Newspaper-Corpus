@@ -10,6 +10,8 @@ bin/
 input/
 output/
 temp/
-metric/lib/
 project/
 target/
+metric/lib/
+*~
+*.pdf

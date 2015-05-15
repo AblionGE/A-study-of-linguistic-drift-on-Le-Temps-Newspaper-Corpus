@@ -33,7 +33,7 @@ import java.util.List;
  * 
  */
 public class ChiSquare {
-    private static final int NUM_REDUCERS = 25;
+    private static final int NUM_REDUCERS = 50;
 
     /**
      * Mapper to compute chi-square distance: takes a directory with all 1-gram
@@ -147,18 +147,27 @@ public class ChiSquare {
 	    double wordCount1 = 0.0;
 	    double wordCount2 = 0.0;
 	    double frequency = 0.0;
+	    double prev;
+	    String w;
 
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
-		words.add(val[1]);
+		w = val[1];
 		frequency = Double.parseDouble(val[2]);
+		words.add(val[1]);
+		prev = 0.0;
 		if (val[0].equals(year1)) {
-		    freqYear1.put(val[1], frequency);
-		    wordCount1 += frequency;
+		    if(freqYear1.containsKey(w)){
+			prev = freqYear1.get(w);
+		    }
+		    freqYear1.put(w, prev+frequency);
 		}
+		prev = 0.0;
 		if (val[0].equals(year2)) {
-		    freqYear2.put(val[1], frequency);
-		    wordCount2 += frequency;
+		    if(freqYear2.containsKey(w)){
+			prev = freqYear2.get(w);
+		    }
+		    freqYear2.put(w, prev+frequency);
 		}
 	    }
 
@@ -175,10 +184,12 @@ public class ChiSquare {
 
 		    // Chi-Square distance
 		    if (freqYear1.containsKey(word)) {
-			freq1 = freqYear1.get(word);
+				freq1 = freqYear1.get(word);
+				wordCount1 += freq1;
 		    }
 		    if (freqYear2.containsKey(word)) {
-			freq2 = freqYear2.get(word);
+				freq2 = freqYear2.get(word);
+		    	wordCount2 += freq2;
 		    }
 		    dist += Math.pow(freq1 / wordCount1 - freq2 / wordCount2, 2) / wordOccurence;
 		}

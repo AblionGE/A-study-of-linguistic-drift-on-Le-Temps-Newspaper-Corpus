@@ -3,9 +3,9 @@ Big Data 2015 - A Study of linguistic drift - Kullback-Leibler Divergence - Marc
 This code computes the Kullback-Leibler Divergence between all years.
 
 It takes as arguments :
-        - The number of grams considered (1,2 or 3, but only 1 for the moment)
-        - If the corpus used is the corpus with the "Corrected" OCR or "WithoutCorrection"
-        - If you want to compute with the "Probability" of each word or with its "TFIDF" value
+        - The number of grams considered (1,2 or 3) or, in case of topics, the topic (0 to 14)
+        - If the corpus used is the corpus with the "Corrected" OCR or "WithoutCorrection" (unused with topics)
+        - If you want to compute with the "Probability" of each word or with its "TFIDF" value or using the topics
         - The output directory
 
 A call sample (You have to be in the directory where the code is and you have to compile it with 'sbt package') :
@@ -19,3 +19,4 @@ IMPORTANT : This code needs to have the following directory with data :
         - /projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordOverAllYears/
         - /projects/linguistic-shift/stats/Corrected/ProbabilityOfAWordPerYear/
         - /projects/linguistic-shift/stats/WithoutCorrection/ProbabilityOfAWordPerYear/
+        - /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic?*/

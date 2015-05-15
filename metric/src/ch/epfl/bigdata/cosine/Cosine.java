@@ -122,17 +122,26 @@ public class Cosine {
 	    double frequency = 0.0;
 	    double norm1 = 0.0;
 	    double norm2 = 0.0;
+	    String w;
+	    double prev;
 	    while (valuesIt.hasNext()) {
 		String[] val = valuesIt.next().toString().split("/");
-		words.add(val[1]);
+		w = val[1];
 		frequency = Double.parseDouble(val[2]);
+		words.add(val[1]);
+		prev = 0.0;
 		if (val[0].equals(year1)) {
-		    freqYear1.put(val[1], frequency);
-		    norm1 += Math.pow(frequency, 2);
+		    if(freqYear1.containsKey(w)) {
+			prev = freqYear1.get(w);
+		    }
+		    freqYear1.put(val[1], prev+frequency);
 		}
+		prev = 0.0;
 		if (val[0].equals(year2)) {
-		    freqYear2.put(val[1], frequency);
-		    norm2 += Math.pow(frequency, 2);
+		    if(freqYear2.containsKey(w)){
+			prev = freqYear2.get(w);
+		    }
+		    freqYear2.put(val[1], prev+frequency);
 		}
 	    }
 
@@ -148,10 +157,12 @@ public class Cosine {
 
 		    // Cosine similarity:
 		    if (freqYear1.containsKey(word)) {
-			freq1 = freqYear1.get(word);
+				freq1 = freqYear1.get(word);
+				norm1 += Math.pow(freq1,2);
 		    }
 		    if (freqYear2.containsKey(word)) {
-			freq2 = freqYear2.get(word);
+				freq2 = freqYear2.get(word);
+				norm2 += Math.pow(freq2,2);
 		    }
 		    similarity += freq1 * freq2;
 		}

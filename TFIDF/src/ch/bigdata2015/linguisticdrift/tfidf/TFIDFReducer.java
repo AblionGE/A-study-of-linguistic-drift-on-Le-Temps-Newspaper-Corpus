@@ -9,7 +9,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 /**
  * Reducer for TF-IDF combination.
  * 
- * @author Marc Schär
+ * @author Marc Schaer
  *
  */
 public class TFIDFReducer extends Reducer<Text, Text, Text, Text> {
