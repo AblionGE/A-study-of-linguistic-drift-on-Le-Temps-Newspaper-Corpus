@@ -15,10 +15,10 @@ object SelectArticle {
     }
 
     val sc = new SparkContext(new SparkConf().setAppName("SelectArticle"))
-    val random = new scala.util.Random(args(4).toInt);
+    
     val articles = sc.textFile(args(2) + "/" + args(0) + "*")
     val articlesTemp = articles.map(e => e.split(", ")).map(e => e.flatMap(f => f.split('\t'))).groupBy(e => e(2)).map(e => e._2.toArray)
-    val sampleArticle = sc.parallelize(articlesTemp.takeSample(false, args(1).toInt, random.nextInt(10000)))
+    val sampleArticle = sc.parallelize(articlesTemp.takeSample(false, args(1).toInt, args(4).toInt))
     val formattedArticle = sampleArticle.flatMap(e => e.map(f => (f(0), f(1).toInt))).reduceByKey(_+_)
     
     val generalFormattedArticle = formattedArticle.map(e => e._1 + "\t" + e._2)

@@ -81,7 +81,7 @@ do
     if [ -f "select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar" ]; then
             # Create a subset of articles
             #spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/corrected_nGramArticle/nGram/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
-            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/nGramArticle/TopicnGramArticle/topic_$TOPIC/ $TEMPORARY_DIRECTORY/articles/${i}/${2} 2>err_choose_articles
+            spark-submit --class "SelectArticle" --master yarn-cluster --executor-memory 8g --num-executors 50 select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar "$2" "$1" hdfs:///projects/linguistic-shift/nGramArticle/TopicnGramArticle/topic_$TOPIC/ $TEMPORARY_DIRECTORY/articles/${i}/${2} $RANDOM 2>err_choose_articles
             hadoop fs -get $TEMPORARY_DIRECTORY/articles/${i}/${2}/
             cat ${2}/* > ${2}/${2}
             rm ${2}/part*
@@ -93,26 +93,6 @@ do
             echo "The compilated code of select_articles.scala should be in 'select_articles/target/scala-2.10/selectarticle_2.10-1.0.jar'"
             echo "In select_articles directory, just execute the command 'sbt package'"
             exit
-    fi
-
-######################## TFIDF ##############################
-    echo "Computing TF-IDF..."
-    if [ -d "TFIDF_article" ]; then
-        if [ -f "TFIDF_article/TFIDF.jar" ]; then
-            # Run TF-IDF
-            #hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
-            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC 2>err_TFIDF
-        else
-            cd "TFIDF"
-            ./compile.sh
-            cd ..
-            #hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/corrected_ngrams/1-grams 2>err_TFIDF
-            hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF $TEMPORARY_DIRECTORY/articles/${i}/${2} $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC 2>err_TFIDF
-        fi
-    else
-        echo "No jar for TF-IDF"
-        hadoop fs -rm -r $TEMPORARY_DIRECTORY
-        exit
     fi
 
 ######################## DISTANCE1 ##############################
@@ -177,38 +157,6 @@ do
     COSINE_ERROR[$i]=$(($RES-$2))
     if [ ${COSINE_ERROR["$i"]} -lt 0 ]; then
             COSINE_ERROR[$i]=$(echo "${COSINE_ERROR[$i]} * -1" | bc -l)
-    fi
-
-######################## COSINE WITH TFIDF ##############################
-    echo "Computing Cosine Metric with TF-IDF..."
-    if [ -d "cosine_tfidf" ]; then
-        if [ -f "cosine_tfidf/CosineArticles.jar" ]; then
-            # Run Cosine
-            #hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
-            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
-        else
-            cd "cosine_tfidf"
-            ./compile.sh
-            cd ..
-            #hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/stats/Corrected/TFIDF/1-grams $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
-            hadoop jar cosine_tfidf/CosineArticles.jar ch/epfl/bigdata/CosineArticles $TEMPORARY_DIRECTORY/tfidf/$i /projects/linguistic-shift/nGramArticle/TopicYearArticle/topic$TOPIC $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i 2>err_Cosine
-        fi
-    else
-        echo "No jar for CosineArticles"
-        hadoop fs -rm -r $TEMPORARY_DIRECTORY
-        exit
-    fi
-    echo "Getting result of CosineArticles with TF-IDF and parsing it..."
-    # Get Result and create results.csv for Cosine
-    hadoop fs -get $TEMPORARY_DIRECTORY/Cosine_TFIDF/$i/ && cat $i/* > results_Cos_tfidf.csv
-    rm -r $i/
-
-    # Find the smallest distance and add it into an array for Cosine
-    RES=`(cat results_Cos_tfidf.csv | awk 'BEGIN {FS=","}{print $2 " " $3}' | awk 'BEGIN{a=2; b=0}{if ($2<0.0+a) {a=0.0+$2; b=$1}} END{print b}')`
-    echo "Real year is $2 and predicted year is $RES"
-    COSINE_TFIDF_ERROR[$i]=$(($RES-$2))
-    if [ ${COSINE_TFIDF_ERROR["$i"]} -lt 0 ]; then
-            COSINE_TFIDF_ERROR[$i]=$(echo "${COSINE_TFIDF_ERROR[$i]} * -1" | bc -l)
     fi
 
 
@@ -296,13 +244,13 @@ OUT_SUM=0
 PUNCT_SUM=0
 for j in `seq "$3"`
 do
-        KL_SUM=$(($KL_SUM + ${KL_ERROR[$j]}))
+        #KL_SUM=$(($KL_SUM + ${KL_ERROR[$j]}))
         D1_SUM=$(($D1_SUM + ${DISTANCE1_ERROR[$j]}))
         COS_SUM=$(($COS_SUM + ${COSINE_ERROR[$j]}))
-        COS_TFIDF_SUM=$(($COS_TFIDF_SUM + ${COSINE_TFIDF_ERROR[$j]}))
+        #COS_TFIDF_SUM=$(($COS_TFIDF_SUM + ${COSINE_TFIDF_ERROR[$j]}))
         CHI_SUM=$(($CHI_SUM + ${CHISQUARE_ERROR[$j]}))
         OUT_SUM=$(($OUT_SUM + ${OUTOFPLACE_ERROR[$j]}))
-        PUNCT_SUM=$(($PUNCT_SUM + ${PUNCT_ERROR[$j]}))
+        #PUNCT_SUM=$(($PUNCT_SUM + ${PUNCT_ERROR[$j]}))
 done
 
 KL_MEAN=$(echo "${KL_SUM}/$3" | bc -l)
@@ -317,10 +265,10 @@ echo "Writing in mean_error.txt..."
 echo "Mean error for different metrics for $1 articles in year $2 with $3 iterations" >> ${5}
 echo "Distance1 :" $D1_MEAN >> ${5}
 echo "Cosine :" $COS_MEAN >> ${5}
-echo "Cosine-TFIDF :" $COS_TFIDF_MEAN >> ${5}
+#echo "Cosine-TFIDF :" $COS_TFIDF_MEAN >> ${5}
 echo "Chi-Square :" $CHI_MEAN >> ${5}
-echo "Kullback-Leibler :" $KL_MEAN >> ${5}
+#echo "Kullback-Leibler :" $KL_MEAN >> ${5}
 echo "OutOfPlace :" $OUT_MEAN >> ${5}
-echo "Punctuation :" $PUNCT_MEAN >> ${5}
+#echo "Punctuation :" $PUNCT_MEAN >> ${5}
 
 echo "Done!"
