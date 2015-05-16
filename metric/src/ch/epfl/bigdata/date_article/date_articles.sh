@@ -141,7 +141,7 @@ do
             DISTANCE1_ERROR[$i]=$(echo "${DISTANCE1_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${DISTANCE1_ERROR["$i"]} -ge 158 ]; then
-        ${DISTANCE1_ERROR["$i"]}=158
+        DISTANCE1_ERROR["$i"]=158
     fi
 
 ######################## COSINE ##############################
@@ -174,7 +174,7 @@ do
             COSINE_ERROR[$i]=$(echo "${COSINE_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${COSINE_ERROR["$i"]} -ge 158 ]; then
-        ${COSINE_ERROR["$i"]}=158
+        COSINE_ERROR["$i"]=158
     fi
 
 ######################## COSINE WITH TFIDF ##############################
@@ -207,7 +207,7 @@ do
             COSINE_TFIDF_ERROR[$i]=$(echo "${COSINE_TFIDF_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${COSINE_TFIDF_ERROR["$i"]} -ge 158 ]; then
-        ${COSINE_TFIDF_ERROR["$i"]}=158
+        COSINE_TFIDF_ERROR["$i"]=158
     fi
 
 
@@ -241,7 +241,7 @@ do
             CHISQUARE_ERROR[$i]=$(echo "${CHISQUARE_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${CHISQUARE_ERROR["$i"]} -ge 158 ]; then
-        ${CHISQUARE_ERROR["$i"]}=158
+        CHISQUARE_ERROR["$i"]=158
     fi
 
 ######################## OUTOFPLACE ##############################
@@ -274,7 +274,7 @@ do
             OUTOFPLACE_ERROR[$i]=$(echo "${OUTOFPLACE_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${OUTOFPLACE_ERROR["$i"]} -ge 158 ]; then
-        ${OUTOFPLACE_ERROR["$i"]}=158
+        OUTOFPLACE_ERROR["$i"]=158
     fi
 
 ######################## PUNCT-SENTENCES ##############################
@@ -299,6 +299,9 @@ do
     PUNCT_ERROR[$i]=$(($RES-$2))
     if [ ${PUNCT_ERROR["$i"]} -lt 0 ]; then
             PUNCT_ERROR[$i]=$(echo "${PUNCT_ERROR[$i]} * -1" | bc -l)
+    fi
+    if [ ${PUNCT_ERROR["$i"]} -ge 158 ]; then
+        PUNCT_ERROR["$i"]=158
     fi
 
 ######################## KULLBACK-LEIBLER ##############################
@@ -325,7 +328,7 @@ do
             KL_ERROR[$i]=$(echo "${KL_ERROR[$i]} * -1" | bc -l)
     fi
     if [ ${KL_ERROR["$i"]} -ge 158 ]; then
-        ${KL_ERROR["$i"]}=158
+        KL_ERROR["$i"]=158
     fi
 
     # Rename the file to keep it for manual verification of minimum and other things in case of failure
