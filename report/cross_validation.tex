@@ -88,7 +88,7 @@ Punctuation :& 33.13333333333333333333\\
     Punctuation :& 81.80000000000000000000\\
 \end{tabular}\\
 
-We observe that two metrics are in general better than the others. These two metrics are the \emph{Kullback-Leibler} Divergence and the Cosine with TF-IDF. Indeed, as explained in section \ref{metrics}, these two metrics are good and we know why. The other metrics are not so bad, even the basic distance which has surprisingly an error of 0 when dating articles from 1843. We think this distance was just lucky with the subset of articles. TOOOOOOOOOOOOOOOOOOOOOOOOODDDDDDDDDDDDDDDOOOOOOOOOOOOOOOOOOOOOOOOOOOO Indeed, we have run the dating of articles with the same options but with different subsets of articles and we can observe that the basic distance is not anymore equal to 0. For the other metrics, we can observe that they vary depending on the year or certainly on the subset of articles.\\
+We observe that two metrics are in general better than the others. These two metrics are the \emph{Kullback-Leibler} Divergence and the Cosine with TF-IDF. Indeed, as explained in section \ref{metrics}, these two metrics are good and we know why. The other metrics are not so bad, even the basic distance which has surprisingly an error of 0 when dating articles from 1843. We think this distance was just lucky with the subset of articles because for the other years, the basic distance is clearly not the best one. For the other metrics, we can observe that they vary depending on the year or certainly on the subset of articles.\\
 
 To judge which metric is the best one, we can simply compute the mean error over all our samples. As it takes a lot of time to compute 15 times each metrics, we can't compute it for each year. Here is the overall mean over all the years we tested :\\
 
@@ -105,4 +105,33 @@ To judge which metric is the best one, we can simply compute the mean error over
 
 We can observe that, as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
 
-Finally, we made some tests to compare, for a given year, if the number of selected articles to date changes a lot the results of the metrics. And....
+Finally, we made some tests to compare, for a given year, if the number of selected articles to date changes a lot the results of the metrics. We chose to run for a given year (1934) the dating of articles with subsets of articles of sizes 5, 15, 30, 45, 60, 75 and 90. The results are shown in the following table (the smallest distance is colored in green, the biggest in red in table \ref{table_comparison_size_articles}).
+\begin{center}
+    \begin{table}[h!]
+        \begin{tabular}{ | p{3.3cm} | p{1.4cm} | p{1.4cm} | p{1.4cm} | p{1.4cm} | p{1.4cm} | p{1.4cm} | p{1.4cm} | }
+            \hline
+            \textbf{\# of articles} & \textbf{5} & \textbf{15} & \textbf{30} & \textbf{45} & \textbf{60} & \textbf{75} & \textbf{90}\\
+            \hline
+            \hline
+            \textbf{Basic Distance} & \textcolor{green}{64} & \textcolor{green}{64} & \textcolor{red}{190.0667} & 65.4 & 66.8 & & \\
+            \hline
+            \textbf{Cosine} & 35 & \textcolor{green}{18.7334} & \textcolor{red}{270.2667} & 135.8667 & 265.6 & & \\
+            \hline
+            \textbf{Cosine-TFIDF} & 2.5334 & \textcolor{green}{0.6667} & 257.8667 & 128.9334 & \textcolor{red}{258.2667} & &  \\
+            \hline
+            \textbf{Chi-Square} & 2.1334 & \textcolor{green}{0} & \textcolor{red}{257.8667} & 128.9334 & \textcolor{red}{257.8667} & & \\
+            \hline
+            \textbf{Kullback-Leibler} & \textcolor{green}{0.0667} & \textcolor{green}{0.6667} & \textcolor{red}{134.6667} & 5.7334 & 11.4667 & & \\
+            \hline
+            \textbf{Out of Place} & 89.2 & \textcolor{green}{88.2667} & 334.6667 & 211.2 & \textcolor{red}{334.4} & & \\
+            \hline
+            \textbf{Punctuation} & 46.6 & \textcolor{red}{52.4667} & 46 & 28.667 & \textcolor{green}{33.3337} & & \\
+            \hline
+        \end{tabular}
+        \caption{Mean error distance for the year 1934 with different numbers of articles for 15 iterations}
+        \label{table_comparison_size_articles}
+    \end{table}
+\end{center}
+
+We observe that in general, more we have articles, worst is the dating. First, we have to note that more we take articles, more we remove words in the article's year which can make the number of words in this year consequently smaller than other years. It could be an explanation why taking a lot of articles to date them is not necessarily a good thing. Nevertheless, we observe that the punctuation distance prefers a bigger set of articles, because it can have a better approximation of the sentences length, number of commas and so on for the article's year. For the other metrics, the best dating is reached between with 15 articles in the subset. With only 5 articles, the subset should not contain enough words to be able to date as precisely as with 15 articles. Finally, we can observe that the worst case is with 30 articles, which is quite strange. We explain that with the fact that the articles.... RECOMPUTE DATA BECAUSE OF ERRORS !
+
