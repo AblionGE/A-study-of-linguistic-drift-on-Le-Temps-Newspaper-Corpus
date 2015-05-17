@@ -10,25 +10,27 @@ In each subset $C_i$ of the corpus, we can denote $f_{i,j}$ the frequency of the
 \end{eqnarray}
 where $f_{i.} = \sum_j f_{i,j}$ is the total number of words contained in $C_i$ and $f_{.j} = \sum_i f_{i,j}$ is the frequency of the word $w_j$ over the entire corpus.
 
+The term $f_{i,j}$ can also be replaced by the TF-IDF term.
+
 \subsubsection{Computations on the corpus}
 
 We applied the chi-square distance on the years contained in the corrected corpus, producing the following matrix:
 
 \begin{figure}[H]
     \begin{minipage}[b]{0.48\linewidth}
-        \includegraphics[scale=0.4]{Pictures/chi2/chi2_corrected2.jpg}
+        \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected2.jpg}
         \caption{chi-square distance for 1-gram with OCR correction}
         \label{chi2_1}
     \end{minipage}\hfill
     \begin{minipage}[b]{0.5\linewidth}
-        \includegraphics[scale=0.4]{Pictures/chi2/chi2_corrected2.jpg}
+        \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected.jpg}
         \caption{chi-square distance with reduced scale}
         \label{chi2_2}
     \end{minipage}\hfill
 \end{figure}
 \begin{figure}[H]
     \begin{minipage}[b]{0.48\linewidth}
-        \includegraphics[scale=0.4]{Pictures/chi2/chi2_corrected_tfidf.jpg}
+        \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected_tfidf.jpg}
         \caption{chi-square distance weighted by TF-IDF}
         \label{chi2_tfidf}
     \end{minipage}\hfill
