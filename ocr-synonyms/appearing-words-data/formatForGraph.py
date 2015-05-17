@@ -10,7 +10,6 @@ res.write("\n")
 res.write("""
 fig = figure;
 hold on;
-
 """)
 
 
@@ -39,5 +38,10 @@ for fileStart in ['v10-50','v20-50','v20-100']:
                 res.write(file+' = ['+(";".join(vals))+'];')
                 res.write("\n")
 
-print('done')
+res.write("""
+title('Number of words appearing each year')
+xlabel('smalest year from 5-years range')
+ylabel('number of word that appeared')
+legend('low = 10, high = 50','low = 20, high = 50','low = 20, high = 100')
+""")
 res.close()

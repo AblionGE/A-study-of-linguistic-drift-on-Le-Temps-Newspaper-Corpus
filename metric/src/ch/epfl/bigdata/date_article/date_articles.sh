@@ -140,6 +140,9 @@ do
     if [ ${DISTANCE1_ERROR["$i"]} -lt 0 ]; then
             DISTANCE1_ERROR[$i]=$(echo "${DISTANCE1_ERROR[$i]} * -1" | bc -l)
     fi
+    if [ ${DISTANCE1_ERROR["$i"]} -ge 158 ]; then
+        DISTANCE1_ERROR["$i"]=158
+    fi
 
 ######################## COSINE ##############################
     echo "Computing Cosine Metric..."
@@ -170,6 +173,9 @@ do
     if [ ${COSINE_ERROR["$i"]} -lt 0 ]; then
             COSINE_ERROR[$i]=$(echo "${COSINE_ERROR[$i]} * -1" | bc -l)
     fi
+    if [ ${COSINE_ERROR["$i"]} -ge 158 ]; then
+        COSINE_ERROR["$i"]=158
+    fi
 
 ######################## COSINE WITH TFIDF ##############################
     echo "Computing Cosine Metric with TF-IDF..."
@@ -199,6 +205,9 @@ do
     COSINE_TFIDF_ERROR[$i]=$(($RES-$2))
     if [ ${COSINE_TFIDF_ERROR["$i"]} -lt 0 ]; then
             COSINE_TFIDF_ERROR[$i]=$(echo "${COSINE_TFIDF_ERROR[$i]} * -1" | bc -l)
+    fi
+    if [ ${COSINE_TFIDF_ERROR["$i"]} -ge 158 ]; then
+        COSINE_TFIDF_ERROR["$i"]=158
     fi
 
 
@@ -231,6 +240,9 @@ do
     if [ ${CHISQUARE_ERROR["$i"]} -lt 0 ]; then
             CHISQUARE_ERROR[$i]=$(echo "${CHISQUARE_ERROR[$i]} * -1" | bc -l)
     fi
+    if [ ${CHISQUARE_ERROR["$i"]} -ge 158 ]; then
+        CHISQUARE_ERROR["$i"]=158
+    fi
 
 ######################## OUTOFPLACE ##############################
     echo "Computing OutOfPlace..."
@@ -261,6 +273,9 @@ do
     if [ ${OUTOFPLACE_ERROR["$i"]} -lt 0 ]; then
             OUTOFPLACE_ERROR[$i]=$(echo "${OUTOFPLACE_ERROR[$i]} * -1" | bc -l)
     fi
+    if [ ${OUTOFPLACE_ERROR["$i"]} -ge 158 ]; then
+        OUTOFPLACE_ERROR["$i"]=158
+    fi
 
 ######################## PUNCT-SENTENCES ##############################
     echo "Computing Metric with punctuation..."
@@ -285,6 +300,9 @@ do
     if [ ${PUNCT_ERROR["$i"]} -lt 0 ]; then
             PUNCT_ERROR[$i]=$(echo "${PUNCT_ERROR[$i]} * -1" | bc -l)
     fi
+    if [ ${PUNCT_ERROR["$i"]} -ge 158 ]; then
+        PUNCT_ERROR["$i"]=158
+    fi
 
 ######################## KULLBACK-LEIBLER ##############################
     echo "Computing Kullback-Leibler Divergence..."
@@ -308,6 +326,9 @@ do
     KL_ERROR[$i]=$(($RES-$2))
     if [ ${KL_ERROR["$i"]} -lt 0 ]; then
             KL_ERROR[$i]=$(echo "${KL_ERROR[$i]} * -1" | bc -l)
+    fi
+    if [ ${KL_ERROR["$i"]} -ge 158 ]; then
+        KL_ERROR["$i"]=158
     fi
 
     # Rename the file to keep it for manual verification of minimum and other things in case of failure
