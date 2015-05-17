@@ -4,11 +4,11 @@ In order to have a template and a point of comparison for our following work, we
 
 \subsubsection{The formula}
 
-The distance calculation is based on the common words between two subsets $C_1$ and $C_2$ of the corpus. The distance $d(C_1,C_2)$ is defined as follows:
+The distance calculation is based on the common words between two subsets $C_i$ and $C_{i'}$ of the corpus. The distance $d(C_i,C_{i'})$ is defined as follows:
 \begin{eqnarray}
- d(C_1,C_2) = 1 - \frac{2 \Arrowvert C_1 \cap C_2\Arrowvert}{\Arrowvert C_1 \Arrowvert + \Arrowvert C_2 \Arrowvert }
+ d(C_i,C_{i'}) = 1 - \frac{2 \Arrowvert C_i \cap C_{i'}\Arrowvert}{\Arrowvert C_i \Arrowvert + \Arrowvert C_{i'} \Arrowvert }
 \end{eqnarray}
-where $\Arrowvert \cdot \Arrowvert$ denotes here the number of distinct words and $C_1 \cap C_2$ is the set containing the common words between $C_1$ and $C_2$.
+where $\Arrowvert \cdot \Arrowvert$ denotes here the number of distinct words and $C_i \cap C_{i'}$ is the set containing the common words between $C_i$ and $C_{i'}$.
 
 \subsubsection{Computations on the corpus}
 
