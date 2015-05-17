@@ -1,4 +1,5 @@
-We look to determine a metric (or distance) between the years of the corpus that can show a linguistic drift. Intuitively, the language nowadays and 10 years ago is relatively the same, but there is more differences with the language 200 years ago. It a smooth evolution and we want to find a way to characterize it mathematically. Here are some intuitive properties for a distance $d$ between two subsets of the corpus $C_i$ and $C_{i'}$:
+
+We look to determine a metric (or distance) between the years of the corpus that can show a linguistic drift. Intuitively, the language nowadays and 10 years ago is relatively the same, but there is more differences with the language of 200 years ago. Intuition make us think that, it is a smooth evolution and we want to find a way to characterize it mathematically. Here are some intuitive properties for a distance $d$ between two subsets of the corpus $C_i$ and $C_{i'}$:
 
 \begin{itemize}
  \item Normalization: $0 \leq d(C_i,C_{i'}) \leq 1$.
@@ -7,7 +8,7 @@ We look to determine a metric (or distance) between the years of the corpus that
  \item The distance should not depend on the size of the corpus.
 \end{itemize}
 
-In the following, distances will be represented in matrices of size $N \times N$, with $N = 159$ years is the interval of years building our corpus:
+In the following, distances will be represented in matrices of size $N \times N$, with $N = 159$ years corresponding to the interval of years building our corpus:
 \[
 \begin{matrix}
  & year1 & year2 & ... & yearN \\
