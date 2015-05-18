@@ -1,4 +1,9 @@
-To have stronger values when we date articles, we wrote a script that runs several times each metrics for a different subsets of article of the same year. The idea here is to have an average on the error of each metric to be able to compare them together. We obtained the following results for random years.\\
+To have stronger values when we date articles, we wrote a script that runs several times each metrics for a different subset of article of the same year $y$. The idea here is to have an average on the error of each metric to be able to compare them together as follows:
+\[
+ Mean\_ error = \frac{1}{N} \sum_{i=1}^N \arrowvert p_i - y \arrowvert
+\]
+
+where $p_i$ is the prediction at iteration $i$ and $N$ is the number of iterations. We obtained the following results for random years.\\
 
 \textbf{Mean error for different metrics for 15 articles in year 1843 with 15 iterations}\\
 \begin{tabular}{p{3cm} p{5cm}}
@@ -92,16 +97,12 @@ We observe that two metrics are in general better than the others. These two met
 
 To judge which metric is the best one, we can simply compute the mean error over all our samples. As it takes a lot of time to compute 15 times each metrics, we can't compute it for each year. Here is the overall mean over all the years we tested (1843, 1854, 1888, 1905, 1918, 1934, 1954 and 1984) :\\
 
-\textbf{Mean error for different metrics for 15 articles in the years selected above with 15 iterations per year}\\
-\begin{tabular}{p{3cm} p{5cm}}
-    Distance1 :& 39.7875\\
-    Cosine :& 13.35875\\
-    Cosine-TFIDF :& 0.36675\\
-    Chi-Square :& 63.008625\\
-    Kullback-Leibler :& 2.292\\
-    OutOfPlace :& 64.75\\
-    Punctuation :& 37.65025\\
-\end{tabular}\\
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.70]{Pictures/date_articles/date_corpus.jpg}
+        \caption{Mean error for 15 articles selection and 15 iterations. 1.Cosine TF-IDF, 2.Kullback-Leibler, 3.Cosine, 4.Punctuation, 5.Basic, 6.Chi-Square, 7.Out-of-place}
+        \label{date_cv}
+\end{figure}
 
 We can observe that, as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
 
