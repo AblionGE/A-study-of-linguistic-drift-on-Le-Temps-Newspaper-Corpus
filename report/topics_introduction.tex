@@ -1,5 +1,26 @@
 We wanted to see how is the evolution of the language inside a specific topic of the corpus (e.g. swiss politics, sport, art,...).	
 Our idea was that a topic clustering would help us capture the linguistic drift more precisely when comparing two articles that talk about the same subject.
 This new approach would give us different results.\\
-For topic clustering, we chose to use \emph{Latent Dirichlet Allocation} (LDA) implemented in spark since spark 1.3.0. 
-The algorithms take as input a matrix of article and 1-gram occurrences and cluster the articles into a specified number \textit{n} of topics. We could also set te parameters for topic distribution over terms $\beta$ and articles distribution over topics $\alpha$. Empirical results led us to set the $\beta$ to 17, a relatively high value because articles contain lot of stop words that could have too much weight for lower values. In the same way, we set $\alpha$ to 1.1, the minimum value, as articles in a newspaper would rather belong to a single topic. For a number of topics equal to \textit{n} equal to 20.\\
+For topic clustering, we chose to use \emph{Latent Dirichlet Allocation} (LDA) implemented in spark since spark 1.3.0.
+
+The algorithms take as input a matrix of article and 1-gram occurrences and cluster the articles into a specified number \textit{n} of topics. We could also set the parameters for topic distribution over terms $\beta$ and articles distribution over topics $\alpha$. Empirical results led us to set the $\beta$ to 17, a relatively high value because articles contain lot of stop words that could have too much weight for lower values. In the same way, we set $\alpha$ to 1.1, the minimum value, as articles in a newspaper would rather belong to a single topic. For a number of topics equal to \textit{n} equal to 15.\\
+The LDA algorithm gave us as output the following sample of topic(the words are giving in the decreasing order of weight to describe a topic):\\
+\\
+TOPIC: Sport\\
+match, equipe, club, championnat\\
+TOPIC: Religion\\
+oeuvre, histoire, auteur, oeuvres, religion\\
+TOPIC: Undefined\\
+bien, sans, homme, fait\\
+TOPIC: Politics\\
+politique, gouvernement, conseil, parti\\
+TOPIC: Banque, Stock\\
+banque, action, bourse, paris\\
+TOPIC: Governement\\
+ministre, etats, unis, gouvernement\\
+TOPIC: Swiss Politic\\
+conseil, president, etat, canton\\
+TOPIC: Swiss Market\\
+dutch, nestle, shell, steel, pacific\\
+\\
+We can see that some topics are well defined and we can identify them easily. Others contains words that does not allow us to find a topic by inspection. But in general the result we have is good and can perform well.
