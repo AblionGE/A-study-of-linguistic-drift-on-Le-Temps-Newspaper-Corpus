@@ -1,6 +1,10 @@
-Having some metrics to compare the articles between years, we thought it was a good idea to try to date a subset of articles from a year with these metrics. Thus, we wrote a \emph{Scala} application that selects a subset of articles in a year and we considered this subset of articles as a year to be able to reuse the same code as for the comparison between years. Nevertheless, we had to adapt a bit our codes because it was unnecessary to compare years with years but only articles with years. We also had to remove the articles from the year they belong to. Finally, we selected a subset of articles and not only one article because in the corpus, some titles of articles in the newspaper are considered as a complete article. Thus, it has no sense to have the possibility to select only one article with 4 or 5 words.\\
+Having some metrics to compare the articles between years, we thought it was a good idea to try to date a subset of articles from a year with these metrics. Thus, we wrote a \emph{Scala} application that selects a subset of articles in a year.\\
+Nevertheless, we had to adapt a bit our codes because it was unnecessary to compare years with years but only articles with years.\\
+To simulate the fact that the selected subset of articles is new and cannot be taken into account in the 'already known' corpus, we had to remove the articles from the year they belong to.\\
+Finally, some titles of articles in the newspaper are considered as a complete article. So we selected a subset of articles and not only a single one to avoid having the impossible job of dating only 4 or 5 words.\\
+The dating is done as follows: the distance is computed between the selection of articles and each year of the corpus. The prediction is then given by the year for which the distance is the smallest.\\
 
-You can find below the different results for the different metrics with the years 1880, 1920 and 1995 and with taking 15 articles in each year.
+You can find below the results for the different metrics with the years 1880, 1920 and 1995 and with taking a subset of 15 articles in each year.
 
 \subsection{Metrics}
 

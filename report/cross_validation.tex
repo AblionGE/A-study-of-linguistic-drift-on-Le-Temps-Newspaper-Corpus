@@ -3,7 +3,7 @@ To have stronger values when we date articles, we wrote a script that runs sever
  Mean\_ error = \frac{1}{N} \sum_{i=1}^N \arrowvert p_i - y \arrowvert
 \]
 
-where $p_i$ is the prediction at iteration $i$ and $N$ is the number of iterations. We obtained the following results for random years.\\
+where $p_i$ is the prediction at iteration $i$ and $N$ is the number of iterations. We obtained the following results for random years:\\
 
 \textbf{Mean error for different metrics for 15 articles in year 1843 with 15 iterations}\\
 \begin{tabular}{p{3cm} p{5cm}}
@@ -104,7 +104,7 @@ To judge which metric is the best one, we can simply compute the mean error over
         \label{date_cv}
 \end{figure}
 
-We can observe that, as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones.\\
+We can observe that, as expected, Cosine with TF-IDF distance and \emph{Kullback-Leibler} Divergence are the best ones. Not only their error means are the lowest but also their error variance are the tightest. In the remaining metrics, the simple Cosine and our punctuation metrics also have a relatively tight variance and a mean error below 40 years. We can observe that the \emph{Chi-Square} and \emph{Out of Place} metrics can have up to 159 years of error, which is the maximum gap in our corpus\\
 
 Finally, we made some tests to compare, for a given year, if the number of selected articles to date changes a lot the results of the metrics. We chose to run for a given year (1934) the dating of articles with subsets of articles of sizes 5, 15, 30, 45, 60, 75 and 90. The results are shown in the following table (the smallest distance is colored in green, the biggest in red in table \ref{table_comparison_size_articles}).
 \begin{center}

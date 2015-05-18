@@ -1,6 +1,6 @@
 \subsection{Chi-Square Distance}
 
-The chi-square distance is often used in textual data analysis to find similarities between documents. It is very close to the euclidean distance (sum of squared differences between the elements) weighted by a term associated to the frequency of each word in the whole corpus.
+The \emph{Chi-Square} distance is often used in textual data analysis to find similarities between documents. It is very close to the euclidean distance (sum of squared differences between the elements) weighted by a term associated to the frequency of each word in the whole corpus.
 
 \subsubsection{The formula}
 
@@ -14,30 +14,30 @@ The term $f_{i,j}$ can also be replaced by the TF-IDF term.
 
 \subsubsection{Computations on the corpus}
 
-We applied the chi-square distance on the years contained in the corrected corpus, producing the following matrix:
+We applied the \emph{Chi-Square} distance on the years contained in the corrected corpus, producing the following matrices:
 
 \begin{figure}[H]
     \begin{minipage}[b]{0.48\linewidth}
         \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected2.jpg}
-        \caption{chi-square distance for 1-gram with OCR correction}
+        \caption{Chi-Square distance for 1-gram with OCR correction}
         \label{chi2_1}
     \end{minipage}\hfill
     \begin{minipage}[b]{0.5\linewidth}
         \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected.jpg}
-        \caption{chi-square distance with reduced scale}
+        \caption{Chi-Square distance with reduced scale}
         \label{chi2_2}
     \end{minipage}\hfill
 \end{figure}
 \begin{figure}[H]
     \begin{minipage}[b]{0.48\linewidth}
         \includegraphics[scale=0.3]{Pictures/chi2/chi2_corrected_tfidf.jpg}
-        \caption{chi-square distance weighted by TF-IDF}
+        \caption{Chi-Square distance weighted by TF-IDF}
         \label{chi2_tfidf}
     \end{minipage}\hfill
 \end{figure}
 
 \subsubsection{Analysis}
 
-As we have a huge amount of articles for each year and that chi-square is used to compare documents, the maximal distance achieved is very low as shown in figure \ref{chi2_1}. In order to observe something we reduced the scale of the colours in figure \ref{chi2_2}. This distance is definitively smoother than the basic one but it doesn't show any evolution through the years.
+As we have a huge amount of articles for each year and that \emph{Chi-Square} is used to compare documents (with a relatively small amount of words compared to our case), the maximal distance achieved is very low as shown in figure \ref{chi2_1}. In order to observe something we reduced the scale of the colours in figure \ref{chi2_2}. This distance is definitively smoother than the basic one but it doesn't show any evolution through the years.
 
 Figure \ref{chi2_tfidf} shows the results when the terms of the distance are weighted by the TF-IDF coefficients. The values look similar than without the weighting.

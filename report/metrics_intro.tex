@@ -1,5 +1,5 @@
 
-We look to determine a metric (or distance) between the years of the corpus that can show a linguistic drift. Intuitively, the language nowadays and 10 years ago is relatively the same, but there is more differences with the language of 200 years ago. Intuition make us think that, it is a smooth evolution and we want to find a way to characterize it mathematically. Here are some intuitive properties for a distance $d$ between two subsets of the corpus $C_i$ and $C_{i'}$:
+We look to determine a metric (or distance) between the years of the corpus that can show a linguistic drift. Intuitively, the language nowadays and 10 years ago is relatively the same, but there is more differences with the language of 200 years ago. It should be a smooth evolution and we want to find a way to characterize it mathematically. Here are some properties that we defined for a distance $d$ between two subsets of the corpus $C_i$ and $C_{i'}$:
 
 \begin{itemize}
  \item Normalization: $0 \leq d(C_i,C_{i'}) \leq 1$.
@@ -14,12 +14,12 @@ In the following, distances will be represented in matrices of size $N \times N$
  & year1 & year2 & ... & yearN \\
  year1 & \mathbf{0} & \mathbf{d(year1,year2)} & ... & \mathbf{d(year1,yearN)} \\
  year2 & \mathbf{d(year2,year1)} & \mathbf{0} & ... & \mathbf{d(year2,yearN)} \\
- ... & ... & ... & ... \\
+ ... & ... & ... & ... & ... \\
  yearN & \mathbf{d(yearN,year1)} & \mathbf{d(yearN,year2)} & ... & \mathbf{0}
 \end{matrix}
 \]
-We tried several metrics that are presented in the next subsections. We also put a set of criteria that we could use to judge that a metric is better than another one.
-For the robustness, first the size of the corpus shouldn't influence the distance. Thus, the distance between a subset of corpus C1 from another corpus C2 should be the same that the distance between the whole corpuses C1 and C2.
-Secondly, the distance should be robust considering OCR unresolved errors.
-We also proceeded a datation of articles for each metric to compare the datation efficiency of each one. We would estimate that a datation is efficient if, when computing the distance of an article from the each year or years intervals, the smaller distance should assign the text to a year with 10 years margin.
-Finally, in the matrix plot the color should fade out homogeneously from the diagonal to the opposite corners. There should be a kind of 'band' around the diagonal.
+We tried several metrics that are presented in the next subsections. We also put a set of criteria that we could use to judge that a metric is better than another one.\\
+For the robustness, the size of the corpus shouldn't influence the distance. Thus, the distance between a subset of a set $C_i$ and a subset of another set $C_{i'}$ should be the same as the distance between the whole sets $C_i$ and $C_{i'}$.\\
+Secondly, the distance should be robust considering OCR unresolved errors.\\
+We also proceeded a datation of articles for each metric to compare the efficiency of each one. We would estimate that a datation is efficient if, when computing the distance of an article with each year or years intervals, then the smaller distance should assign the text to a year with 10 years margin.\\
+Finally, in the matrix plot, the colour should fade out homogeneously from the diagonal to the opposite corners. There should be a kind of 'band' around the diagonal.
