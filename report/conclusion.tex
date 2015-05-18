@@ -1,3 +1,7 @@
-\section{Conclusion}
+To conclude this report, we can say that there exists linguistic drift in our newspaper corpus. Indeed, we have observed that through time we use more vocabulary to express the same ideas and we do shorter sentences. We also saw that words not really disappear over time, but in general only appear.
 
-This is not yet a conclusion
+About the correction of the OCR, we saw that for some metrics the correction is completely useless but for other ones (in particular for cosine distance), it helps to improve the observation of linguistic drift. Then, with the TF-IDF values, it is again the cosine metric that benefits of the importance of uncommon words. For the other metrics, it is less useful.
+
+Then, when we tried to date articles, we obtained some really good results using the \emph{Kullback-Leibler} Divergence and the cosine distance with TF-IDF. Indeed, with those two metrics, we were able to date a subset of articles with less than 10 years error in general. With the other metrics, the error is a bit bigger, but they can have sometimes some good results due to some specific reasons (like the number of words in the year).
+
+Finally, with the topics, we found some interesting ones for which we were able to found some properties using the \emph{Kullback-Leibler} Divergence and the cosine distance. Indeed, with the KL divergence, we saw that the years are close to each other and with cosine we saw that years that are closed have a small distance between them.
