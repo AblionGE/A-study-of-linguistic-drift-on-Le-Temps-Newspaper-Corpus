@@ -1,0 +1,39 @@
+\section{OCR Correction}
+\subsection{Why we need to clean the OCR?}
+
+Limited by the optical character recognition, OCR documents comprise of a significant amount of erroneous words. Since our project rely heavily on word matching between documents, we need to deal with OCR error before we apply advance similarity calculation methods. 
+
+Moreover, with all that said, the practical reality is that many OCR errors are quite predictable. So it is possible, and useful, to produce a pretty-good list of rules that simply translate individual tokens back into correctly spelled words. In this part, we utilized one simplest approach, i.e., to develop a set of rules to translate individual tokens produced by OCR errors back into correctly-spelled forms.
+
+In order to found the impact of OCR correction, in the later section (Metrics), we also experimented different metrics on OCR corrected dataset and OCR non-corrected dataset to find out whether OCR will play a significant effect upon the accuracy of metrics.
+
+\subsection{Clean Strategy}
+Since we need to pay more attention to the linguistic shift, here, for the OCR correction, we chose simplest approach and identified a set of predictable character substitutions. 
+
+\begin{enumerate}[1.]
+\item Basic Replacement Rule
+
+We apply some common replacement rules to make the OCR word to be the same form.
+	\begin{enumerate}[1.]
+	\item Remove capital letter
+	\item Remove alone letter
+	\item Remove punctuation
+	\item Remove accent
+	\item Remove special letter (e.g., ;, /, -, ', \&)
+	\end{enumerate}
+\item Apply a set of predictable character substitutions
+
+	In this part, we identified a set of common OCR error and do basic word replacement.
+
+		\begin{enumerate}[1.]
+		\item Replace complete word
+
+		We replaced complete word if current n-grams exists a match with the word that in the dictionary, e.g., $so \rightarrow se$, $pir \rightarrow par$, $pavs \rightarrow pays$.
+
+		\item Replace part of word
+
+		For the matching of the partial word, we also use regular expression to find the corresponding word and its replacement word, e.g., $iii \rightarrow m$, $ii \rightarrow n$, $q.([a-z]) \rightarrow qu?$. Actually, most of wrong OCR words are local errors, and the substitution of local error plays a significant role in the OCR correction. 
+
+		\end{enumerate}
+
+\end{enumerate}
