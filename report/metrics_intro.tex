@@ -18,4 +18,8 @@ In the following, distances will be represented in matrices of size $N \times N$
  yearN & \mathbf{d(yearN,year1)} & \mathbf{d(yearN,year2)} & ... & \mathbf{0}
 \end{matrix}
 \]
-We tried several metrics that are presented in the next subsections.
+We tried several metrics that are presented in the next subsections. We also put a set of criteria that we could use to judge that a metric is better than another one.
+For the robustness, first the size of the corpus shouldn't influence the distance. Thus, the distance between a subset of corpus C1 from another corpus C2 should be the same that the distance between the whole corpuses C1 and C2.
+Secondly, the distance should be robust considering OCR unresolved errors.
+We also proceeded a datation of articles for each metric to compare the datation efficiency of each one. We would estimate that a datation is efficient if, when computing the distance of an article from the each year or years intervals, the smaller distance should assign the text to a year with 10 years margin.
+Finally, in the matrix plot the color should fade out homogeneously from the diagonal to the opposite corners. There should be a kind of 'band' around the diagonal.
