@@ -1,6 +1,6 @@
 \subsection{Synonyms}
 
-We have to remember that beyond n-gram frequency changes, there is also a shift in term of topics that are covered by newspapers over the years. To try to isolate our analysis from that effect, we planned to compare frequencies of words that have similar meaning using a synonym dictionary. After trying a few of them, we have chosen to use the myThes v2.0 synonym dictionary from OpenOffice that seemed exhaustive and accurate enough. \\
+We have to remember that beyond n-grams frequency changes, there is also a shift in term of topics that are covered by newspapers over the years. To try to isolate our analysis from that effect, we planned to compare frequencies of words that have similar meaning using a synonym dictionary. After trying a few of them, we have chosen to use the myThes v2.0 synonym dictionary from OpenOffice that seemed exhaustive and accurate enough. \\
 
 Frequency vectors were generated for every entry in the synonym database (using mapReduce) before being inserted in an SQL database. We have chosen to average frequencies to ranges of 5 years such as we limit the data size. Then we build a little web application that allows to check for words in the thesaurus database, then select a subset of the proposed similar words before displaying a plot with the evolution of frequencies.\\
 

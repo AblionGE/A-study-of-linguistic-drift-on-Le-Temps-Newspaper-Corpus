@@ -3,9 +3,9 @@
 
 Limited by the optical character recognition, OCR documents comprise of a significant amount of erroneous words. Since our project rely heavily on word matching between documents, we need to deal with OCR error before we apply advance similarity calculation methods. 
 
-Moreover, with all that said, the practical reality is that many OCR errors are quite predictable. So it is possible, and useful, to produce a pretty-good list of rules that simply translate individual tokens back into correctly spelled words. In this part, we utilized one simplest approach, i.e., to develop a set of rules to translate individual tokens produced by OCR errors back into correctly-spelled forms.
+Moreover, with all that said, the practical reality is that many OCR errors are quite predictable. So it is possible, and useful, to produce a pretty-good list of rules that simply translates individual tokens back into correctly spelled words. In this part, we utilized one simplest approach, i.e. to develop a set of rules to translate individual tokens produced by OCR errors back into correctly-spelled forms.
 
-In order to found the impact of OCR correction, in the later section (Metrics), we also experimented different metrics on OCR corrected dataset and OCR non-corrected dataset to find out whether OCR will play a significant effect upon the accuracy of metrics.
+In order to found the impact of OCR correction, in the later section \ref{metrics} about metrics, we also experimented different metrics on OCR corrected dataset and OCR non-corrected dataset to find out whether OCR will play a significant effect upon the accuracy of metrics.
 
 \subsection{Clean Strategy}
 Since we need to pay more attention to the linguistic shift, here, for the OCR correction, we chose simplest approach and identified a set of predictable character substitutions. 

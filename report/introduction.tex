@@ -1,6 +1,10 @@
 \section{Introduction}
 
 \subsection{Problem Statement}
-Intuition help us think that, through time, language is changing because of the changes on the vocabulary but also in the words of this vocabulary is used.
+Intuition helps us think that, through time, language is changing because of the changes on the vocabulary but also in the words of this vocabulary is used.
 Along with discoveries and civilization evolution, some words disappear and others emerge. Moreover, the 21\textsuperscript{st} is characterized by secondary source documents that influence us in our way of expressing ourselves. Thus, our study tries to define the features that could prove that there is a linguistic drift and to quantify the changes with a metric.
-Our dataset is a French newspaper corpus from 1840 to 1998. We are provided with xml files of OCRized articles. The comparison is done between all pairs of years. The fact that there is less articles during first years is sometimes to be considered.
+Our dataset is a French newspaper corpus from 1840 to 1998 in two swiss newspapers. We are provided with xml files of OCRized articles. The comparison is done between all pairs of years. The fact that there is less articles during first years is sometimes to be considered, as is the fact that for years 1917 to 1919 we just have one newspaper's articles and that in 1998, we just have the articles of a few months.\\
+
+We want to see with this project the evolution of the language. Do some words appear and then disappear ? How much different words do we need to cover a certain percentage of the language ? Is the correction of the OCR useful to observe the linguistic drift ? Does giving more weight to uncommon words improve the drift ? Is it possible to date an article with precision using only its vocabulary ? Are topics helpful for observing the linguistic drift ?\\
+
+This report is structured as follows : first, in section \ref{statistics} we present some statistics about the corpus using the number of words, the sentences, their length, the use of punctuation. Secondly, in section \ref{metrics}, we present and explain different metrics we used to try to observe a linguistic drift. Then, in section \ref{dating}, we try to date articles using the metrics presented in section \ref{metrics}. After that, in section \ref{topics}, we present some topics we found and we try to date articles according to topics. Finally, in section \ref{conclusion}, we answer the questions stated in this introduction.
