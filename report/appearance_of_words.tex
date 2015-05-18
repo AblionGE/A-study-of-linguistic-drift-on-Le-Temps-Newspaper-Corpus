@@ -6,21 +6,21 @@ A simple approach to estimate the apparition of new words would be to sum up the
 
 The idea was to define a pair of thresholds, one below which a word would be considered as not existing and a higher one meaning that the 1-gram is commonly used. The lower bound is not zero such as to take possible OCR correction into account. Once the higher threshold has been crossed, we require the frequencies to stay above the threshold R\% of the time.  This filter will only detects words that appear quite suddenly. After checking, we find that this method is accurate for determining the precise time where the words appeared (inferred from \textit{zerosSeqAtStart}). Figure \ref{algoschema} is meant to illustrate the algorithm.\\
 
-\begin{figure}[h!]
+\begin{figure}[H]
         \includegraphics[scale=0.7]{Pictures/statistics/appearing-words/algo-schema.png}
         \caption{Visualization of the detection algorithm's behavior}
         \label{algoschema}
 	\centering
 \end{figure}
 
-Figures \ref{ratio60} and \ref{ratio80} show the amounts of words spotted as appearing, using frequencies averaged over range of 5 years.  In our opinion, the results for the first 15 year are overly influenced by the fact that they contains very few articles compared to other years (factor of 6). We see a clear increase in term of word creation recently, no matter the set of parameters selected. 
-\begin{figure}[h!]
+Figures \ref{ratio60} and \ref{ratio80} show the amounts of words spotted as appearing, using frequencies averaged over range of 5 years. In our opinion, the results for the first 15 years are overly influenced by the fact that they contains very few articles compared to other years (factor of 6). We see a clear increase in term of word creation recently, no matter the set of parameters selected. 
+\begin{figure}[H]
         \includegraphics[scale=0.65]{Pictures/statistics/appearing-words/word-appearing-ratio60.png}
         \caption{New words detection with tolerance rate R = 60\%}
         \label{ratio60}
 	\centering
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[H]
         \includegraphics[scale=0.65]{Pictures/statistics/appearing-words/word-appearing-ratio80.png}
         \caption{New words detection with tolerance rate R = 80\%}
         \label{ratio80}
