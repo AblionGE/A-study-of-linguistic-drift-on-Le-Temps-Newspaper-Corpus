@@ -10,6 +10,6 @@ A call sample (You have to be in the directory where the code is and you have to
 
 hadoop jar TFIDF/TFIDF.jar ch.bigdata2015.linguisticdrift.tfidf.TFIDF /projects/linguistic-shift/articles_samples/15_articles/Corrected/1995 output_directory /projects/linguistic-shift/corrected_ngrams/1-grams
 
-You have to assume that the articles directory exists and contains files.
+You have to assume that the articles directory exists and contains files and that the files starts with the year of the article for the 4th first letters of the filename.
 
 The different directories for the articles are in /projects/linguistic-shift/articles_samples/ or you can take a subset of article with the select_article program.

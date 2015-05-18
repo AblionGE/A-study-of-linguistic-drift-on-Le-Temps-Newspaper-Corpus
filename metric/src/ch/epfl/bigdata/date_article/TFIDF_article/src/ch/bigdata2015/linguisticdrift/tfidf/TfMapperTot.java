@@ -24,7 +24,7 @@ public class TfMapperTot extends Mapper<LongWritable, Text, Text, IntWritable> {
 	String fileName;
 
 	/**
-	 * Map function that outputs : Key : Year Value : occurence for a word
+	 * Map function that outputs : Key : Year Value : occurrence for a word
 	 */
 	public void map(LongWritable inputKey, Text inputValue, Context context)
 			throws IOException, InterruptedException {
