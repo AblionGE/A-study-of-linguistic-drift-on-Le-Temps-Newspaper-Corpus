@@ -14,7 +14,7 @@ Obviously, this divergence is not symmetric. Indeed, let us take for example two
 
 To compute this formula, as we need to have vectors with the same size representing the same words in the same order but some words appear only in certain years, we need to add the missing words in each year with a number of occurrences equal to 0. Doing so, we have for each year a vector containing all words over the whole corpus. With KL Divergence, we have to be careful, because if $P(i)$ or $Q(i)$ is 0, the computation will be totally wrong. Thus, we have to add some smoothing in the KL computation. We made the choice to add a really small value ($10^{25}$) and to weight it with the probability of the word over the whole corpus. Thus, we keep a small difference between words that appear a lot in the corpus and the ones that are less frequent\footnote{It is a way to take less into account for words that appear not that much, like words that does not exist in french and that we were not be able to correct perfectly.}.
 
-\subsubsection{Computation of \emph{Kullback-Leibler} Divergence}
+\subsubsection{Computations on the corpus}
 We computed the \emph{Kullback-Leibler} Divergence with the non-corrected corpus and the OCR-corrected corpus. We also used the probability that a word appears in a year and the TF-IDF value of each one. The explanations about the plots are located below.
 
 \begin{figure}[H]
