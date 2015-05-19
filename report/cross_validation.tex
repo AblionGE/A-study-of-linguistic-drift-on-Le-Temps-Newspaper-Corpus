@@ -100,6 +100,20 @@ We observe that two metrics are in general better than the others. These two met
 
 To judge which metric is the best one, we can simply compute the mean error over all our samples. As it takes a lot of time to compute 15 times each metrics, we can't compute it for each year. Here is the overall mean over all the years we tested (1843, 1854, 1888, 1905, 1918, 1934, 1954 and 1984) :\\
 
+\newpage{}
+\textbf{Mean error for different metrics for 15 articles in the years selected above with 15 iterations per year}\\
+\begin{tabular}{p{3cm} p{5cm}}
+    Distance1 :& 39.7875\\
+    Cosine :& 13.35875\\
+    Cosine-TFIDF :& 0.36675\\
+    Chi-Square :& 63.008625\\
+    Kullback-Leibler :& 2.292\\
+    OutOfPlace :& 64.75\\
+    Punctuation :& 37.65025\\
+\end{tabular}\\
+
+In figure \ref{date_cv}, we can observe all these results put together in a plot :
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.70]{Pictures/date_articles/date_corpus.jpg}
